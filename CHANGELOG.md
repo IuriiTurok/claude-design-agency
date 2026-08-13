@@ -1,5 +1,24 @@
 # Changelog
 
+## 0.3.0 (2026-08-13)
+
+**The pipeline orchestrator ships.** `refine` — the skill that sequences
+`audit → layout → typeset → colorize → harden → polish` with a gate between every stage —
+was referenced by nine bundled skills but never shipped with them; `audit` and `critique`
+both ended with "Next: `/refine`" pointing at nothing. Installing the plugin from GitHub
+got you nine dangling references. It is now `skills/refine/`, with its two host-machine
+references (`~/.claude/skills/impeccable/context-protocol.md` and a private planning doc)
+rewritten to `${CLAUDE_PLUGIN_ROOT}` and to inline prose.
+
+**Adoption is documented.** A new README section covers the three levers for using the
+agency in your own repo — classifier config, an `AGENTS.md` routing stanza, and the
+optional `DesignAgencyAgent/master_agent.md` auto-engage marker. That marker is what
+`hooks/design-intent.py` has always detected, and it had never been written down.
+
+**Fixes.** `bin/setup-state.sh` pointed installers at the private source repo, which is a
+404 for everyone but the author. `license` now reads `MIT AND Apache-2.0` in both
+manifests, matching what `NOTICE.md` has always described.
+
 ## 0.2.0 (2026-08-13)
 
 **Consolidation + first publishable release.**
@@ -20,7 +39,7 @@ rather than guessed at. Previously the enforcer, the anti-pattern canon, the Imp
 binding preamble, and six role files each carried their own copy of the literals.
 
 **Fixed: `harden` had unparseable YAML frontmatter** (an unquoted `production-ready:`),
-so it loaded with *all* metadata silently dropped and could never trigger. Now quoted;
+so it loaded with _all_ metadata silently dropped and could never trigger. Now quoted;
 all 23 skills verified to parse.
 
 **Portability.** Removed the one hardcoded absolute home path. Replaced eight absolute

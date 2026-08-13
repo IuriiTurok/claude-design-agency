@@ -27,12 +27,12 @@ Only `python3` (stdlib) is required. Everything else is optional — see
 
 ## What you get
 
-| Component | Count | What it does |
-|---|---|---|
-| **Skills** | 23 | 3 agency skills (orchestrator, routing, taste) + 2 design-intelligence skills + the 18 Impeccable design skills (`design-agency:layout`, `:typeset`, `:colorize`, `:animate`, `:critique`, `:polish`, …) |
-| **QA subagents** | 5 | `style-enforcer` and `visual-qa` (hard gates) · `taste-guardian`, `polish-inspector`, `motion-designer` (advisory) |
-| **Roles** | 23 | Creative director, logo designer, brandbook designer, copywriter, researcher, prototype lead, character designer, project manager, … |
-| **Hooks** | 2 | Design-intent detection on every prompt · a post-edit gate on `ui/*.html` |
+| Component        | Count | What it does                                                                                                                                                                                             |
+| ---------------- | ----- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Skills**       | 23    | 3 agency skills (orchestrator, routing, taste) + 2 design-intelligence skills + the 18 Impeccable design skills (`design-agency:layout`, `:typeset`, `:colorize`, `:animate`, `:critique`, `:polish`, …) |
+| **QA subagents** | 5     | `style-enforcer` and `visual-qa` (hard gates) · `taste-guardian`, `polish-inspector`, `motion-designer` (advisory)                                                                                       |
+| **Roles**        | 23    | Creative director, logo designer, brandbook designer, copywriter, researcher, prototype lead, character designer, project manager, …                                                                     |
+| **Hooks**        | 2     | Design-intent detection on every prompt · a post-edit gate on `ui/*.html`                                                                                                                                |
 
 ## How it works
 
@@ -105,17 +105,81 @@ engagement. `DESIGN_AGENCY_DISABLE=1` turns both hooks off entirely.
 Tune `ask_threshold` by reviewing `~/.claude/cache/design-agency/audit.jsonl` — a high
 `not_design` rate means the threshold is too low.
 
+## Adopting in a new project
+
+**None of this is required.** With no configuration at all the plugin still works: the
+hook classifies prompts by keyword heuristics, and state lands in
+`~/.claude/design-agency/`. The three levers below buy you progressively stronger routing,
+and matter most in a repo where design work is the norm rather than the exception.
+
+The failure they prevent is real and specific. An audit of 58 sessions in an
+agency-operated repo found the workflow was bypassed in nearly every one — not because
+the skills were wrong, but because nothing routed sessions into them. Keyword heuristics
+alone lose to a prompt like *"fix the spacing on the pricing card"*.
+
+**1. Tune the classifier** — `<repo>/.claude/design-agency.json`
+
+Lower `ask_threshold` in a design-heavy repo, and add vocabulary the heuristics miss:
+
+```json
+{ "ask_threshold": 0.45, "extra_signals": ["brand", "palette", "mockup"] }
+```
+
+**2. Route every session** — a stanza in `<repo>/AGENTS.md`
+
+This is the lever that fixes the bypass problem, because it acts on sessions the hook
+never scores. Declare the bootstrap and the engagement classes:
+
+```markdown
+## Mandatory Context Bootstrap
+
+Before any work in this repo (read-only actions only until complete):
+
+1. Invoke the `design-agency` skill — orchestrator, workflow, gates, state resolution.
+2. Classify the session with the Engagement Router below, then follow that protocol.
+
+## Engagement Router (classify EVERY session before acting)
+
+Role files live at `{AGENCY_ROOT}/roles/` — the `design-agency` skill resolves
+`{AGENCY_ROOT}`; never hardcode a path to the plugin.
+
+| Engagement type | Signals | Protocol |
+|---|---|---|
+| New brand project | new client, brand identity, logo, brand book from scratch | Full Phases 1–6 |
+| Deliverable iteration | editing an existing `<project>/ui/*.html` | Maintenance & Iteration Mode |
+| Product prototype | app replication, multi-screen prototype | `roles/prototype_lead.md` |
+| One-off asset | favicon, avatar, social image | `roles/asset_designer.md` |
+| Ops / release / git | release notes, commit/deploy, file moves | no design gates |
+```
+
+**3. Force auto-engage** — an optional `DesignAgencyAgent/` marker
+
+`hooks/design-intent.py` walks up from the working directory looking for
+`DesignAgencyAgent/master_agent.md`. If it finds one, the session engages the agency
+unconditionally (`source: repo_agents_md`) regardless of what the prompt says. **Only the
+file's existence is checked — its contents are never read**, so an empty file is a valid
+marker:
+
+```bash
+mkdir -p DesignAgencyAgent && touch DesignAgencyAgent/master_agent.md
+```
+
+Creating that directory also switches the state chain to repo-local: `style_library.md`
+and `logo_feedback_log.json` then live in the repo instead of `~/.claude/design-agency/`
+(see the State table below), which is what you want when the agency's memory should be
+versioned with the project rather than with the machine.
+
 ### State
 
 The plugin directory is **read-only at runtime**. Everything writable resolves through
 `execution/state_paths.py`:
 
-| File | Chain (first that exists wins) |
-|---|---|
-| `style_library.md` | `<repo>/DesignAgencyAgent/style_library.md` → `~/.claude/design-agency/style_library.md` |
-| `lessons_learned.md` | `<repo>/lessons_learned.md` → `~/.claude/design-agency/lessons_learned.md` |
-| `logo_feedback_log.json` | `<repo>/DesignAgencyAgent/execution/logo_feedback_log.json` → `~/.claude/design-agency/logo_feedback_log.json` |
-| `config.json`, `lessons/` | `~/.claude/design-agency/` |
+| File                      | Chain (first that exists wins)                                                                                 |
+| ------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| `style_library.md`        | `<repo>/DesignAgencyAgent/style_library.md` → `~/.claude/design-agency/style_library.md`                       |
+| `lessons_learned.md`      | `<repo>/lessons_learned.md` → `~/.claude/design-agency/lessons_learned.md`                                     |
+| `logo_feedback_log.json`  | `<repo>/DesignAgencyAgent/execution/logo_feedback_log.json` → `~/.claude/design-agency/logo_feedback_log.json` |
+| `config.json`, `lessons/` | `~/.claude/design-agency/`                                                                                     |
 
 `DESIGN_AGENCY_STATE_DIR` overrides the whole chain. Deliverables and QA reports go to
 the project repo; agency memory goes to state; nothing is ever written back into the
@@ -135,13 +199,13 @@ Stated plainly, because a UserPromptSubmit hook deserves it:
 
 ## Optional dependencies
 
-| Dependency | Purpose | Without it |
-|---|---|---|
-| `GEMINI_API_KEY` + `google-generativeai` | Logo generation | Logo roles produce SVG by hand |
-| vision venv (`.venv-vision`) | Saliency heatmaps, visual diffing | Heatmap analyst is skipped (advisory anyway) |
-| `node` + `npx` | marp decks, svgo, sharp | Presentation/asset roles degrade to HTML |
-| chrome-devtools MCP | visual-qa full-page screenshots | visual-qa grades from source only |
-| `~/.claude/lib/self-improving-loop` | Self-improving rubric loops | Loops print a notice and exit cleanly |
+| Dependency                               | Purpose                           | Without it                                   |
+| ---------------------------------------- | --------------------------------- | -------------------------------------------- |
+| `GEMINI_API_KEY` + `google-generativeai` | Logo generation                   | Logo roles produce SVG by hand               |
+| vision venv (`.venv-vision`)             | Saliency heatmaps, visual diffing | Heatmap analyst is skipped (advisory anyway) |
+| `node` + `npx`                           | marp decks, svgo, sharp           | Presentation/asset roles degrade to HTML     |
+| chrome-devtools MCP                      | visual-qa full-page screenshots   | visual-qa grades from source only            |
+| `~/.claude/lib/self-improving-loop`      | Self-improving rubric loops       | Loops print a notice and exit cleanly        |
 
 ## Development
 

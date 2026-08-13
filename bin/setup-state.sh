@@ -2,7 +2,7 @@
 # setup-state.sh — seed the agency's writable state and report optional deps.
 #
 # The plugin itself is installed by the marketplace:
-#   /plugin marketplace add IuriiTurok/design-agency
+#   /plugin marketplace add IuriiTurok/claude-design-agency
 #   /plugin install design-agency@design-agency-mp
 #
 # Skills, agents, and hooks all register from the plugin manifest. This script

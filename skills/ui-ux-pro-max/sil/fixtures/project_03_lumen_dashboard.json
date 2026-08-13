@@ -1,0 +1,12 @@
+{
+  "project": "lumen-dashboard",
+  "rule_id": "6",
+  "fields": {
+    "pattern": "Data-Dense Dashboard",
+    "style": "Dark Mode (OLED) + Data-Dense",
+    "color_mood": "Dark bg + Red/Green alerts + Trust blue",
+    "typography_mood": "Clear + Readable typography",
+    "key_effects": "Real-time number animations + Alert pulse"
+  },
+  "overrides": {}
+}

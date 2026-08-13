@@ -1,0 +1,14 @@
+/* known-good: hairline 1px border-left is allowed (rule bans > 1px only),
+   solid heading color, distinctive pairing. Should produce ZERO hits. */
+.row {
+  border-left: 1px solid oklch(0.90 0.01 90);
+  padding-inline: var(--space-sm);
+}
+h1.display {
+  font-family: "Ogg", "Canela", serif;
+  color: oklch(0.22 0.03 90);
+  letter-spacing: -0.01em;
+}
+body {
+  font-family: "Hanken Grotesk", sans-serif;
+}

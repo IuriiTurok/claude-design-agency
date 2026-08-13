@@ -1,0 +1,15 @@
+# Vision/saliency stack for predict_attention.py
+#
+# HARD deps (predictor falls back to OpenCV-only mode without the optional set):
+numpy>=1.24
+Pillow>=10.0
+opencv-python-headless>=4.9
+opencv-contrib-python-headless>=4.9   # provides cv2.saliency
+
+# OPTIONAL — install for DeepGaze IIE (academic baseline, higher fidelity):
+#   pip install -r requirements_vision.txt
+#   pip install torch torchvision deepgaze-pytorch
+#
+# OPTIONAL — install for UEyes (UI-trained, highest fit):
+#   Clone the UEyes repo + download pretrained weights into
+#   execution/.models/ueyes/. See setup_vision.sh for the exact steps.

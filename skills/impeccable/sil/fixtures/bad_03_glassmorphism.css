@@ -1,0 +1,8 @@
+/* known-bad: decorative glassmorphism. The mechanical checker has NOT yet
+   adopted this ban (it lives only as prose in the ban list), so a Bridge-D
+   candidate proposing it is a genuine GROW move with a measurable +metric. */
+.glass-card {
+  backdrop-filter: blur(12px);
+  background: rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}

@@ -1,0 +1,29 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "design-agency-mp",
+  "description": "Single-plugin marketplace for design-agency \u2014 a 23-role virtual design agency for Claude Code, with design-intent detection and hard QA gates.",
+  "owner": {
+    "name": "iuriiturok"
+  },
+  "plugins": [
+    {
+      "name": "design-agency",
+      "version": "0.2.0",
+      "description": "A 23-role virtual design agency with hard QA gates. Detects design intent in your prompt, runs a multi-phase brand engagement, and blocks delivery until a mechanical style enforcer and a visual QA pass both clear.",
+      "author": {
+        "name": "iuriiturok"
+      },
+      "category": "design",
+      "tags": [
+        "design",
+        "branding",
+        "design-system",
+        "quality-gates",
+        "anti-slop"
+      ],
+      "source": "./",
+      "homepage": "https://github.com/IuriiTurok/claude-design-agency",
+      "license": "MIT"
+    }
+  ]
+}

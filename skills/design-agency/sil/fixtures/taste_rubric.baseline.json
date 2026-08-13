@@ -1,0 +1,12 @@
+{
+  "_comment": "Baseline taste rubric the sil adapter tunes. Mirrors the dimension/weight/threshold shape the taste-guardian applies when scoring a deliverable against the three visual_philosophy.md knobs (0-5 scale). This is the LOOP-PRIVATE copy the adapter reads + proposes edits to; applying a kept proposal is a human ONE_CLICK step (the canonical taste_guardian.md under read-only {AGENCY_ROOT} is never written by the loop).",
+  "scale_max": 5,
+  "hard_gate_min": 3.0,
+  "dimensions": {
+    "motion_restraint": {"weight": 1.0, "min_threshold": 3.0},
+    "type_scale": {"weight": 1.0, "min_threshold": 3.0},
+    "originality": {"weight": 1.5, "min_threshold": 3.0},
+    "craft": {"weight": 1.5, "min_threshold": 3.0},
+    "color_discipline": {"weight": 1.0, "min_threshold": 3.0}
+  }
+}

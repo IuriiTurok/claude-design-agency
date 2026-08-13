@@ -1,0 +1,24 @@
+{"name":"logo-design-ask","payload":{"prompt":"design a logo for Acme","cwd":"/tmp","session_id":"fixture-logo-001"},"expect":"ask","expect_type":"asset"}
+{"name":"ci-fix-none","payload":{"prompt":"fix the failing CI test in the api","cwd":"/tmp","session_id":"fixture-ci-002"},"expect":"none"}
+{"name":"noagency-rebrand-none","payload":{"prompt":"#noagency rebrand everything","cwd":"/tmp","session_id":"fixture-noagency-003"},"expect":"none"}
+{"name":"brandbook-repo-engage","payload":{"prompt":"please rebrand everything","cwd":"{{MARKER_REPO}}","session_id":"fixture-brandbook-004"},"expect":"engage","expect_source":"repo_agents_md"}
+{"name":"yes-go-ahead-none","payload":{"prompt":"yes go ahead","cwd":"/tmp","session_id":"fixture-yes-005"},"expect":"none"}
+{"name":"ok-short-none","payload":{"prompt":"ok","cwd":"/tmp","session_id":"fixture-ok-006"},"expect":"none"}
+{"name":"glassmorphism-theory-none","payload":{"prompt":"what is glassmorphism?","cwd":"/tmp","session_id":"fixture-theory-007"},"expect":"none"}
+{"name":"agency-override-engage","payload":{"prompt":"#agency check this layout please","cwd":"/tmp","session_id":"fixture-agency-008"},"expect":"engage","expect_source":"override"}
+{"name":"brand-book-ask","payload":{"prompt":"create a brand book for the new startup","cwd":"/tmp","session_id":"fixture-brandbook2-009"},"expect":"ask","expect_type":"brand_project"}
+{"name":"mascot-pose-sheet-ask","payload":{"prompt":"build a mascot pose sheet for the app","cwd":"/tmp","session_id":"fixture-mascot-010"},"expect":"ask","expect_type":"character_3d"}
+{"name":"favicon-social-card-ask","payload":{"prompt":"make a favicon and social card set","cwd":"/tmp","session_id":"fixture-favicon-011"},"expect":"ask","expect_type":"asset"}
+{"name":"interactive-prototype-ask","payload":{"prompt":"build an interactive prototype for the talent profile","cwd":"/tmp","session_id":"fixture-prototype-012"},"expect":"ask","expect_type":"prototype"}
+{"name":"design-system-tokens-ask","payload":{"prompt":"design system tokens need updating","cwd":"/tmp","session_id":"fixture-tokens-013"},"expect":"ask","expect_type":"deliverable_iteration"}
+{"name":"deploy-api-migration-none","payload":{"prompt":"deploy the api and fix the database migration bug","cwd":"/tmp","session_id":"fixture-deploy-014"},"expect":"none"}
+{"name":"slash-command-none","payload":{"prompt":"/route status","cwd":"/tmp","session_id":"fixture-slash-015"},"expect":"none"}
+{"name":"landing-page-hero-ask","payload":{"prompt":"improve the landing page hero section","cwd":"/tmp","session_id":"fixture-hero-016"},"expect":"ask"}
+{"name":"css-grid-explain-none","payload":{"prompt":"explain how css grid works","cwd":"/tmp","session_id":"fixture-css-017"},"expect":"none"}
+{"name":"session-already-engaged-none","payload":{"prompt":"create another logo variation","cwd":"/tmp","session_id":"fixture-logo-001"},"expect":"none"}
+{"name":"deliverable-path-none","payload":{"prompt":"redesign ui/landing_page.html spacing","cwd":"/tmp","session_id":"fixture-deliv-019"},"expect":"none"}
+{"name":"api-tests-color-palette-none","payload":{"prompt":"add api tests for the color palette endpoint","cwd":"/tmp","session_id":"fixture-apicolor-020"},"expect":"none"}
+{"name":"testimonial-not-engineering-ask","payload":{"prompt":"improve the testimonial section on the landing page","cwd":"/tmp","session_id":"fixture-testimonial-021"},"expect":"ask"}
+{"name":"social-card-ci-substring-ask","payload":{"prompt":"design a social card for the launch announcement","cwd":"/tmp","session_id":"fixture-socialci-022"},"expect":"ask","expect_type":"asset"}
+{"name":"refactor-alone-no-penalty-ask","payload":{"prompt":"refactor the landing page hero spacing","cwd":"/tmp","session_id":"fixture-refactor-023"},"expect":"ask"}
+{"name":"schema-migration-endpoint-none","payload":{"prompt":"update the database schema migration for the users endpoint","cwd":"/tmp","session_id":"fixture-schema-024"},"expect":"none"}

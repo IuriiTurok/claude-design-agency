@@ -1,0 +1,14 @@
+{
+  "project": "acme-saas",
+  "rule_id": "1",
+  "fields": {
+    "pattern": "Hero + Features + CTA",
+    "style": "Glassmorphism + Flat Design",
+    "color_mood": "Trust blue + Accent contrast",
+    "typography_mood": "Professional + Hierarchy",
+    "key_effects": "Subtle hover (200-250ms) + Smooth transitions"
+  },
+  "overrides": {
+    "style": "Flat Design + Minimalism"
+  }
+}

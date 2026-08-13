@@ -1,0 +1,9 @@
+__pycache__/
+*.pyc
+.venv-vision/
+.DS_Store
+
+# execution/generate_logo.py reads a .env from the plugin root as a fallback.
+# Never let one become committable.
+.env
+.env.*

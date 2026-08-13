@@ -1,0 +1,11 @@
+/* known-bad: side-stripe accent border (BAN 1) + reflex font (Inter).
+   Should be CAUGHT by the antipattern check. */
+.alert {
+  border-left: 4px solid var(--color-warning);
+  padding: 16px;
+  background: #fff;
+  font-family: "Inter", system-ui, sans-serif;
+}
+.alert--error {
+  border-left: 3px solid #ff0000;
+}

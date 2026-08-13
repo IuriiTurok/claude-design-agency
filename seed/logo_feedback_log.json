@@ -1,0 +1,20 @@
+{
+  "sessions": [],
+  "learnings": [
+    "Gemini Nano Banana models produce best results with highly specific spatial descriptions rather than abstract concepts",
+    "Always specify 'flat vector logo, no photorealistic elements, clean background' to avoid photo-style outputs",
+    "Including negative instructions ('no gradients', 'no 3D shadows') significantly improves logo-appropriate outputs"
+  ],
+  "prompt_patterns": {
+    "effective": [
+      "Specifying exact geometric shapes and their spatial relationships",
+      "Including 'professional brand mark, suitable for business cards and app icons' as context",
+      "Describing the negative space explicitly when it carries meaning"
+    ],
+    "ineffective": [
+      "Vague descriptors like 'modern and clean' without visual specifics",
+      "Requesting text/typography in the image - AI letterforms are often garbled",
+      "Asking for multiple logo variants in a single generation - produces collages instead of clean marks"
+    ]
+  }
+}

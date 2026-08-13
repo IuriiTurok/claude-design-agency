@@ -1,0 +1,14 @@
+{
+  "project": "atlas-ecommerce",
+  "rule_id": "3",
+  "fields": {
+    "pattern": "Feature-Rich Showcase",
+    "style": "Vibrant & Block-based",
+    "color_mood": "Brand primary + Success green",
+    "typography_mood": "Engaging + Clear hierarchy",
+    "key_effects": "Card hover lift (200ms) + Scale effect"
+  },
+  "overrides": {
+    "color_mood": "Brand primary + Trust blue"
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "name": "design-agency",
+  "version": "0.2.0",
+  "description": "A 23-role virtual design agency with hard QA gates. Detects design intent in your prompt, runs a multi-phase brand engagement, and blocks delivery until a mechanical style enforcer and a visual QA pass both clear.",
+  "author": {
+    "name": "iuriiturok"
+  },
+  "homepage": "https://github.com/IuriiTurok/claude-design-agency",
+  "repository": "https://github.com/IuriiTurok/claude-design-agency",
+  "license": "MIT",
+  "keywords": [
+    "design",
+    "branding",
+    "design-system",
+    "ui-ux",
+    "quality-gates",
+    "anti-slop",
+    "hooks",
+    "subagents"
+  ]
+}

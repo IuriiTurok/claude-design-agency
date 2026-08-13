@@ -1,0 +1,9 @@
+/* known-bad: gradient text (BAN 2) + reflex font (Space Grotesk).
+   Should be CAUGHT by the antipattern check. */
+.hero__title {
+  font-family: "Space Grotesk", sans-serif;
+  background: linear-gradient(90deg, #7c3aed, #2563eb);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}

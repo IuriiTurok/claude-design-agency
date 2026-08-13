@@ -1,0 +1,13 @@
+/* known-good: full border + background tint, no side-stripe, solid text color,
+   non-reflex font. Should produce ZERO anti-pattern hits. */
+.callout {
+  border: 1px solid oklch(0.85 0.02 250);
+  background: oklch(0.97 0.01 250);
+  border-radius: 8px;
+  padding: var(--space-md);
+  font-family: "Hanken Grotesk", system-ui, sans-serif;
+}
+.callout__title {
+  color: oklch(0.30 0.04 250);
+  font-weight: 600;
+}

@@ -7,7 +7,7 @@ description: >
   and VISUAL_DENSITY knobs from visual_philosophy.md to calibrate evaluation. Halts if
   knobs are absent. Writes taste_report.md with Originality and Craft scores for visual-qa
   to consume. Model: opus for aesthetic judgment.
-model: opus
+model: sonnet
 tools: ["Read", "Write", "Grep", "Glob"]
 ---
 

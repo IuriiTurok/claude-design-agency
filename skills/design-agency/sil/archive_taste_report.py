@@ -13,7 +13,7 @@ CLI:
     --scores '{"originality":4.0,"craft":3.5}' --hard-gate-passed \
     [--ts 2026-06-15T00:00:00+00:00]
 
-Path mirrors the loop's REAL_REPORTS constant (DA_AGENCY_STATE override honored).
+Path mirrors the loop's REAL_REPORTS constant (DESIGN_AGENCY_STATE_DIR honored).
 """
 
 from __future__ import annotations
@@ -21,10 +21,21 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import sys
 from datetime import datetime, timezone
 
-STATE = os.path.expanduser(os.environ.get("DA_AGENCY_STATE", "~/.claude/design-agency"))
-REAL_REPORTS = os.path.join(STATE, "sil", "taste-reports.jsonl")
+# The plugin's own state resolver, three levels up in execution/. Ships with the
+# plugin (stdlib-only). Keeps DESIGN_AGENCY_STATE_DIR — the one documented
+# override — authoritative here as it is everywhere else in the agency.
+sys.path.insert(
+    0,
+    os.path.abspath(
+        os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "..", "execution")
+    ),
+)
+import state_paths  # noqa: E402
+
+REAL_REPORTS = os.path.join(str(state_paths.resolve("sil")), "taste-reports.jsonl")
 
 
 def archive_taste_report(

@@ -31,6 +31,16 @@ KERNEL = os.path.expanduser(
 )
 sys.path.insert(0, KERNEL)
 
+# The plugin's own state resolver, three levels up in execution/. Ships with the
+# plugin (stdlib-only), so unlike the kernel above this import is not optional.
+sys.path.insert(
+    0,
+    os.path.abspath(
+        os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "..", "execution")
+    ),
+)
+import state_paths  # noqa: E402
+
 # The self-improving-loop kernel is an OPTIONAL companion install, not a plugin
 # dependency. Everything else in the agency works without it, so a missing kernel
 # must degrade to a clear message rather than an ImportError traceback.
@@ -55,8 +65,11 @@ BASELINE_RUBRIC = os.path.join(FIXTURES, "taste_rubric.baseline.json")
 REPORTS = os.path.join(FIXTURES, "taste_reports.jsonl")
 
 # {AGENCY_STATE} convention — the skill's live state dir (never {AGENCY_ROOT}).
-STATE = os.path.expanduser(os.environ.get("DA_AGENCY_STATE", "~/.claude/design-agency"))
-SIL_DIR = os.path.join(STATE, "sil")
+# Resolved through the plugin's canonical resolver so DESIGN_AGENCY_STATE_DIR, the
+# one documented override, moves this loop's state exactly as it moves everything
+# else. "sil" is not a REPO_RELATIVE name, so resolve() skips the repo-local tier
+# and yields <override-or-~/.claude/design-agency>/sil — the historical path.
+SIL_DIR = str(state_paths.resolve("sil"))
 LEDGER = os.path.join(SIL_DIR, "taste-ledger.jsonl")  # §2.1 ledger path
 # Real archived taste_report outcomes (one JSON row per completed engagement),
 # the realized signal measure() prefers over the fixture corpus once a post-

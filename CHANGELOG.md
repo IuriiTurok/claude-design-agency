@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.3.1 (2026-08-20)
+
+**The state-dir override now actually moves all the state.** `DESIGN_AGENCY_STATE_DIR` is
+the documented override — the README, `bin/setup-state.sh`, every `roles/*.md`, the main
+`SKILL.md`, and the canonical resolver in `execution/state_paths.py` all agree on it. But
+the two self-improving-loop scripts never went through the resolver: they read a
+`DA_AGENCY_STATE` variable that appears nowhere else in the plugin and nowhere in the
+shared kernel. Both defaulted to the same `~/.claude/design-agency`, so nothing looked
+wrong — until you set the documented override, at which point the taste ledger and the
+archived taste-reports kept writing to the default while everything else relocated.
+
+`skills/design-agency/sil/design-agency_loop.py` and `sil/archive_taste_report.py` now
+import `state_paths` and call `resolve("sil")`. Because `sil` is not a repo-relative name,
+`resolve()` skips the repo-local tier and returns the historical path when no override is
+set — so default behavior is byte-identical and `DA_AGENCY_STATE` is gone from the tree.
+
 ## 0.3.0 (2026-08-13)
 
 **The pipeline orchestrator ships.** `refine` — the skill that sequences

@@ -9,7 +9,7 @@ description: >
   deliverable. May be invoked directly for spot-polishing a single deliverable outside
   the full pipeline. Skip when style_directive.md is absent and no Impeccable defaults
   are available. Model: opus for fine craft judgment.
-model: opus
+model: sonnet
 tools: ["Read", "Edit", "Write", "Grep", "Glob"]
 ---
 

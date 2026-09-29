@@ -117,14 +117,14 @@ Normally entered via `design-agency-routing` after a `<design-agency-decision>` 
 routed or direct, classify before any creative action. Generalizes to ANY repo — no fixed
 client-folder names; `<project>` = the folder the engagement targets.
 
-| Engagement type                         | Signals                                                       | Protocol                                                              |
-| --------------------------------------- | ------------------------------------------------------------- | --------------------------------------------------------------------- |
-| **New brand project**                   | brand identity / logo / brand book from scratch               | Full Phases 1–6 below                                                 |
-| **Deliverable iteration** (most common) | editing an existing `<project>/ui/*.html` or `brand_book.md`  | **Maintenance & Iteration Mode** below                                |
-| **Product prototype**                   | app replication, multi-screen prototype, prototype iterations | `{AGENCY_ROOT}/roles/prototype_lead.md`                               |
-| **Character / mascot / 3D**             | mascot, character, pose sheet, multi-view, image-to-3D        | `{AGENCY_ROOT}/roles/character_designer.md`                           |
-| **One-off asset**                       | favicon, avatar, social image, single collateral piece        | `{AGENCY_ROOT}/roles/asset_designer.md` — directive binding           |
-| **Ops / release / git**                 | release notes, handoff docs, commit/deploy, file moves        | `{AGENCY_ROOT}/roles/project_manager.md` conventions; no design gates |
+| Engagement type                         | Signals                                                       | Protocol                                                                                     |
+| --------------------------------------- | ------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| **New brand project**                   | brand identity / logo / brand book from scratch               | Full Phases 1–6 below                                                                        |
+| **Deliverable iteration** (most common) | editing an existing `<project>/ui/*.html` or `brand_book.md`  | **Maintenance & Iteration Mode** below                                                       |
+| **Product prototype**                   | app replication, multi-screen prototype, prototype iterations | `{AGENCY_ROOT}/roles/prototype_lead.md`                                                      |
+| **Character / mascot / 3D**             | mascot, character, pose sheet, multi-view, image-to-3D        | `{AGENCY_ROOT}/roles/character_designer.md` (3D models via the external `img2threejs` skill) |
+| **One-off asset**                       | favicon, avatar, social image, single collateral piece        | `{AGENCY_ROOT}/roles/asset_designer.md` — directive binding                                  |
+| **Ops / release / git**                 | release notes, handoff docs, commit/deploy, file moves        | `{AGENCY_ROOT}/roles/project_manager.md` conventions; no design gates                        |
 
 ### Hard Rules (all engagement types)
 
@@ -158,11 +158,15 @@ Especially the three imported-vocabulary skills:
 - **Impeccable** (18 sub-skills at `{AGENCY_ROOT}/skills/`, namespaced `design-agency:layout`,
   `design-agency:typeset`, …; entry point `{AGENCY_ROOT}/roles/polish_inspector.md`) —
   suggestions are advisory, clamped to directive tokens before application.
-- **Taste Skill** (`{AGENCY_ROOT}/roles/taste_guardian.md`) — evaluates _execution of
-  strategy_, never proposes overrides. Its own defaults (premium-OLED, baked-in motion
-  intensity) are disabled in agency context; the three knobs (DESIGN_VARIANCE,
-  MOTION_INTENSITY, VISUAL_DENSITY) are set per-project by Creative Director in
-  `visual_philosophy.md`.
+- **Taste Skill** (`design-agency:taste-skill`, v2) — used at **generation** time by
+  the UI/UX Designer (§0 Design Read, then §14 pre-flight →
+  `taste_preflight_<deliverable>.md` before QA) and at **evaluation** time by
+  `taste_guardian` (§9 AI Tells). It carries no baseline: the three dials
+  (DESIGN_VARIANCE, MOTION_INTENSITY, VISUAL_DENSITY) and `TASTE_MODE` (soft |
+  minimalist | brutalist | none) are set per-project by Creative Director in
+  `visual_philosophy.md` (Phase 2). §13 out-of-scope surfaces (dashboards, product UI,
+  prototypes) do not get it — they route to `/ui-ux-pro-max` and
+  `{AGENCY_ROOT}/roles/prototype_lead.md`.
 
 `style_enforcer` is the only hard compliance gate. The three skills raise the ceiling on
 craft, originality, and motion; they do not weaken the floor.
@@ -277,7 +281,11 @@ consults the Style Librarian for collision checks ONLY (not copying); synthesize
 `research_context.md` + the **client's brief** into `brand_strategy.md` (decisions trace
 to brief/web research, not past
 projects). Picks a **named** archetype via `/ui-ux-pro-max` (50+ styles, 161 palettes,
-57 font pairings); builds a **Visual Philosophy** via `/canvas-design`. Selects the
+57 font pairings); builds a **Visual Philosophy** via `/canvas-design`. While building
+the Visual Philosophy, also sets the three taste-skill dials (DESIGN_VARIANCE,
+MOTION_INTENSITY, VISUAL_DENSITY) and `TASTE_MODE` (soft | minimalist | brutalist |
+none) in `visual_philosophy.md`, using taste-skill v2 §1 and the mode files at
+`{AGENCY_ROOT}/skills/taste-skill/references/modes/`. Selects the
 primary accent, then invokes the **Color System Generator** for the full palette
 (10-shade accent ramp, temperature-matched neutrals, semantics, WCAG AA contrast pairs)
 → CSS custom properties + Tailwind v4 `@theme inline`. Produces **`style_directive.md`**
@@ -308,6 +316,7 @@ shadcn/ui CLI. _QA:_ six-stage pipeline + `agent-browser-verify`.
   `superpowers:dispatching-parallel-agents` (sections per Completeness Matrix →
   `references/completeness_matrix.md`):
   - **A — Landing Page** (`ui/landing_page.html`): UI/UX Designer via `/frontend-design`;
+    `design-agency:taste-skill` Design Read first, §14 pre-flight written before QA;
     complete, polished, single-file; shadcn/ui patterns (Card, Button, Badge, Tabs) over
     raw HTML; literal font names, not CSS variables.
   - **B — Design System** (`ui/design_system.html`): Design System Expert via
@@ -610,8 +619,10 @@ as subagents (in brackets). **Full roster — Strategy & Discovery, Creative Des
 Production output (frontend HTML, PDFs, presentations, logos, color ramps, SVG
 optimization) is handled by official Anthropic skills (`/frontend-design`,
 `/canvas-design`, `/theme-factory`, `/pdf`, `/pptx`, `/web-artifacts-builder`,
-`/brand-guidelines`, `/ui-ux-pro-max`), the shadcn/ui CLI, the
-`{AGENCY_ROOT}/execution/` scripts, and the Node.js `tools/` pipeline — each operating
-**within** `style_directive.md`. Sub-agents MUST invoke the appropriate official skill
-rather than hand-produce these formats. **Full catalog →
+`/brand-guidelines`, `/ui-ux-pro-max`), `design-agency:taste-skill`, the shadcn/ui CLI,
+the `{AGENCY_ROOT}/execution/` scripts, and the Node.js `tools/` pipeline — each
+operating **within** `style_directive.md`. Sub-agents MUST invoke the appropriate
+official skill rather than hand-produce these formats. 3D reconstruction uses the
+external `img2threejs` skill (installed at `~/.claude/skills/img2threejs`, not bundled;
+catalog entry in `_official_skills.md`). **Full catalog →
 `{AGENCY_ROOT}/roles/_official_skills.md`.**

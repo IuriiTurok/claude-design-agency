@@ -22,3 +22,5 @@
 {"name":"social-card-ci-substring-ask","payload":{"prompt":"design a social card for the launch announcement","cwd":"/tmp","session_id":"fixture-socialci-022"},"expect":"ask","expect_type":"asset"}
 {"name":"refactor-alone-no-penalty-ask","payload":{"prompt":"refactor the landing page hero spacing","cwd":"/tmp","session_id":"fixture-refactor-023"},"expect":"ask"}
 {"name":"schema-migration-endpoint-none","payload":{"prompt":"update the database schema migration for the users endpoint","cwd":"/tmp","session_id":"fixture-schema-024"},"expect":"none"}
+{"name":"mascot-threejs-3d-ask","payload":{"prompt":"rebuild this mascot photo as a three.js model","cwd":"/tmp","session_id":"fixture-mascot3d-025"},"expect":"ask","expect_type":"character_3d"}
+{"name":"threejs-build-fix-none","payload":{"prompt":"fix the three.js build error in the api","cwd":"/tmp","session_id":"fixture-threejsfix-026"},"expect":"none"}

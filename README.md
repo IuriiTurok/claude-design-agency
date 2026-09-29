@@ -20,19 +20,21 @@ happen — every QA agent writes its report to disk.
 /plugin install design-agency@design-agency-mp
 ```
 
-Restart Claude Code. Hooks activate automatically from `hooks/hooks.json`.
+Restart Claude Code. Hooks activate automatically from `hooks/hooks.json`. Landing/marketing
+work also reads the three taste dials and `TASTE_MODE` from each project's
+`visual_philosophy.md`; the Creative Director sets them in Phase 2.
 
 Only `python3` (stdlib) is required. Everything else is optional — see
 [Optional dependencies](#optional-dependencies).
 
 ## What you get
 
-| Component        | Count | What it does                                                                                                                                                                                             |
-| ---------------- | ----- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Skills**       | 23    | 3 agency skills (orchestrator, routing, taste) + 2 design-intelligence skills + the 18 Impeccable design skills (`design-agency:layout`, `:typeset`, `:colorize`, `:animate`, `:critique`, `:polish`, …) |
-| **QA subagents** | 5     | `style-enforcer` and `visual-qa` (hard gates) · `taste-guardian`, `polish-inspector`, `motion-designer` (advisory)                                                                                       |
-| **Roles**        | 23    | Creative director, logo designer, brandbook designer, copywriter, researcher, prototype lead, character designer, project manager, …                                                                     |
-| **Hooks**        | 2     | Design-intent detection on every prompt · a post-edit gate on `ui/*.html`                                                                                                                                |
+| Component        | Count | What it does                                                                                                                                                                                                |
+| ---------------- | ----- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Skills**       | 23    | 3 agency skills (orchestrator, routing, taste v2) + 2 design-intelligence skills + the 18 Impeccable design skills (`design-agency:layout`, `:typeset`, `:colorize`, `:animate`, `:critique`, `:polish`, …) |
+| **QA subagents** | 5     | `style-enforcer` and `visual-qa` (hard gates) · `taste-guardian`, `polish-inspector`, `motion-designer` (advisory)                                                                                          |
+| **Roles**        | 23    | Creative director, logo designer, brandbook designer, copywriter, researcher, prototype lead, character designer, project manager, …                                                                        |
+| **Hooks**        | 2     | Design-intent detection on every prompt · a post-edit gate on `ui/*.html`                                                                                                                                   |
 
 ## How it works
 
@@ -115,7 +117,7 @@ and matter most in a repo where design work is the norm rather than the exceptio
 The failure they prevent is real and specific. An audit of 58 sessions in an
 agency-operated repo found the workflow was bypassed in nearly every one — not because
 the skills were wrong, but because nothing routed sessions into them. Keyword heuristics
-alone lose to a prompt like *"fix the spacing on the pricing card"*.
+alone lose to a prompt like _"fix the spacing on the pricing card"_.
 
 **1. Tune the classifier** — `<repo>/.claude/design-agency.json`
 
@@ -143,13 +145,13 @@ Before any work in this repo (read-only actions only until complete):
 Role files live at `{AGENCY_ROOT}/roles/` — the `design-agency` skill resolves
 `{AGENCY_ROOT}`; never hardcode a path to the plugin.
 
-| Engagement type | Signals | Protocol |
-|---|---|---|
-| New brand project | new client, brand identity, logo, brand book from scratch | Full Phases 1–6 |
-| Deliverable iteration | editing an existing `<project>/ui/*.html` | Maintenance & Iteration Mode |
-| Product prototype | app replication, multi-screen prototype | `roles/prototype_lead.md` |
-| One-off asset | favicon, avatar, social image | `roles/asset_designer.md` |
-| Ops / release / git | release notes, commit/deploy, file moves | no design gates |
+| Engagement type       | Signals                                                   | Protocol                     |
+| --------------------- | --------------------------------------------------------- | ---------------------------- |
+| New brand project     | new client, brand identity, logo, brand book from scratch | Full Phases 1–6              |
+| Deliverable iteration | editing an existing `<project>/ui/*.html`                 | Maintenance & Iteration Mode |
+| Product prototype     | app replication, multi-screen prototype                   | `roles/prototype_lead.md`    |
+| One-off asset         | favicon, avatar, social image                             | `roles/asset_designer.md`    |
+| Ops / release / git   | release notes, commit/deploy, file moves                  | no design gates              |
 ```
 
 **3. Force auto-engage** — an optional `DesignAgencyAgent/` marker
@@ -206,6 +208,7 @@ Stated plainly, because a UserPromptSubmit hook deserves it:
 | `node` + `npx`                           | marp decks, svgo, sharp           | Presentation/asset roles degrade to HTML     |
 | chrome-devtools MCP                      | visual-qa full-page screenshots   | visual-qa grades from source only            |
 | `~/.claude/lib/self-improving-loop`      | Self-improving rubric loops       | Loops print a notice and exit cleanly        |
+| `img2threejs` skill at `~/.claude/skills/img2threejs` (clone https://github.com/img2threejs/img2threejs and symlink) | Image-to-3D procedural Three.js models for the Character Designer | The 3D track stops and prints the install commands |
 
 ## Development
 

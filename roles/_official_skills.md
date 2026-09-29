@@ -80,6 +80,69 @@ pairings, 161 product types, 99 UX guidelines, and 25 chart types.
 
 ---
 
+## Bundled design-intelligence skills
+
+### `design-agency:taste-skill` (v2)
+
+Anti-slop art direction for landing/marketing/portfolio surfaces. Reads a one-line
+Design Read (§0) against the brief, then the three dials (DESIGN_VARIANCE,
+MOTION_INTENSITY, VISUAL_DENSITY) and `TASTE_MODE` (soft | minimalist | brutalist |
+none) from `visual_philosophy.md`, enforces the §9 AI-tell ban list (incl. the §9.G
+em-dash ban), and runs a §14 pre-flight matrix before QA. Carries no baseline values of
+its own — the dials and mode are declared per-project by the Creative Director.
+Supporting material at `{AGENCY_ROOT}/skills/taste-skill/references/` (engineering,
+design-systems, vocabulary, redesign, block-library) and
+`{AGENCY_ROOT}/skills/taste-skill/references/modes/` (one file per `TASTE_MODE`).
+
+- **Invoked by:** UI/UX Designer (`{AGENCY_ROOT}/roles/uiux_designer.md`) at
+  **generation** time — Design Read before `/frontend-design`, §14 pre-flight written
+  to `<project>/taste_preflight_<deliverable>.md` before QA — and Creative Director
+  (`{AGENCY_ROOT}/roles/creative_director.md`) at Phase 2 to set the dials/mode in
+  `visual_philosophy.md`.
+- **Consumed by:** `taste_guardian` and `style_enforcer` read §9 as ban-list input.
+- **Constraint:** `style_directive.md` is upstream of every taste-skill rule —
+  directive wins on conflict. Not for §13 out-of-scope surfaces (dashboards, product
+  UI, prototypes, data tables, wizards, code editors, native mobile) — those route to
+  `/ui-ux-pro-max` and `{AGENCY_ROOT}/roles/prototype_lead.md`.
+- **Source:** vendored from `github.com/Leonxlnx/taste-skill` @ `ce26fc25c0e5`. Licence:
+  MIT.
+
+---
+
+## External skills (installed on the host, not bundled)
+
+### `img2threejs`
+
+Rebuilds the object or character in a reference image as a code-only procedural
+Three.js TypeScript factory, through a gated multi-pass pipeline driven by Python
+3.10+ stdlib scripts. Not vendored into this plugin — it lives on the host at
+`~/.claude/skills/img2threejs`.
+
+- **Install:**
+  ```
+  git clone https://github.com/img2threejs/img2threejs ~/Code/vendor/img2threejs
+  ln -s ~/Code/vendor/img2threejs ~/.claude/skills/img2threejs
+  ```
+  Optional harness: `npx github:img2threejs/img2 install`, then
+  `img2 add img2threejs/plugin-character`.
+- **Invocation:** run from the skill root —
+  ```
+  python3 forge/state.py init --state .img2threejs/state.json --reference <img> \
+    --profile <generic|character> --spec object-sculpt-spec.json
+  python3 forge/next.py --state .img2threejs/state.json
+  ```
+  State and outputs live under `<project>/3d/<name>/`.
+- **Outputs:** `object-sculpt-spec.json`, `src/create<Name>Model.ts`, comparison sheets
+  under `<project>/3d/<name>/`.
+- **Gates:** its own turntable/comparison gates run first (inside the pipeline), then
+  the deliverable still passes through `visual-qa` like any other agency asset.
+- **Invoked by:** Character Designer (`{AGENCY_ROOT}/roles/character_designer.md`) for
+  the 3D track of a character/mascot engagement.
+- **Licence:** Apache-2.0. Never vendored into the plugin — always resolved from the
+  host install.
+
+---
+
 ## shadcn/ui CLI
 
 Component source-code generator. Use over raw Tailwind divs when building

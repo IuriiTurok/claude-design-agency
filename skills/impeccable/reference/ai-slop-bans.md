@@ -170,8 +170,10 @@ stays reusable by any project.
   `style_library.md` and the agency seed/role files; defer to those for the
   brand-specific specifics. This file holds only the durable, cross-engagement own-brand
   ban additions — per-engagement choices stay in the engagement's own style library.
-- **Stack conventions** (DESIGN_VARIANCE / MOTION_INTENSITY / VISUAL_DENSITY baselines)
-  remain owned by `taste-skill`; this file does not duplicate them — it only carries the
-  own-brand ban additions that are not already in the General section.
+- **Stack conventions** (DESIGN_VARIANCE / MOTION_INTENSITY / VISUAL_DENSITY baselines,
+  plus `TASTE_MODE`) are declared per project in `<project>/visual_philosophy.md` by
+  the Creative Director; `design-agency:taste-skill` v2 carries no baseline of its own.
+  This file does not duplicate them — it only carries the own-brand ban additions that
+  are not already in the General section.
 
 Promoted own-brand candidates (Bridge D, `scope: own_brand`) append here.

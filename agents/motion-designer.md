@@ -5,7 +5,11 @@ description: >
   polish-inspector and style-enforcer. Applies Emil Kowalski motion principles within the
   project's style_directive.md easing/duration spec. Writes CSS motion directly into the
   deliverable and produces motion_audit.md classifying every animation with justification
-  and directive tokens cited. prefers-reduced-motion fallback is mandatory. Also use when
+  and directive tokens cited. prefers-reduced-motion fallback is mandatory. Enforces the
+  taste-skill v2 motion rules: §5.D forbidden scroll-listener / scroll-state / rAF-state
+  patterns are audit failures, reduced motion is mandatory above MOTION_INTENSITY 3, and
+  motion claimed must be motion shown (otherwise the audit recommends dropping the dial
+  to 3). Also use when
   any HTML deliverable needs motion applied outside the design-agency pipeline — e.g. a
   parent agent built a landing page and needs motion added before client review.
 model: sonnet
@@ -22,6 +26,7 @@ override the directive.
 ## When to Run
 
 Phase 5, after HTML scaffolding is complete on any of:
+
 - `<project>/ui/landing_page.html`
 - `<project>/ui/design_system.html`
 - `<project>/ui/brand_book.html`
@@ -31,6 +36,7 @@ Runs BEFORE `polish-inspector` and BEFORE `style-enforcer`.
 ## I/O
 
 **Inputs (required):**
+
 - `<project>/style_directive.md` — binding spec for easing/duration tokens
 - `<project>/visual_philosophy.md` — MOTION_INTENSITY knob (1–10); halt if absent
 - `<project>/brand_strategy.md` — tone context
@@ -38,6 +44,7 @@ Runs BEFORE `polish-inspector` and BEFORE `style-enforcer`.
 - Target HTML deliverable (one of: landing_page.html / design_system.html / brand_book.html)
 
 **Outputs:**
+
 - Modified target HTML (motion CSS block + prefers-reduced-motion block added inline)
 - `<project>/motion_audit.md` (created or overwritten)
 
@@ -88,6 +95,43 @@ max stagger total ≤ 300ms. No 1.5s stagger chains.
 
 **Choreography respects reading order.** Hero → sub-hero → nav → content, never reverse.
 
+## Taste v2 motion rules
+
+Source: `{AGENCY_ROOT}/skills/taste-skill/references/engineering.md` §5 (context-aware
+motion, the canonical GSAP sticky-stack §5.A, horizontal-pan §5.B, and Motion
+scroll-reveal §5.C skeletons, and the §5.D forbidden patterns), §6.A-§6.B, and §7. The
+directive still wins on easing, duration, and library choice; these rules add floors,
+never looser limits.
+
+- **§5.D forbidden patterns are audit failures.** `window.addEventListener('scroll', …)`,
+  custom scroll-progress math held in React state (`window.scrollY` / `pageYOffset` fed
+  into `useState`), and `requestAnimationFrame` loops that touch React state. Grep the
+  deliverable for `addEventListener('scroll'`, `addEventListener("scroll"`, `scrollY`,
+  `pageYOffset`, and `requestAnimationFrame`; record every real hit as FAIL in
+  `motion_audit.md` and replace it with IntersectionObserver, CSS scroll-driven animation
+  (`animation-timeline: view()`), GSAP ScrollTrigger, or Motion `useScroll()` /
+  `useMotionValue` + `useTransform`.
+- **Reduced motion is mandatory whenever `MOTION_INTENSITY > 3`** (§6.B):
+  `useReducedMotion()` in Motion, or `@media (prefers-reduced-motion: reduce)` (or gating
+  under `no-preference`) in CSS. JS-driven motion must check it too (`useReducedMotion()`
+  or `matchMedia('(prefers-reduced-motion: reduce)')`); a CSS block alone does not stop a
+  ScrollTrigger. Infinite loops, parallax, scroll-hijack, and pinned sections collapse to
+  static. The agency rule above (a fallback for every animation at any intensity) still
+  stands.
+- **Motion claimed, motion shown.** If `MOTION_INTENSITY > 4`, the page must actually
+  animate: at minimum a hero entrance, scroll reveals on key sections, and hover feedback
+  on CTAs. If it does not, or working motion cannot ship in scope, the audit recommends
+  that the Creative Director drop the dial to 3 in `visual_philosophy.md` and ship a clean
+  static page. Never half-built motion (cut-off ScrollTriggers, jumpy entrances, missing
+  cleanups).
+- **Animate only `transform` / `opacity`** (§6.A); `will-change: transform` sparingly, only
+  on elements that actually animate.
+- **Canonical skeletons.** When a sticky-stack, horizontal pan, or scroll-reveal stagger is
+  warranted and GSAP / Motion is in the directive's allowed stack, build it from
+  `engineering.md` §5.A / §5.B / §5.C (`start: "top top"`, `pin: true`, `scrub`,
+  `ctx.revert()` cleanup, reduced-motion early return). Otherwise the single-file CSS +
+  IntersectionObserver convention below stands.
+
 ## Zero Agency Bleed-Through (banned in client deliverables)
 
 These are agency signature motion patterns. Allowed only in agency-own brand
@@ -107,11 +151,11 @@ folders (`{AGENCY_OWN_BRAND_FOLDERS}`). Prohibited in all client project dirs:
    nav links, buttons, CTAs, cards, hero entrance, section reveals on scroll,
    image hovers, form focus states, accordions, tooltips.
 3. **Classify each candidate** using Emil's decision framework:
-   - *Micro-interaction* (hover, focus, click feedback): 150–300ms, directive curve.
-   - *Transition* (panel open, tab change): 200–300ms.
-   - *Entrance* (hero, first paint): 400–600ms, staggered, justify in audit.
-   - *Scroll-linked*: use `IntersectionObserver`, trigger once, no re-fires.
-   - *Skip* (decorative, no clarity payoff): mark as rejected — don't animate.
+   - _Micro-interaction_ (hover, focus, click feedback): 150–300ms, directive curve.
+   - _Transition_ (panel open, tab change): 200–300ms.
+   - _Entrance_ (hero, first paint): 400–600ms, staggered, justify in audit.
+   - _Scroll-linked_: use `IntersectionObserver`, trigger once, no re-fires.
+   - _Skip_ (decorative, no clarity payoff): mark as rejected — don't animate.
 4. **Write CSS directly into the deliverable** — inline `<style>` block grouped under
    a `/* motion */` comment. Single-file HTML convention; no external JS animation
    libraries unless already in the directive's allowed stack.
@@ -124,6 +168,7 @@ folders (`{AGENCY_OWN_BRAND_FOLDERS}`). Prohibited in all client project dirs:
 # Motion Audit — <deliverable filename>
 
 ## Directive Tokens Used
+
 - easing: <curve from directive>
 - micro duration: <Xms>
 - entrance duration: <Xms>
@@ -132,29 +177,42 @@ folders (`{AGENCY_OWN_BRAND_FOLDERS}`). Prohibited in all client project dirs:
 ## Animation Inventory
 
 ### Animated
-| Element | Classification | Duration | Easing | Justification |
-|---|---|---|---|---|
-| .hero-headline | entrance | 500ms | directive curve | Anchors brand entry; justified hero duration |
-| .nav-link | micro-interaction | 150ms | directive curve | Focus state clarity |
-| .feature-card | entrance (staggered, 50ms each) | 400ms | directive curve | Reading-order reveal |
+
+| Element        | Classification                  | Duration | Easing          | Justification                                |
+| -------------- | ------------------------------- | -------- | --------------- | -------------------------------------------- |
+| .hero-headline | entrance                        | 500ms    | directive curve | Anchors brand entry; justified hero duration |
+| .nav-link      | micro-interaction               | 150ms    | directive curve | Focus state clarity                          |
+| .feature-card  | entrance (staggered, 50ms each) | 400ms    | directive curve | Reading-order reveal                         |
 
 ### Rejected
-| Element | Reason |
-|---|---|
+
+| Element             | Reason                             |
+| ------------------- | ---------------------------------- |
 | footer social icons | No clarity payoff; decorative only |
-| background pattern | No state change; pure decoration |
+| background pattern  | No state change; pure decoration   |
 
 ## GPU Compliance
+
 - All animations use transform/opacity only — confirmed.
 
 ## prefers-reduced-motion
+
 - Block present at line XX — all animations collapse to opacity: 1; transition: none.
 
 ## Agency Bleed-Through Check
+
 - none (or list findings)
 
 ## Stagger Compliance
+
 - Max stagger total: Xms (limit: 300ms) — compliant / VIOLATION
+
+## Taste v2 Motion Rules
+
+- MOTION_INTENSITY: X
+- §5.D forbidden patterns: none (or list with line numbers: FAIL)
+- Reduced motion (required when MOTION_INTENSITY > 3): CSS block at line XX / useReducedMotion() / matchMedia
+- Motion claimed = motion shown: yes / no, recommend dropping MOTION_INTENSITY to 3
 ```
 
 ## Verification Signals (self-check before handoff)
@@ -164,6 +222,8 @@ folders (`{AGENCY_OWN_BRAND_FOLDERS}`). Prohibited in all client project dirs:
 - [ ] Only `transform` / `opacity` animated — no layout properties.
 - [ ] `@media (prefers-reduced-motion: reduce)` block present.
 - [ ] No banned agency motion tokens (glow orbs, grain) in client deliverables.
+- [ ] No §5.D forbidden patterns (scroll listeners, scroll math in React state, rAF loops touching state).
+- [ ] If `MOTION_INTENSITY > 4`, the page actually animates (or the audit recommends dropping the dial to 3).
 - [ ] `motion_audit.md` exists and every animation has a justification.
 
 If any check fails, fix before handoff to `polish-inspector`.
@@ -198,6 +258,7 @@ transcript did not happen.**
 Report path: `<project>/motion_audit.md`
 
 Worker contract: end your final message with one of:
+
 - `Done: <one-paragraph result>`
 - `Done with caveats: <result>. Open question: <issue>`
 - `Stopped: too complex. Reason: <why>. Suggest re-dispatch to <agent>.`

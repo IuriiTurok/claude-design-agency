@@ -1,280 +1,354 @@
 ---
 name: taste-skill
-description: Senior UI/UX engineer that overrides default LLM design biases with
-  metric-based rules — deterministic typography, color calibration (no AI purple/blue),
-  layout diversification, strict component architecture, and CSS hardware acceleration.
-  Use when the user wants high-agency frontend generation that avoids generic AI-slop
-  output, asks for premium/distinctive UI, or wants bias-corrected design decisions baked
-  into the code (not just a critique).
+description: >
+  Anti-slop art direction for marketing surfaces: landing pages, marketing sites,
+  portfolios, brand sites, hero and section design, and redesigns of marketing pages.
+  Use when the user asks to make a page "look less AI", "less generic", "less
+  templated", or "more premium". Reads the three dials (DESIGN_VARIANCE,
+  MOTION_INTENSITY, VISUAL_DENSITY) and TASTE_MODE (soft | minimalist | brutalist |
+  none) from the project's visual_philosophy.md, emits a one-line Design Read, enforces
+  the AI-tell ban list, and writes a pre-flight report before QA. Skip for dashboards,
+  admin panels, data tables, multi-step forms, product prototypes, code editors, and
+  native mobile; those go to ui-ux-pro-max and roles/prototype_lead.md.
+license: MIT. Vendored from github.com/Leonxlnx/taste-skill at ce26fc25c0e5 (upstream name design-taste-frontend) with an agency binding prepended.
 ---
 
-# High-Agency Frontend Skill
+# Taste Skill (v2) — Agency Binding
 
-## 1. ACTIVE BASELINE CONFIGURATION
+<design-agency-binding>
+**YOU ARE INSIDE THE DESIGN AGENCY.** Everything below this block is upstream taste-skill v2 (`design-taste-frontend`), kept verbatim. It is subordinate to these rules. Where upstream defaults conflict with these rules, these rules win.
 
-- DESIGN_VARIANCE: 8 (1=Perfect Symmetry, 10=Artsy Chaos)
-- MOTION_INTENSITY: 6 (1=Static/No movement, 10=Cinematic/Magic Physics)
-- VISUAL_DENSITY: 4 (1=Art Gallery/Airy, 10=Pilot Cockpit/Packed Data)
+**Binding rules:**
 
-**AI Instruction:** The standard baseline for all generations is strictly set to these values (8, 6, 4). Do not ask the user to edit this file. Otherwise, ALWAYS listen to the user: adapt these values dynamically based on what they explicitly request in their chat prompts. Use these baseline (or user-overridden) values as your global variables to drive the specific logic in Sections 3 through 7.
+- **`style_directive.md` is upstream of every rule here.** The active project's `style_directive.md` is the binding aesthetic contract. Where an upstream default conflicts with it (fonts, palette, radius, motion library, Tailwind version, icon set), the directive wins. Upstream picks such as Geist, Phosphor, GSAP, or Tailwind v4 apply only where the directive is silent.
+- **Dials come from the Creative Director, never from this file.** Read `DESIGN_VARIANCE`, `MOTION_INTENSITY`, `VISUAL_DENSITY` (1-10) and `TASTE_MODE` from the project's `visual_philosophy.md`, written in Phase 2 by the Creative Director. This skill carries no baseline values: the `8 / 6 / 4` baseline in §1 and the §1.A / §1.B tables are the Creative Director's tools for choosing values, not a runtime fallback. If any dial or `TASTE_MODE` is missing, stop and request it from the Creative Director. Never default silently.
+- **`TASTE_MODE` loads one mode file.** `soft` → `references/modes/soft.md`, `minimalist` → `references/modes/minimalist.md`, `brutalist` → `references/modes/brutalist.md`, `none` → nothing. Load only the selected mode. A mode sharpens the aesthetic on top of this file; it never outranks the directive, and QA still enforces §9.
+- **Scope is §13.** Landing pages, marketing sites, portfolios, brand sites, and redesigns of those. If the brief is a dashboard, product UI, prototype, data table, or wizard, say so in one line, route it to `ui-ux-pro-max` and `{AGENCY_ROOT}/roles/prototype_lead.md`, and apply only this skill's marketing-surface parts to the surfaces where they fit.
+- **§9.G governs output, not docs.** The em-dash ban applies to generated page copy and markup. It does not apply to this plugin's own documentation, including this file and `references/`.
+- **Bleed-through rules still apply on top of §9.** `{AGENCY_RESERVED_TOKENS}` (every font and color in `reserved_tokens` from `python3 ${CLAUDE_PLUGIN_ROOT}/execution/state_paths.py --brand`, plus grain overlays and glow orbs) are banned in client deliverables and allowed only inside `own_brand_folders`. When `reserved_tokens` is empty there is nothing to enforce. The canonical agency ban list is `{AGENCY_ROOT}/skills/impeccable/reference/ai-slop-bans.md`; §9 adds to it, it does not replace it.
+- **Who runs what.** The UI/UX Designer invokes this skill before `/frontend-design` to emit the §0.B Design Read, and runs §14 before handing to QA. The QA subagents `taste-guardian` and `style-enforcer` read §9 as the ban list.
 
-## 2. DEFAULT ARCHITECTURE & CONVENTIONS
+**Output convention:** the §14 pre-flight result is written to `<project>/taste_preflight_<deliverable>.md`: the Design Read, the dial values and `TASTE_MODE` used, and every §14 box marked pass or fail with the fix for each failure. A check that exists only in the transcript did not happen, same rule as the other agency gates.
+</design-agency-binding>
 
-Unless the user explicitly specifies a different stack, adhere to these structural constraints to maintain consistency:
+## Where the rest lives
 
-- **DEPENDENCY VERIFICATION [MANDATORY]:** Before importing ANY 3rd party library (e.g. `framer-motion`, `lucide-react`, `zustand`), you MUST check `package.json`. If the package is missing, you MUST output the installation command (e.g. `npm install package-name`) before providing the code. **Never** assume a library exists.
-- **Framework & Interactivity:** React or Next.js. Default to Server Components (`RSC`).
-  - **RSC SAFETY:** Global state works ONLY in Client Components. In Next.js, wrap providers in a `"use client"` component.
-  - **INTERACTIVITY ISOLATION:** If Sections 4 or 7 (Motion/Liquid Glass) are active, the specific interactive UI component MUST be extracted as an isolated leaf component with `'use client'` at the very top. Server Components must exclusively render static layouts.
-- **State Management:** Use local `useState`/`useReducer` for isolated UI. Use global state strictly for deep prop-drilling avoidance.
-- **Styling Policy:** Use Tailwind CSS (v3/v4) for 90% of styling.
-  - **TAILWIND VERSION LOCK:** Check `package.json` first. Do not use v4 syntax in v3 projects.
-  - **T4 CONFIG GUARD:** For v4, do NOT use `tailwindcss` plugin in `postcss.config.js`. Use `@tailwindcss/postcss` or the Vite plugin.
-- **ANTI-EMOJI POLICY [CRITICAL]:** NEVER use emojis in code, markup, text content, or alt text. Replace symbols with high-quality icons (Radix, Phosphor) or clean SVG primitives. Emojis are BANNED.
-- **Responsiveness & Spacing:**
-  - Standardize breakpoints (`sm`, `md`, `lg`, `xl`).
-  - Contain page layouts using `max-w-[1400px] mx-auto` or `max-w-7xl`.
-  - **Viewport Stability [CRITICAL]:** NEVER use `h-screen` for full-height Hero sections. ALWAYS use `min-h-[100dvh]` to prevent catastrophic layout jumping on mobile browsers (iOS Safari).
-  - **Grid over Flex-Math:** NEVER use complex flexbox percentage math (`w-[calc(33%-1rem)]`). ALWAYS use CSS Grid (`grid grid-cols-1 md:grid-cols-3 gap-6`) for reliable structures.
-- **Icons:** You MUST use exactly `@phosphor-icons/react` or `@radix-ui/react-icons` as the import paths (check installed version). Standardize `strokeWidth` globally (e.g., exclusively use `1.5` or `2.0`).
+This file holds §0, §1, §9, §13, and §14. Everything else is relocated verbatim under `references/`. Read a file only when its trigger fires.
 
-## 3. DESIGN ENGINEERING DIRECTIVES (Bias Correction)
+| File                                                                                          | Upstream sections                                                                                                                                                                                   | Read when                                             |
+| --------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------- |
+| `references/engineering.md`                                                                   | §3 Architecture & Conventions, §4 Design Engineering Directives, §5 Context-Aware Proactivity (GSAP / Motion skeletons), §6 Performance & Accessibility, §7 Dial Definitions, §8 Dark Mode Protocol | Before writing any code.                              |
+| `references/design-systems.md`                                                                | §2 Brief → Design System Map, Appendix A (install commands), Appendix B (canonical sources), Appendix C (Apple Liquid Glass approximation)                                                          | When the brief names a design system or an aesthetic. |
+| `references/vocabulary.md`                                                                    | §10 Reference Vocabulary                                                                                                                                                                            | When choosing hero / nav / grid / card paradigms.     |
+| `references/redesign.md`                                                                      | §11 Redesign Protocol, plus the upstream `redesign-skill` companion                                                                                                                                 | When an existing page is being changed.               |
+| `references/block-library.md`                                                                 | §12 Block Library contract                                                                                                                                                                          | When adding a block implementation.                   |
+| `references/modes/soft.md`, `references/modes/minimalist.md`, `references/modes/brutalist.md` | Upstream `soft-skill`, `minimalist-skill`, `brutalist-skill`                                                                                                                                        | Only the one named by `TASTE_MODE`.                   |
 
-LLMs have statistical biases toward specific UI cliché patterns. Proactively construct premium interfaces using these engineered rules:
+---
 
-**Rule 1: Deterministic Typography**
+# tasteskill: Anti-Slop Frontend Skill
 
-- **Display/Headlines:** Default to `text-4xl md:text-6xl tracking-tighter leading-none`.
-  - **ANTI-SLOP:** Discourage `Inter` for "Premium" or "Creative" vibes. Force unique character using `Geist`, `Outfit`, `Cabinet Grotesk`, or `Satoshi`.
-  - **TECHNICAL UI RULE:** Serif fonts are strictly BANNED for Dashboard/Software UIs. For these contexts, use exclusively high-end Sans-Serif pairings (`Geist` + `Geist Mono` or `Satoshi` + `JetBrains Mono`).
-- **Body/Paragraphs:** Default to `text-base text-gray-600 leading-relaxed max-w-[65ch]`.
+> Landing pages, portfolios, and redesigns. Not dashboards, not data tables, not multi-step product UI.
+> Every rule below is **contextual**. None of it fires automatically. First read the brief, then pull only what fits.
 
-**Rule 2: Color Calibration**
+---
 
-- **Constraint:** Max 1 Accent Color. Saturation < 80%.
-- **THE LILA BAN:** The "AI Purple/Blue" aesthetic is strictly BANNED. No purple button glows, no neon gradients. Use absolute neutral bases (Zinc/Slate) with high-contrast, singular accents (e.g. Emerald, Electric Blue, or Deep Rose).
-- **COLOR CONSISTENCY:** Stick to one palette for the entire output. Do not fluctuate between warm and cool grays within the same project.
+## 0. BRIEF INFERENCE (Read the Room Before Anything Else)
 
-**Rule 3: Layout Diversification**
+> Sections 2-8 and 10-12 live in references/ (see "Where the rest lives").
 
-- **ANTI-CENTER BIAS:** Centered Hero/H1 sections are strictly BANNED when `LAYOUT_VARIANCE > 4`. Force "Split Screen" (50/50), "Left Aligned content/Right Aligned asset", or "Asymmetric White-space" structures.
+Before touching code or tweaking dials, **infer what the user actually wants**. Most LLM design output is bad because the model jumps to a default aesthetic instead of reading the room.
 
-**Rule 4: Materiality, Shadows, and "Anti-Card Overuse"**
+### 0.A Read these signals first
 
-- **DASHBOARD HARDENING:** For `VISUAL_DENSITY > 7`, generic card containers are strictly BANNED. Use logic-grouping via `border-t`, `divide-y`, or purely negative space. Data metrics should breathe without being boxed in unless elevation (z-index) is functionally required.
-- **Execution:** Use cards ONLY when elevation communicates hierarchy. When a shadow is used, tint it to the background hue.
+1. **Page kind** - landing (SaaS / consumer / agency / event), portfolio (dev / designer / creative studio), redesign (preserve vs overhaul), editorial / blog.
+2. **Vibe words** the user used - "minimalist", "calm", "Linear-style", "Awwwards", "brutalist", "premium consumer", "Apple-y", "playful", "serious B2B", "editorial", "agency-y", "glassy", "dark tech".
+3. **Reference signals** - URLs they linked, screenshots they pasted, products they named, brands they're competing with.
+4. **Audience** - B2B procurement panel vs. design-conscious consumer vs. recruiter scanning a portfolio. The audience picks the aesthetic, not your taste.
+5. **Brand assets that already exist** - logo, color, type, photography. For redesigns, these are starting material, not optional input (see Section 11).
+6. **Quiet constraints** - accessibility-first audiences, public-sector, regulated industries, trust-first commerce, kids' products. These constraints OVERRIDE aesthetic preference.
 
-**Rule 5: Interactive UI States**
+### 0.B Output a one-line "Design Read" before generating
 
-- **Mandatory Generation:** LLMs naturally generate "static" successful states. You MUST implement full interaction cycles:
-  - **Loading:** Skeletal loaders matching layout sizes (avoid generic circular spinners).
-  - **Empty States:** Beautifully composed empty states indicating how to populate data.
-  - **Error States:** Clear, inline error reporting (e.g., forms).
-  - **Tactile Feedback:** On `:active`, use `-translate-y-[1px]` or `scale-[0.98]` to simulate a physical push indicating success/action.
+Before any code, state in one line: **"Reading this as: \<page kind> for \<audience>, with a \<vibe> language, leaning toward \<design system or aesthetic family>."**
 
-**Rule 6: Data & Form Patterns**
+Example reads:
 
-- **Forms:** Label MUST sit above input. Helper text is optional but should exist in markup. Error text below input. Use a standard `gap-2` for input blocks.
+- _"Reading this as: B2B SaaS landing for technical buyers, with a Linear-style minimalist language, leaning toward Tailwind utilities + Geist + restrained motion."_
+- _"Reading this as: solo designer portfolio for hiring managers, with an editorial / kinetic-type language, leaning toward native CSS + scroll-driven animation + custom typography."_
+- _"Reading this as: redesign of a public-sector service site, with a trust-first language, leaning toward GOV.UK Frontend or USWDS."_
 
-## 4. CREATIVE PROACTIVITY (Anti-Slop Implementation)
+### 0.C If the brief is ambiguous, ask one question, do not guess
 
-To actively combat generic AI designs, systematically implement these high-end coding concepts as your baseline:
+Ask exactly **one** clarifying question - never a multi-question dump - and only when the design read genuinely diverges. Example: _"Should this feel closer to Linear-clean or Awwwards-experimental?"_
 
-- **"Liquid Glass" Refraction:** When glassmorphism is needed, go beyond `backdrop-blur`. Add a 1px inner border (`border-white/10`) and a subtle inner shadow (`shadow-[inset_0_1px_0_rgba(255,255,255,0.1)]`) to simulate physical edge refraction.
-- **Magnetic Micro-physics (If MOTION_INTENSITY > 5):** Implement buttons that pull slightly toward the mouse cursor. **CRITICAL:** NEVER use React `useState` for magnetic hover or continuous animations. Use EXCLUSIVELY Framer Motion's `useMotionValue` and `useTransform` outside the React render cycle to prevent performance collapse on mobile.
-- **Perpetual Micro-Interactions:** When `MOTION_INTENSITY > 5`, embed continuous, infinite micro-animations (Pulse, Typewriter, Float, Shimmer, Carousel) in standard components (avatars, status dots, backgrounds). Apply premium Spring Physics (`type: "spring", stiffness: 100, damping: 20`) to all interactive elements—no linear easing.
-- **Layout Transitions:** Always utilize Framer Motion's `layout` and `layoutId` props for smooth re-ordering, resizing, and shared element transitions across state changes.
-- **Staggered Orchestration:** Do not mount lists or grids instantly. Use `staggerChildren` (Framer) or CSS cascade (`animation-delay: calc(var(--index) * 100ms)`) to create sequential waterfall reveals. **CRITICAL:** For `staggerChildren`, the Parent (`variants`) and Children MUST reside in the identical Client Component tree. If data is fetched asynchronously, pass the data as props into a centralized Parent Motion wrapper.
+If you can confidently infer from context, **do not ask**. Just declare the design read and proceed.
 
-## 5. PERFORMANCE GUARDRAILS
+### 0.D Anti-Default Discipline
 
-- **DOM Cost:** Apply grain/noise filters exclusively to fixed, pointer-event-none pseudo-elements (e.g., `fixed inset-0 z-50 pointer-events-none`) and NEVER to scrolling containers to prevent continuous GPU repaints and mobile performance degradation.
-- **Hardware Acceleration:** Never animate `top`, `left`, `width`, or `height`. Animate exclusively via `transform` and `opacity`.
-- **Z-Index Restraint:** NEVER spam arbitrary `z-50` or `z-10` unprompted. Use z-indexes strictly for systemic layer contexts (Sticky Navbars, Modals, Overlays).
+Do not default to: AI-purple gradients, centered hero over dark mesh, three equal feature cards, generic glassmorphism on everything, infinite-loop micro-animations everywhere, Inter + slate-900. These are the LLM defaults. Reach past them deliberately based on the design read.
 
-## 6. TECHNICAL REFERENCE (Dial Definitions)
+---
 
-### DESIGN_VARIANCE (Level 1-10)
+## 1. THE THREE DIALS (Core Configuration)
 
-- **1-3 (Predictable):** Flexbox `justify-center`, strict 12-column symmetrical grids, equal paddings.
-- **4-7 (Offset):** Use `margin-top: -2rem` overlapping, varied image aspect ratios (e.g., 4:3 next to 16:9), left-aligned headers over center-aligned data.
-- **8-10 (Asymmetric):** Masonry layouts, CSS Grid with fractional units (e.g., `grid-template-columns: 2fr 1fr 1fr`), massive empty zones (`padding-left: 20vw`).
-- **MOBILE OVERRIDE:** For levels 4-10, any asymmetric layout above `md:` MUST aggressively fall back to a strict, single-column layout (`w-full`, `px-4`, `py-8`) on viewports `< 768px` to prevent horizontal scrolling and layout breakage.
+After the design read, set three dials. Every layout, motion, and density decision below is gated by these.
 
-### MOTION_INTENSITY (Level 1-10)
+- **`DESIGN_VARIANCE: 8`** - 1 = Perfect Symmetry, 10 = Artsy Chaos
+- **`MOTION_INTENSITY: 6`** - 1 = Static, 10 = Cinematic / Physics
+- **`VISUAL_DENSITY: 4`** - 1 = Art Gallery / Airy, 10 = Cockpit / Packed Data
 
-- **1-3 (Static):** No automatic animations. CSS `:hover` and `:active` states only.
-- **4-7 (Fluid CSS):** Use `transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1)`. Use `animation-delay` cascades for load-ins. Focus strictly on `transform` and `opacity`. Use `will-change: transform` sparingly.
-- **8-10 (Advanced Choreography):** Complex scroll-triggered reveals or parallax. Use Framer Motion hooks. NEVER use `window.addEventListener('scroll')`.
+**Baseline:** `8 / 6 / 4`. Use these unless the design read overrides them. Do not ask the user to edit this file - overrides happen conversationally.
 
-### VISUAL_DENSITY (Level 1-10)
+### 1.A Dial Inference (design read → dial values)
 
-- **1-3 (Art Gallery Mode):** Lots of white space. Huge section gaps. Everything feels very expensive and clean.
-- **4-7 (Daily App Mode):** Normal spacing for standard web apps.
-- **8-10 (Cockpit Mode):** Tiny paddings. No card boxes; just 1px lines to separate data. Everything is packed. **Mandatory:** Use Monospace (`font-mono`) for all numbers.
+| Signal                                                             | VARIANCE       | MOTION | DENSITY        |
+| ------------------------------------------------------------------ | -------------- | ------ | -------------- |
+| "minimalist / clean / calm / editorial / Linear-style"             | 5-6            | 3-4    | 2-3            |
+| "premium consumer / Apple-y / luxury / brand"                      | 7-8            | 5-7    | 3-4            |
+| "playful / wild / Dribbble / Awwwards / experimental / agency"     | 9-10           | 8-10   | 3-4            |
+| "landing page / portfolio / marketing site (default)"              | 7-9            | 6-8    | 3-5            |
+| "trust-first / public-sector / regulated / accessibility-critical" | 3-4            | 2-3    | 4-5            |
+| "redesign - preserve"                                              | match existing | +1     | match existing |
+| "redesign - overhaul"                                              | +2             | +2     | match existing |
 
-## 7. AI TELLS (Forbidden Patterns)
+### 1.B Use-Case Presets
 
-**Canonical ban list:** General AI-slop bans and own-brand overrides live in
-`${CLAUDE_PLUGIN_ROOT}/skills/impeccable/reference/ai-slop-bans.md`. Read that file first.
-The items below are a supplemental quick-reference for the patterns most relevant to
-this skill's generation scope; they are a subset of the canonical list, not the source.
+| Use case                      | VARIANCE | MOTION  | DENSITY |
+| ----------------------------- | -------- | ------- | ------- |
+| Landing (SaaS, mainstream)    | 7        | 6       | 4       |
+| Landing (Agency / creative)   | 9        | 8       | 3       |
+| Landing (Premium consumer)    | 7        | 6       | 3       |
+| Portfolio (Designer / studio) | 8        | 7       | 3       |
+| Portfolio (Developer)         | 6        | 5       | 4       |
+| Editorial / Blog              | 6        | 4       | 3       |
+| Public-sector service         | 3        | 2       | 5       |
+| Redesign - preserve           | match    | match+1 | match   |
+| Redesign - overhaul           | +2       | +2      | match   |
 
-General bans: see that file → General.
-Own-brand overrides: same file → Own Brand, resolved against the `reserved_tokens` in
-`python3 ${CLAUDE_PLUGIN_ROOT}/execution/state_paths.py --brand`.
+### 1.C How the Dials Drive Output
 
-To guarantee a premium, non-generic output, you MUST strictly avoid these common AI design signatures unless explicitly requested:
+Use these (or user-overridden values) as global variables. Cross-references throughout this document refer to these exact variable names - never invent aliases like `LAYOUT_VARIANCE` or `ANIM_LEVEL`.
 
-### Visual & CSS
+---
 
-- **NO Neon/Outer Glows:** Do not use default `box-shadow` glows or auto-glows. Use inner borders or subtle tinted shadows.
-- **NO Pure Black:** Never use `#000000`. Use Off-Black, Zinc-950, or Charcoal.
-- **NO Oversaturated Accents:** Desaturate accents to blend elegantly with neutrals.
-- **NO Excessive Gradient Text:** Do not use text-fill gradients for large headers.
-- **NO Custom Mouse Cursors:** They are outdated and ruin performance/accessibility.
+## 9. AI TELLS (Forbidden Patterns)
 
-### Typography
+> Sections 2-8 and 10-12 live in references/ (see "Where the rest lives").
 
-- **NO Inter Font:** Banned. Use `Geist`, `Outfit`, `Cabinet Grotesk`, or `Satoshi`.
-- **NO Oversized H1s:** The first heading should not scream. Control hierarchy with weight and color, not just massive scale.
-- **Serif Constraints:** Use Serif fonts ONLY for creative/editorial designs. **NEVER** use Serif on clean Dashboards.
+Avoid these signatures unless the brief explicitly asks for them.
 
-### Layout & Spacing
+### 9.A Visual & CSS
 
-- **Align & Space Perfectly:** Ensure padding and margins are mathematically perfect. Avoid floating elements with awkward gaps.
-- **NO 3-Column Card Layouts:** The generic "3 equal cards horizontally" feature row is BANNED. Use a 2-column Zig-Zag, asymmetric grid, or horizontal scrolling approach instead.
+- **NO neon / outer glows** by default. Use inner borders or subtle tinted shadows.
+- **NO pure black (`#000000`).** Off-black, zinc-950, or charcoal.
+- **NO oversaturated accents.** Desaturate to blend with neutrals.
+- **NO excessive gradient text** for large headers.
+- **NO custom mouse cursors.** Outdated, accessibility-hostile, perf-hostile.
 
-### Content & Data (The "Jane Doe" Effect)
+### 9.B Typography
 
-- **NO Generic Names:** "John Doe", "Sarah Chan", or "Jack Su" are banned. Use highly creative, realistic-sounding names.
-- **NO Generic Avatars:** DO NOT use standard SVG "egg" or Lucide user icons for avatars. Use creative, believable photo placeholders or specific styling.
-- **NO Fake Numbers:** Avoid predictable outputs like `99.99%`, `50%`, or basic phone numbers (`1234567`). Use organic, messy data (`47.2%`, `+1 (312) 847-1928`).
-- **NO Startup Slop Names:** "Acme", "Nexus", "SmartFlow". Invent premium, contextual brand names.
-- **NO Filler Words:** Avoid AI copywriting clichés like "Elevate", "Seamless", "Unleash", or "Next-Gen". Use concrete verbs.
+- **AVOID Inter as default.** See Section 4.1. Override path exists.
+- **NO oversized H1s** that just scream. Control hierarchy with weight + color, not raw scale.
+- **Serif constraints:** Serif for editorial / luxury / publication. Not for dashboards.
 
-### External Resources & Components
+### 9.C Layout & Spacing
 
-- **NO Broken Unsplash Links:** Do not use Unsplash. Use absolute, reliable placeholders like `https://picsum.photos/seed/{random_string}/800/600` or SVG UI Avatars.
-- **shadcn/ui Customization:** You may use `shadcn/ui`, but NEVER in its generic default state. You MUST customize the radii, colors, and shadows to match the high-end project aesthetic.
-- **Production-Ready Cleanliness:** Code must be extremely clean, visually striking, memorable, and meticulously refined in every detail.
+- **Mathematically perfect** padding and margins. No floating elements with awkward gaps.
+- **NO 3-column equal feature cards.** The generic "three identical cards horizontally" feature row is banned. Use 2-column zig-zag, asymmetric grid, scroll-pinned, or horizontal-scroll alternative.
 
-## 8. THE CREATIVE ARSENAL (High-End Inspiration)
+### 9.D Content & Data ("Jane Doe" Effect)
 
-Do not default to generic UI. Pull from this library of advanced concepts to ensure the output is visually striking and memorable. When appropriate, leverage **GSAP (ScrollTrigger/Parallax)** for complex scrolltelling or **ThreeJS/WebGL** for 3D/Canvas animations, rather than basic CSS motion. **CRITICAL:** Never mix GSAP/ThreeJS with Framer Motion in the same component tree. Default to Framer Motion for UI/Bento interactions. Use GSAP/ThreeJS EXCLUSIVELY for isolated full-page scrolltelling or canvas backgrounds, wrapped in strict useEffect cleanup blocks.
+- **NO generic names.** "John Doe", "Sarah Chan", "Jack Su" → use creative, realistic, locale-appropriate names.
+- **NO generic avatars.** No SVG "egg" or Lucide user icons → use believable photo placeholders or specific styling.
+- **NO fake-perfect numbers.** Avoid `99.99%`, `50%`, `1234567`. Use organic, messy data (`47.2%`, `+1 (312) 847-1928`).
+- **NO startup-slop brand names.** "Acme", "Nexus", "SmartFlow", "Cloudly" → invent contextual, premium names that sound real.
+- **NO filler verbs.** "Elevate", "Seamless", "Unleash", "Next-Gen", "Revolutionize" → concrete verbs only.
 
-### The Standard Hero Paradigm
+### 9.E External Resources & Components
 
-- Stop doing centered text over a dark image. Try asymmetric Hero sections: Text cleanly aligned to the left or right. The background should feature a high-quality, relevant image with a subtle stylistic fade (darkening or lightening gracefully into the background color depending on if it is Light or Dark mode).
+- **NO hand-rolled SVG icons.** Use Phosphor / HugeIcons / Radix / Tabler. Lucide on explicit request only.
+- **Hand-rolled decorative SVGs strongly discouraged** as default (see Section 4.8).
+- **NO div-based fake screenshots.** Never build a fake product UI out of `<div>` rectangles to simulate a screenshot. Use real images, generated images, or skip the preview.
+- **NO broken Unsplash links.** Use `https://picsum.photos/seed/{descriptive-string}/{w}/{h}`, or generated photo placeholders, or actual assets.
+- **shadcn/ui customization:** Allowed, but NEVER in default state. Customize radii, colors, shadows, typography to the project aesthetic.
+- **Production-Ready Cleanliness:** Code visually clean, memorable, meticulously refined.
 
-### Navigation & Menüs
+### 9.F Production-Test Tells (banned outright)
 
-- **Mac OS Dock Magnification:** Nav-bar at the edge; icons scale fluidly on hover.
-- **Magnetic Button:** Buttons that physically pull toward the cursor.
-- **Gooey Menu:** Sub-items detach from the main button like a viscous liquid.
-- **Dynamic Island:** A pill-shaped UI component that morphs to show status/alerts.
-- **Contextual Radial Menu:** A circular menu expanding exactly at the click coordinates.
-- **Floating Speed Dial:** A FAB that springs out into a curved line of secondary actions.
-- **Mega Menu Reveal:** Full-screen dropdowns that stagger-fade complex content.
+These patterns came out of real LLM-generated landing-page tests. They are the signatures the model defaults to when it tries to "look designed." Treat them as hard bans unless the brief explicitly calls for one.
 
-### Layout & Grids
+**Hero & top-of-page**
 
-- **Bento Grid:** Asymmetric, tile-based grouping (e.g., Apple Control Center).
-- **Masonry Layout:** Staggered grid without fixed row heights (e.g., Pinterest).
-- **Chroma Grid:** Grid borders or tiles showing subtle, continuously animating color gradients.
-- **Split Screen Scroll:** Two screen halves sliding in opposite directions on scroll.
-- **Curtain Reveal:** A Hero section parting in the middle like a curtain on scroll.
+- **NO version labels in the hero.** `V0.6`, `v2.0`, `BETA`, `INVITE-ONLY PREVIEW`, `EARLY ACCESS`, `ALPHA` - banned as default eyebrows. Only acceptable when the brief is explicitly about a product launch / preview status.
+- **NO "Brand · No. 01"-style sub-eyebrows.** "Marrow · No. 01 · The 6-quart" type micro-meta lines. Skip them.
 
-### Cards & Containers
+**Section numbering & micro-labels**
 
-- **Parallax Tilt Card:** A 3D-tilting card tracking the mouse coordinates.
-- **Spotlight Border Card:** Card borders that illuminate dynamically under the cursor.
-- **Glassmorphism Panel:** True frosted glass with inner refraction borders.
-- **Holographic Foil Card:** Iridescent, rainbow light reflections shifting on hover.
-- **Tinder Swipe Stack:** A physical stack of cards the user can swipe away.
-- **Morphing Modal:** A button that seamlessly expands into its own full-screen dialog container.
+- **NO section-number eyebrows.** `00 / INDEX`, `001 · Capabilities`, `002 · Featured commission`, `06 · how it works`, `05 · The honest table` - banned. Eyebrows should name the topic in plain language, not enumerate.
+- **NO `01 / 4`-style pagination on images or bento tiles.** If the user can count, they don't need the label.
+- **NO `Scroll · 001 Capabilities`-style scroll cues.** A simple arrow or "Scroll" is enough; no section-number prefix.
+- **NO "Index of Work, 2018 - 2026"-style range labels** as eyebrows. Just say what the section is.
 
-### Scroll-Animations
+**Separators & dots**
 
-- **Sticky Scroll Stack:** Cards that stick to the top and physically stack over each other.
-- **Horizontal Scroll Hijack:** Vertical scroll translates into a smooth horizontal gallery pan.
-- **Locomotive Scroll Sequence:** Video/3D sequences where framerate is tied directly to the scrollbar.
-- **Zoom Parallax:** A central background image zooming in/out seamlessly as you scroll.
-- **Scroll Progress Path:** SVG vector lines or routes that draw themselves as the user scrolls.
-- **Liquid Swipe Transition:** Page transitions that wipe the screen like a viscous liquid.
+- **The middle-dot (`·`) is rationed.** Maximum 1 per line in metadata strips. Do NOT use it as the default separator for everything ("foo · bar · baz · qux · quux"). If you need a separator family, prefer line breaks, hairlines, or columns.
+- **NO decorative colored status dots on every list/nav/badge.** A colored dot before "ONE Q4 SLOT OPEN" or before every nav link, or every task row - banned by default. Acceptable only when the dot conveys actual semantic state (a server status, an availability flag) and is used sparingly.
 
-### Galleries & Media
+**Em-dashes & typography flourishes**
 
-- **Dome Gallery:** A 3D gallery feeling like a panoramic dome.
-- **Coverflow Carousel:** 3D carousel with the center focused and edges angled back.
-- **Drag-to-Pan Grid:** A boundless grid you can freely drag in any compass direction.
-- **Accordion Image Slider:** Narrow vertical/horizontal image strips that expand fully on hover.
-- **Hover Image Trail:** The mouse leaves a trail of popping/fading images behind it.
-- **Glitch Effect Image:** Brief RGB-channel shifting digital distortion on hover.
+- **NO em-dash (`—`) as a design element OR anywhere else.** See Section 9.G below for the complete, non-negotiable ban. The em-dash character is forbidden in headlines, eyebrows, pills, body copy, quotes, attribution, captions, button text, and alt text. Use the regular hyphen (`-`).
+- **NO `<br>`-broken-and-italicized headlines** as a default "design move." "for thirty\<br\>_years._" type splits. Headlines should read naturally first, get clever only when the brief demands it.
+- **NO vertical rotated text** ("INDEX OF WORK, 2018 - 2026" rotated 90°). Agency-portfolio cliché. Use it only when the brief is explicitly agency / Awwwards / experimental AND it serves a real composition purpose.
+- **NO crosshair / hairline grid lines as decoration.** Vertical and horizontal lines drawn just to make the page "feel designed" - banned. Use them only when they organize real content.
 
-### Typography & Text
+**Fake product previews**
 
-- **Kinetic Marquee:** Endless text bands that reverse direction or speed up on scroll.
-- **Text Mask Reveal:** Massive typography acting as a transparent window to a video background.
-- **Text Scramble Effect:** Matrix-style character decoding on load or hover.
-- **Circular Text Path:** Text curved along a spinning circular path.
-- **Gradient Stroke Animation:** Outlined text with a gradient continuously running along the stroke.
-- **Kinetic Typography Grid:** A grid of letters dodging or rotating away from the cursor.
+- **NO div-based fake product UI in the hero** (fake task list, fake terminal, fake dashboard built from styled divs). It is the #1 LLM-design Tell. Use a real screenshot, a generated image, a real component preview, or none at all.
+- **NO fake version footers** ("v0.6.2-rc.1", "last sync 4s ago · main") inside fake screenshots. Adds nothing, screams AI.
 
-### Micro-Interactions & Effects
+**Marketing-copy Tells**
 
-- **Particle Explosion Button:** CTAs that shatter into particles upon success.
-- **Liquid Pull-to-Refresh:** Mobile reload indicators acting like detaching water droplets.
-- **Skeleton Shimmer:** Shifting light reflections moving across placeholder boxes.
-- **Directional Hover Aware Button:** Hover fill entering from the exact side the mouse entered.
-- **Ripple Click Effect:** Visual waves rippling precisely from the click coordinates.
-- **Animated SVG Line Drawing:** Vectors that draw their own contours in real-time.
-- **Mesh Gradient Background:** Organic, lava-lamp-like animated color blobs.
-- **Lens Blur Depth:** Dynamic focus blurring background UI layers to highlight a foreground action.
+- **NO "Quietly in use at" / "Quietly trusted by"** social-proof headers. Use natural language: "Trusted by", "Used at", "Customers include", or skip the heading entirely if the logos speak.
+- **NO "From the field" / "Field notes" / "Currently on the bench" / "On our desks" / "Loose plates" style poetic labels** on quote, blog, or sidebar sections. Reads as performative-craftsman. Use plain functional labels ("Testimonials", "Latest writing", "Now working on") or skip the label.
+- **NO "We respect the French ones"-style** mock-humble industry-references in body copy. Cute and AI-y.
+- **NO weather / locale strips** ("LIS 14:23 · 18°C") in headers/footers unless the brief is explicitly about a place / time-zone-distributed studio.
+- **NO micro-meta-sentences under eyebrows.** Sentences like _"Each of these is a feature we ship today, not a roadmap promise. The list will stay short on purpose."_ sitting under a section heading are clutter. Eyebrow + Headline + Body is enough.
+- **NO generic step labels.** "Stage 1 / Stage 2 / Stage 3", "Step 1 / Step 2 / Step 3", "Phase 01 / Phase 02 / Phase 03", "Pass One / Pass Two / Pass Three". Banned. The actual step content is the label. If you must show progression, use the verb-noun directly ("Install", "Configure", "Ship") not "Stage 1: Install".
 
-## 9. THE "MOTION-ENGINE" BENTO PARADIGM
+**Pills, labels and version stamps**
 
-When generating modern SaaS dashboards or feature sections, you MUST utilize the following "Bento 2.0" architecture and motion philosophy. This goes beyond static cards and enforces a "Vercel-core meets Dribbble-clean" aesthetic heavily reliant on perpetual physics.
+- **NO pills/labels/tags overlaid on images.** No `<span>` overlays on photos with tags like `Brand · 02`, `PLATE · BRAND`, `Field notes - journal`. Either let the image speak alone, or add a caption directly below (outside the image).
+- **NO photo-credit captions as decoration.** Strings like `Field study no. 12 · Ines Caetano`, `Plate 03 · House archive`, `Frame XII · 35mm` under stock/picsum images are pretentious. Photo credit is allowed ONLY when there is a real photographer being credited for a real photo (with permission). Otherwise: skip the caption or use a one-line functional caption ("The 6-quart, in Sage.").
+- **NO version footers on marketing pages.** Footer strings like `v1.4.2`, `Build 0048`, `last sync 4s ago · main` are CLI / devtool fixtures, not landing-page content. Banned on marketing/landing/portfolio pages.
+- **NO "Reservation 412 of 800"-style live-stock counters** as decoration. Only if the brief is explicitly a limited-run waitlist with real data.
 
-### A. Core Design Philosophy
+**Decoration text strips**
 
-- **Aesthetic:** High-end, minimal, and functional.
-- **Palette:** Background in `#f9fafb`. Cards are pure white (`#ffffff`) with a 1px border of `border-slate-200/50`.
-- **Surfaces:** Use `rounded-[2.5rem]` for all major containers. Apply a "diffusion shadow" (a very light, wide-spreading shadow, e.g., `shadow-[0_20px_40px_-15px_rgba(0,0,0,0.05)]`) to create depth without clutter.
-- **Typography:** Strict `Geist`, `Satoshi`, or `Cabinet Grotesk` font stack. Use subtle tracking (`tracking-tight`) for headers.
-- **Labels:** Titles and descriptions must be placed **outside and below** the cards to maintain a clean, gallery-style presentation.
-- **Pixel-Perfection:** Use generous `p-8` or `p-10` padding inside cards.
+- **NO decoration text strip at hero bottom.** Patterns like `BRAND. MOTION. SPATIAL.`, `TYPE / FORM / MOTION`, `DESIGN · BUILD · SHIP`, `ESTD. 2018 · LISBON · BRAND. MOTION. SPATIAL.` as a small mono-caps strip across the bottom of the hero are an agency-portfolio cliché. Banned by default. Only acceptable when the strip carries real, navigable links (sticky bottom nav) or real status info (cookie banner, build info on a docs site).
+- **NO floating top-right sub-text in section headings.** Pattern: section has a giant left-aligned headline; in the top-right corner of the same section header there is a small explainer paragraph floating with no clear alignment to anything else. That floater is the Tell. Either put the sub-text directly under the headline, or build a clean 2-column header (left: headline, right: aligned body), but not a tiny corner paragraph.
 
-### B. The Animation Engine Specs (Perpetual Motion)
+**Lists, dividers and scoring**
 
-All cards must contain **"Perpetual Micro-Interactions."** Use the following Framer Motion principles:
+- **NO `border-t` + `border-b` on every row of a long list / spec table.** Pick one (bottom-border between rows OR top-border above the group) and use it sparsely. A 10-row spec table with hairlines under each row is the laziest layout - see Section 4.9 for alternative UI components.
+- **NO scoring/progress bars with filled background tracks** as comparison visuals. If you need to show "X out of Y" comparisons, prefer a number + small icon, or a tiny inline bar WITHOUT a background track. Big filled `bg-zinc-200` tracks with a partial fill on top are dashboard-UI clutter on a landing page.
 
-- **Spring Physics:** No linear easing. Use `type: "spring", stiffness: 100, damping: 20` for a premium, weighty feel.
-- **Layout Transitions:** Heavily utilize the `layout` and `layoutId` props to ensure smooth re-ordering, resizing, and shared element state transitions.
-- **Infinite Loops:** Every card must have an "Active State" that loops infinitely (Pulse, Typewriter, Float, or Carousel) to ensure the dashboard feels "alive".
-- **Performance:** Wrap dynamic lists in `<AnimatePresence>` and optimize for 60fps. **PERFORMANCE CRITICAL:** Any perpetual motion or infinite loop MUST be memoized (React.memo) and completely isolated in its own microscopic Client Component. Never trigger re-renders in the parent layout.
+**Locale, time, scroll cues**
 
-### C. The 5-Card Archetypes (Micro-Animation Specs)
+- **Locale / city-name / time / weather strips are banned for 99% of briefs.** "Lisbon, working with founders" in the hero, "1200-690 Lisbon, Portugal" in the footer, "Lisbon 14:23 · 18°C" in the nav. These are agency-portfolio decoration tells. Allowed ONLY when: the brief explicitly describes a globally-distributed studio with timezone-relevant work, OR a travel-focused brand, OR a real-world physical venue. A single contact-address mention in the footer is fine; an atmospheric locale strip is not.
+- **Scroll cues are banned.** `Scroll`, `↓ scroll`, `Scroll to explore`, `Scroll to walk through it`, animated mouse-wheel icons. If the user has not scrolled yet, they are looking at the hero. They know what scroll is. The bottom of the viewport does not need a label.
+- **ZERO decorative status dots by default.** A coloured dot before nav items, before list rows, before badges, before status labels is a Tell. Only acceptable when conveying real semantic state (a live indicator on actual server status, a live availability flag) and limited to one per page section.
 
-Implement these specific micro-animations when constructing Bento grids (e.g., Row 1: 3 cols | Row 2: 2 cols split 70/30):
+### 9.G EM-DASH BAN (the single most-violated Tell)
 
-1. **The Intelligent List:** A vertical stack of items with an infinite auto-sorting loop. Items swap positions using `layoutId`, simulating an AI prioritizing tasks in real-time.
-2. **The Command Input:** A search/AI bar with a multi-step Typewriter Effect. It cycles through complex prompts, including a blinking cursor and a "processing" state with a shimmering loading gradient.
-3. **The Live Status:** A scheduling interface with "breathing" status indicators. Include a pop-up notification badge that emerges with an "Overshoot" spring effect, stays for 3 seconds, and vanishes.
-4. **The Wide Data Stream:** A horizontal "Infinite Carousel" of data cards or metrics. Ensure the loop is seamless (using `x: ["0%", "-100%"]`) with a speed that feels effortless.
-5. **The Contextual UI (Focus Mode):** A document view that animates a staggered highlight of a text block, followed by a "Float-in" of a floating action toolbar with micro-icons.
+**Em-dash (`—`) is COMPLETELY banned.** It is the LLM's signature stylistic crutch and it is the #1 visual Tell in production tests. There is no "limited use" allowance, no "natural language frequency" allowance, no "in body copy is fine" allowance. None.
 
-## 10. FINAL PRE-FLIGHT CHECK
+- **Banned in headlines.** Use a period or a comma.
+- **Banned in eyebrows / labels / pills / button text / image captions / nav items.** Replace with line breaks, columns, or hairlines.
+- **Banned in body copy.** Restructure the sentence: two sentences with a period, OR a comma, OR parentheses, OR a colon.
+- **Banned in quote attribution.** Use a normal hyphen with spaces (`-`) or a line break + smaller-weight name.
+- **Banned in en-dash form too (`–`) when used as a separator.** Date ranges (`2018-2026`) use a hyphen. Number ranges (`€40-80k`) use a hyphen.
 
-Evaluate your code against this matrix before outputting. This is the **last** filter you apply to your logic.
+The ONLY permitted dash characters on the page are:
 
-- [ ] Is global state used appropriately to avoid deep prop-drilling rather than arbitrarily?
-- [ ] Is mobile layout collapse (`w-full`, `px-4`, `max-w-7xl mx-auto`) guaranteed for high-variance designs?
-- [ ] Do full-height sections safely use `min-h-[100dvh]` instead of the bugged `h-screen`?
-- [ ] Do `useEffect` animations contain strict cleanup functions?
-- [ ] Are empty, loading, and error states provided?
-- [ ] Are cards omitted in favor of spacing where possible?
-- [ ] Did you strictly isolate CPU-heavy perpetual animations in their own Client Components?
+- Regular hyphen `-` (for compound words, ranges, line dividers in markup)
+- Minus sign in math (`-5°C`)
+
+If your output contains a single `—` or `–` anywhere visible to the user, the output fails the Pre-Flight Check and must be rewritten.
+
+This rule is non-negotiable. The agent has historically ignored em-dash limits when phrased as "use sparingly." The phrasing here is binary: zero em-dashes.
+
+---
+
+## 13. OUT OF SCOPE
+
+> Sections 2-8 and 10-12 live in references/ (see "Where the rest lives").
+
+This skill is NOT for:
+
+- Dashboards / dense product UI / admin panels (use Fluent, Carbon, Atlassian, or Polaris from Section 2.A).
+- Data tables (use TanStack Table or AG Grid).
+- Multi-step forms / wizards (use Form-specific patterns; this skill won't make them better).
+- Code editors (use Monaco / CodeMirror with their official skinning).
+- Native mobile (use Apple HIG / Material directly).
+- Realtime collab UIs (presence, cursors, OT-aware - different problem class).
+
+If the brief is one of the above, **say so explicitly**, point to the right tool, and only apply this skill's marketing-page / about-page / landing-page parts to the surfaces where they apply.
+
+---
+
+## 14. FINAL PRE-FLIGHT CHECK
+
+> Sections 2-8 and 10-12 live in references/ (see "Where the rest lives").
+
+Run this matrix before outputting code. This is the last filter.
+
+**THIS IS NOT OPTIONAL. Run every box. If any box fails, the output is not done.**
+
+- [ ] **Brief inference** declared (Section 0.B one-liner)?
+- [ ] **Dial values** explicit and reasoned from the brief, not silently using baseline?
+- [ ] **Design system** chosen from Section 2 if applicable, or aesthetic labeled honestly?
+- [ ] **Redesign mode** detected and audit performed (if applicable, Section 11)?
+- [ ] **ZERO em-dashes (`—`) anywhere on the page.** Headlines, eyebrows, pills, body, quotes, attribution, captions, buttons, alt text. Zero. (Section 9.G - non-negotiable.)
+- [ ] **Page Theme Lock**: ONE theme (light, dark, or auto) for the whole page. No section flips to inverted mode mid-page (Section 4.11)?
+- [ ] **Color Consistency Lock**: one accent color used identically across all sections (Section 4.2)?
+- [ ] **Shape Consistency Lock**: one corner-radius system applied consistently (Section 4.4)?
+- [ ] **Button Contrast Check**: every CTA text is readable against its background (no white-on-white, WCAG AA 4.5:1)?
+- [ ] **CTA Button Wrap**: no CTA label wraps to 2+ lines at desktop?
+- [ ] **Form Contrast Check**: form inputs, placeholders, focus rings, labels all pass WCAG AA against the section background?
+- [ ] **Serif discipline**: if a serif is used, it is NOT Fraunces or Instrument_Serif (or it is, with explicit brand justification)? Different serif from your previous project?
+- [ ] **Premium-consumer palette check**: if the brief is premium-consumer (cookware / wellness / artisan / luxury), the palette is NOT the AI-default beige+brass+oxblood+espresso family? Different family from your previous premium-consumer project?
+- [ ] **Italic descender clearance**: every italic word with `y g j p q` has `leading-[1.1]` min + `pb-1` reserve?
+- [ ] **Hero fits the viewport**: headline ≤ 2 lines, subtext ≤ 20 words AND ≤ 4 lines, CTA visible without scroll, font scale planned around image?
+- [ ] **Hero top padding**: max `pt-24` at desktop, hero content does not float halfway down the viewport?
+- [ ] **Hero stack discipline**: max 4 text elements in hero (eyebrow OR brand strip, headline, subtext, CTAs)? No tiny tagline below CTAs, no trust micro-strip in hero?
+- [ ] **EYEBROW COUNT (mechanical)**: count instances of `uppercase tracking` micro-labels above section headlines across all components. Count ≤ ceil(sectionCount / 3)? Hero counts as 1.
+- [ ] **Split-Header Ban**: no "left big headline + right small explainer paragraph" pattern as a section header (vertical stack instead)?
+- [ ] **Zigzag Alternation Cap**: no 3+ consecutive sections with the same image+text-split layout?
+- [ ] **No Duplicate CTA Intent**: no two CTAs with the same intent ("Get in touch" + "Let's talk" both on page = Fail)?
+- [ ] **Logo wall = logo only**: no industry / category labels printed below logos?
+- [ ] **Bento Background Diversity**: at least 2-3 bento cells have real visual variation (image, gradient, pattern), not all white-on-white text cards?
+- [ ] **"Used by / Trusted by" logo wall** lives UNDER the hero, not inside it, uses REAL SVG logos (Simple Icons / devicon) or generated SVG marks, NOT plain text wordmarks?
+- [ ] **Copy Self-Audit**: every visible string re-read, no grammatically-broken or AI-hallucinated phrases ("free on its past" type) shipped?
+- [ ] **Motion motivated**: every animation can be justified in one sentence (hierarchy / storytelling / feedback / state transition), no GSAP-for-show?
+- [ ] **Marquee max-one-per-page**: no two horizontal marquees on the same page?
+- [ ] **Navigation on ONE line** at desktop, height ≤ 80px?
+- [ ] **Section-Layout-Repetition** check: no two sections share the same layout family (at least 4 different families across 8 sections)?
+- [ ] **Bento has rhythm AND exact cell count** (N items → N cells, no empty cells in middle or at end)?
+- [ ] **Long lists use the right UI component** (not default `<ul>` with `divide-y` for > 5 items - see Section 4.9 alternatives)?
+- [ ] **Real images used** (gen-tool first, then Picsum-seed, then explicit placeholder slots) - NO div-based fake screenshots, NO hand-rolled decorative SVGs, NO pure-text minimalism?
+- [ ] **No pills/labels overlaid on images** (no `Plate · Brand`, no `Field notes - journal`)?
+- [ ] **No photo-credit captions as decoration** (`Field study no. 12 · Ines Caetano`)?
+- [ ] **No version footers** (`v1.4.2`, `Build 0048`) on marketing pages?
+- [ ] **No micro-meta-sentences** under eyebrows ("Each of these is a feature we ship today...")?
+- [ ] **No decoration text strip at hero bottom** (`BRAND. MOTION. SPATIAL.`)?
+- [ ] **No floating top-right sub-text** in section headings?
+- [ ] **No scoring/progress bars with filled background tracks** as comparison visuals?
+- [ ] **No locale / city-name / time / weather strips** unless brief is genuinely globally-distributed or place-focused?
+- [ ] **No scroll cues** (`Scroll`, `↓ scroll`, `Scroll to explore`)?
+- [ ] **No version labels in hero** (V0.6, BETA, INVITE-ONLY) unless the brief is a launch?
+- [ ] **No section-numbering eyebrows** (`00 / INDEX`, `001 · Capabilities`, `06 · how it works`)?
+- [ ] **No decorative dots** (zero by default, only for real semantic state)?
+- [ ] **No `border-t` + `border-b` on every row** of long lists / spec tables?
+- [ ] **Content density** sane: no 20-row data tables, no fake-precise specs without justification, ≤ 25-word sub-paragraphs by default?
+- [ ] **Quotes ≤ 3 lines** of body, attribution clean (no em-dash)?
+- [ ] **Motion claimed = motion shown**: if `MOTION_INTENSITY > 4`, page actually animates, not just claimed?
+- [ ] **GSAP sticky-stack / horizontal-pan** implemented per Section 5.A / 5.B canonical skeleton (`start: "top top"`, `pin: true`, correct scrub)?
+- [ ] **No `window.addEventListener('scroll')`** - using Motion `useScroll()` / ScrollTrigger / IntersectionObserver / CSS scroll-driven animations only?
+- [ ] **Reduced motion** wrapped for everything `MOTION_INTENSITY > 3`?
+- [ ] **Dark mode** tokens defined and tested in both modes?
+- [ ] **Mobile collapse** explicit (`w-full`, `px-4`, `max-w-7xl mx-auto`) for high-variance layouts?
+- [ ] **Viewport stability**: `min-h-[100dvh]`, never `h-screen`?
+- [ ] **`useEffect` animations** have strict cleanup functions?
+- [ ] **Empty / loading / error** states provided?
+- [ ] **Cards omitted** in favor of spacing where possible?
+- [ ] **Icons** from an allowed library only (Phosphor / HugeIcons / Radix / Tabler), no hand-rolled SVG paths?
+- [ ] **Motion** isolated in client-leaf components with `'use client'` at the top, memoized?
+- [ ] **No AI Tells** from Section 9 (Inter as default, AI-purple, three-equal cards, Jane Doe, Acme, "Quietly in use at")?
+- [ ] **Core Web Vitals** plausibly hit (LCP < 2.5s, INP < 200ms, CLS < 0.1)?
+- [ ] **One design system** per project (no Material + shadcn mixed)?
+
+If a single checkbox cannot be honestly ticked, the page is not done. Fix it before delivering.
 
 ---
 
@@ -283,7 +357,9 @@ Evaluate your code against this matrix before outputting. This is the **last** f
 This skill learns across runs via a lessons file. Resolve its path once, first hit wins:
 
 1. `<project>/.claude/lessons/taste-skill.md` (preferred when inside a project)
-2. `<this-skill-dir>/LESSONS.md` (fallback when there is no project context)
+2. `{AGENCY_STATE}/lessons/taste-skill.md` (fallback when there is no project context;
+   resolves to `~/.claude/design-agency/lessons/taste-skill.md` unless
+   `DESIGN_AGENCY_STATE_DIR` overrides it) — never the read-only plugin directory
 
 **At run START (read-only, fail-open):**
 

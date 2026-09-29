@@ -82,6 +82,11 @@ TIER_A_SIGNALS = [
     ("character design", "character_3d"),
     ("pose sheet", "character_3d"),
     ("brand kit", "brand_project"),
+    ("3d model", "character_3d"),
+    ("image to 3d", "character_3d"),
+    ("image-to-3d", "character_3d"),
+    ("three.js model", "character_3d"),
+    ("procedural model", "character_3d"),
 ]
 TIER_A_SCORE = 0.85
 

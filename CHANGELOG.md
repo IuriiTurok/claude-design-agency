@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.4.1 (2026-10-14)
+
+**The design-intent hook ignores harness events.** Background-task completions and
+scheduled fires reach UserPromptSubmit as if they were prompts, and an agent report that
+mentions a brand book or a landing page scored as design intent, so the session was told
+to invoke `design-agency-routing` for text nobody typed. `hooks/design-intent.py` now
+returns silently for prompts that open with `<task-notification`, `<scheduled-task` or
+`[SYSTEM NOTIFICATION`. New fixture `task-notification-none` covers it.
+
 ## 0.4.0 (2026-09-29)
 
 **Taste is applied at generation time, not only checked at QA.** The v1 anti-slop list

@@ -53,6 +53,15 @@ CONTINUATION_OPENERS = (
     "approved",
 )
 
+# Harness events (background-task completions, scheduled fires) arrive as
+# UserPromptSubmit payloads but are not human prompts; their payload text
+# (agent reports, file lists) otherwise scores as design intent.
+HARNESS_EVENT_OPENERS = (
+    "<task-notification",
+    "<scheduled-task",
+    "[system notification",
+)
+
 CREATION_VERBS = re.compile(
     r"\b(design|create|make|build|redesign|restyle|polish|improve|iterate)\b", re.I
 )
@@ -347,6 +356,8 @@ def main():
     if len(prompt) < 15:
         return 0
     if lower.startswith(CONTINUATION_OPENERS):
+        return 0
+    if lower.startswith(HARNESS_EVENT_OPENERS) or "<task-notification>" in lower[:300]:
         return 0
 
     # --- (b) per-repo config ---

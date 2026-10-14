@@ -24,3 +24,4 @@
 {"name":"schema-migration-endpoint-none","payload":{"prompt":"update the database schema migration for the users endpoint","cwd":"/tmp","session_id":"fixture-schema-024"},"expect":"none"}
 {"name":"mascot-threejs-3d-ask","payload":{"prompt":"rebuild this mascot photo as a three.js model","cwd":"/tmp","session_id":"fixture-mascot3d-025"},"expect":"ask","expect_type":"character_3d"}
 {"name":"threejs-build-fix-none","payload":{"prompt":"fix the three.js build error in the api","cwd":"/tmp","session_id":"fixture-threejsfix-026"},"expect":"none"}
+{"name":"task-notification-none","payload":{"prompt":"<task-notification>\n<task-id>a62ac81452de4b176</task-id>\n<status>completed</status>\n<result>Design a brand book, rebuild the brandbook landing page and design system</result>\n</task-notification>","cwd":"/tmp","session_id":"fixture-tasknotif-027"},"expect":"none"}

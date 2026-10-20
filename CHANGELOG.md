@@ -1,5 +1,84 @@
 # Changelog
 
+## 0.5.0 (2026-10-20)
+
+**Product UI is a first-class track.** Most real engagements are iterations on product
+apps (dashboards, tables, KPI rows in React/Vue/Svelte code), yet the agency modelled only
+the four brand deliverables. New `roles/product_ui_lead.md` owns the Operate surface:
+the directive comes from `directive_path` in `.claude/design-agency.json`, rules from
+taste-skill 2.1 `references/app-screens.md` (vendored, MIT) and Impeccable's
+`craft-floor.md` / Operate mode (vendored, Apache-2.0), gates are `enforce.py --surface
+operate` → style-enforcer → visual-qa on an Operate rubric. Auth-gated apps are verified
+on a throwaway harness page served by the app's own dev server, never by signing in.
+The orchestrator, taste-skill and the routing skill all fork on `SURFACE_MODE`
+(persuade | operate | read | experience); landing-page tells apply only to persuade.
+
+**Gates dispatch by their registered names.** The edit-gate hook and the orchestrator
+dispatched `style-enforcer`, but the agents are registered as
+`design-agency:style-enforcer` (and so on), so dispatch failed or fell back to an inline
+pass. Every dispatch site is fixed, a test asserts the hook's name matches an agent, and
+the orchestrator now states that an inline pass is not the gate and that the final
+enforcer and VQA runs are sequential. `ui-edit-gate.py` also gates product-UI files
+(`*.tsx|jsx|vue|svelte|css|scss`) when the repo config declares `directive_path` or
+`ui_globs`, or in an engaged session with a directive up the tree.
+
+**visual-qa can see.** It gets the built-in browser and Claude in Chrome tools with a
+capability ladder, serves pages over a local http server instead of `file://`, captures
+1440px and 390px in light and dark, runs keyboard and console checks, and returns
+`UNMEASURED` (never PASS) when no browser exists. Reports have standard names,
+`<reports_dir>/<gate>_report_<name>.md` with a `Verdict:` line, and
+`execution/check_reports.py` checks presence, freshness and verdict.
+
+**A mechanical style enforcer.** `execution/enforce.py` ports the generic rules of the
+brandbook repo's `audit.sh` into a stdlib, directive-driven linter (14 rules; palette and
+font allowlists, token files and surface mode read from `style_directive.md`; `--json`,
+`--report`, `--list-rules`). It also catches orphan classes applied from JS string
+literals, which `audit.sh` missed. style-enforcer runs it first and reports its findings
+verbatim; Impeccable's `detect` is an optional offline second detector.
+
+**Brand Overrides and DESIGN.md.** `style_directive.md` gains a `## Brand Overrides`
+section: one `allow <rule-id>` line per deliberate identity choice (mono figures,
+near-black + one accent, DIN 5008 dashes), honoured by the script and by taste-guardian
+and visual-qa. The Creative Director can also emit a Google-format `DESIGN.md`
+(`assets/examples/DESIGN_example.md`) generated from the directive.
+
+**Classifier false positives.** `hooks/design-intent.py` now matches phrases on word
+boundaries ("poster" no longer matches "posterior"), strips path tokens before scoring
+(the repo name "brandbook"), needs a creation verb for "brandbook"/"logo" and character
+context for "3d model", stops "design system" double-counting the verb "design", and has
+an engineering penalty (0.45) that can cancel a Tier-A hit, a veto at four distinct
+engineering terms or on prompts about the plugin's own machinery, per-repo
+`negative_signals`, bare-string `extra_signals`, and a `product_ui` engagement type. One
+answered question now suppresses only that engagement type for the session; the session
+goes silent only after "Use design agency" (logged by `log_override.py`, which the
+routing skill calls by the absolute `plugin_root` the hook emits; the old relative path
+left 75% of asks unlogged). In a repo with the brandbook marker, an ask is upgraded to
+engage instead of engaging every prompt. Headless sessions take a logged default.
+`DESIGN_AGENCY_CACHE_DIR` and hermetic test runners keep fixture runs out of the real
+telemetry (they had been two thirds of `audit.jsonl`). 23 new fixtures.
+
+**One spec per QA gate.** `agents/<gate>.md` is authoritative (role-only content merged);
+`roles/<gate>.md` are pointers. Wrong "Model: opus" claims, unresolved `{AGENCY_ROOT}` and
+relative paths in subagent prompts, and dead references (`agent-browser-verify`,
+`chrome-devtools-mcp`, `a11y-debugging`, `figma:create-design-system-rules`, slash-named
+official skills) are fixed; official Anthropic skills are optional with named fallbacks.
+`tests/test_refs.py` keeps it that way and checks every skill and agent frontmatter.
+
+**Vendored skills resynced, provenance recorded.** taste-skill app-screens/app-styles at
+v2.1.3; Impeccable craft-floor, operate and mode files at skill-v4.7.0 (the 18 forked
+skills are not restructured); emil-design-eng at `2d22863` plus its animation-performance
+and review-animations skills as references; ui-ux-pro-max v2.5.0 → v2.15.0 data and
+scripts (stack renames `shadcn-ui` → `shadcn`, `tailwindcss` → `html-tailwind`; the
+unused, prompt-shaped `design.csv` / `draft.csv` / `_sync_all.py` removed as upstream did).
+`NOTICE.md` has a provenance table with version and commit for every vendored component.
+
+**Lessons promoted** from shipped work into the files that need them: harness pages,
+browser serving, script-edits for large showcase files, CSS pitfalls
+(`skills/impeccable/reference/css-pitfalls.md`), component/icon inventory before adding,
+logo masters only, scoped greps and strictest readings, DACH font self-hosting and DIN
+5008 overrides, bounded screenshot reads, and character rigging gotchas.
+`hooks/hooks.json` quotes `${CLAUDE_PLUGIN_ROOT}` (strict validation).
+
 ## 0.4.1 (2026-10-14)
 
 **The design-intent hook ignores harness events.** Background-task completions and

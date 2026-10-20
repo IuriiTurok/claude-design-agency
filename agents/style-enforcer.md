@@ -69,6 +69,14 @@ Paste its violations verbatim into the report. Never re-judge or drop a script f
 Brand Overrides waive, and the script already applies them. If the script cannot run, the
 verdict is UNMEASURED, not PASS.
 
+**Optional second detector (Impeccable).** When `npx --no-install impeccable@4.7.0 --help`
+succeeds (the package is already in the npm cache; it then runs offline), also run
+`npx --no-install impeccable@4.7.0 detect --json <files>`: JSON on stdout, exit 0 = clean,
+2 = findings, 1 = a target could not be scanned. Add its findings to the report under
+"Impeccable detect" as advisory input for the LLM checks; they do not change the verdict
+on their own, and a finding that contradicts the directive or a Brand Override is
+dropped with a note. Never install it from inside the gate.
+
 ### Step 2: Load directive and Brand Overrides
 
 Read `style_directive.md`: palette and roles, typography, layout scales (spacing, radius,
@@ -98,19 +106,19 @@ or breakpoint value before asserting it.
 
 **Do-Not-List and agency anti-patterns (non-mechanical)**
 
-| Item | Detection |
-| --- | --- |
-| Purple/violet gradients | `linear-gradient` in purple ranges (#7C3AED, #8B5CF6, #A855F7) |
-| Banned fonts (Inter, Roboto, Arial) | `font-family` names, also via Tailwind `font-` |
-| Stock/placeholder imagery | `<img src>` containing unsplash/placeholder/stock; placeholder SVGs when `assets/` holds real images |
-| Glass on data surfaces | `backdrop-filter: blur` on ancestors of `<table>`, `<form>`, data components |
-| Banned copy | visible text: leverage, synergize, cutting-edge, seamlessly, next-generation |
-| No hover/focus states | no `:hover` on interactive elements; `<button>`/`<a>`/`<input>` without `:focus-visible` |
-| Missing `alt` | any `<img>` without `alt` |
-| Raw divs for Card/Badge/Button | `<div>` with border + rounded where a component pattern fits |
-| Reserved-token bleed in images | agency fonts/colours/grain/glow in raster or SVG assets (the script scans code only) |
-| Logo provenance | see Hard Rules |
-| Every Do-Not-List item | not covered above and not mechanical: check each one by name |
+| Item                                | Detection                                                                                            |
+| ----------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| Purple/violet gradients             | `linear-gradient` in purple ranges (#7C3AED, #8B5CF6, #A855F7)                                       |
+| Banned fonts (Inter, Roboto, Arial) | `font-family` names, also via Tailwind `font-`                                                       |
+| Stock/placeholder imagery           | `<img src>` containing unsplash/placeholder/stock; placeholder SVGs when `assets/` holds real images |
+| Glass on data surfaces              | `backdrop-filter: blur` on ancestors of `<table>`, `<form>`, data components                         |
+| Banned copy                         | visible text: leverage, synergize, cutting-edge, seamlessly, next-generation                         |
+| No hover/focus states               | no `:hover` on interactive elements; `<button>`/`<a>`/`<input>` without `:focus-visible`             |
+| Missing `alt`                       | any `<img>` without `alt`                                                                            |
+| Raw divs for Card/Badge/Button      | `<div>` with border + rounded where a component pattern fits                                         |
+| Reserved-token bleed in images      | agency fonts/colours/grain/glow in raster or SVG assets (the script scans code only)                 |
+| Logo provenance                     | see Hard Rules                                                                                       |
+| Every Do-Not-List item              | not covered above and not mechanical: check each one by name                                         |
 
 **Surface-gated taste-skill v2 tells** (source: `{AGENCY_ROOT}/skills/taste-skill/SKILL.md`
 §9.F, §9.G, §14 and `references/engineering.md`)
@@ -137,11 +145,11 @@ or breakpoint value before asserting it.
 
 **Section completeness** (placeholders TBD/TODO/Lorem ipsum count as missing)
 
-| Deliverable | Required sections |
-| --- | --- |
-| `landing_page.html` | Navigation, Hero, Trust/Social Proof, Benefits (3+), How It Works (3+ steps), Features (6+), Testimonial/Quote, CTA, Footer (4 columns) |
+| Deliverable          | Required sections                                                                                                                                        |
+| -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `landing_page.html`  | Navigation, Hero, Trust/Social Proof, Benefits (3+), How It Works (3+ steps), Features (6+), Testimonial/Quote, CTA, Footer (4 columns)                  |
 | `design_system.html` | Color Swatches, Typography Specimen, Spacing Scale, Buttons (primary/secondary/ghost/destructive), Cards, Form Inputs, Badges/Tags, Data Table, Icon Set |
-| `brand_book.html` | Hero/Cover, Strategy, Logo (inline SVG), Colors, Typography, Components, Motion, Do-Not-List (12+ rules), Accessibility, File Reference |
+| `brand_book.html`    | Hero/Cover, Strategy, Logo (inline SVG), Colors, Typography, Components, Motion, Do-Not-List (12+ rules), Accessibility, File Reference                  |
 
 **Inventory completeness** (`design_system.html` / `brand_book.html` only). Run section F of
 `{AGENCY_ROOT}/references/component_inventory.md`. Each rule is OK / PARTIAL / MISSING;
@@ -149,18 +157,18 @@ severity advisory unless hard-fail below or the directive requires it. Absent
 `design_system/coverage_matrix.md`: one `COVERAGE_MATRIX_MISSING` advisory routed to the
 Design System Expert.
 
-| Rule | Detection | Severity |
-| --- | --- | --- |
-| Dark-mode tokens | no `prefers-color-scheme: dark`, `.dark` or `[data-theme="dark"]` | advisory |
-| Breakpoint scale | fewer than 3 distinct `min-width` media values | advisory |
-| Z-index scale | more than 2 hardcoded `z-index` values without named variables | advisory |
-| Tabular figures | no `tabular-nums` / `"tnum"` | advisory |
-| `prefers-reduced-motion` | no `@media (prefers-reduced-motion: reduce)` block | **hard-fail** |
-| Focus-visible | any button/a/input without `:focus-visible` | **hard-fail** |
-| Skeleton, empty state, toast queue policy | missing when the product is data-heavy | advisory |
-| Spinner-as-primary | spinner without skeleton or progress alternative | advisory |
-| Single uniform radius | all radii resolve to one value | advisory |
-| Doc-depth, coverage shortfall | component section under 8/10 against inventory section D; required R-tier components absent | advisory |
+| Rule                                      | Detection                                                                                   | Severity      |
+| ----------------------------------------- | ------------------------------------------------------------------------------------------- | ------------- |
+| Dark-mode tokens                          | no `prefers-color-scheme: dark`, `.dark` or `[data-theme="dark"]`                           | advisory      |
+| Breakpoint scale                          | fewer than 3 distinct `min-width` media values                                              | advisory      |
+| Z-index scale                             | more than 2 hardcoded `z-index` values without named variables                              | advisory      |
+| Tabular figures                           | no `tabular-nums` / `"tnum"`                                                                | advisory      |
+| `prefers-reduced-motion`                  | no `@media (prefers-reduced-motion: reduce)` block                                          | **hard-fail** |
+| Focus-visible                             | any button/a/input without `:focus-visible`                                                 | **hard-fail** |
+| Skeleton, empty state, toast queue policy | missing when the product is data-heavy                                                      | advisory      |
+| Spinner-as-primary                        | spinner without skeleton or progress alternative                                            | advisory      |
+| Single uniform radius                     | all radii resolve to one value                                                              | advisory      |
+| Doc-depth, coverage shortfall             | component section under 8/10 against inventory section D; required R-tier components absent | advisory      |
 
 ### Step 4: Report
 
@@ -171,11 +179,16 @@ Design System Expert.
 **Directive:** [path] · **Surface:** [mode, inferred or declared] · **Script violations:** N · **LLM violations:** N
 
 ### Script violations (verbatim from enforce.py)
+
 ### Waived (Brand Overrides)
+
 | Rule id | Reason |
+
 ### LLM checks
+
 (Directive compliance, Do-Not-List/anti-patterns, surface tells, section completeness,
 inventory completeness: a table per group, Line | Element | Property | Found | Expected, or Rule | Status | Severity.)
+
 ### Summary
 ```
 

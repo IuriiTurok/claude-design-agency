@@ -19,12 +19,12 @@ Read `${CLAUDE_PLUGIN_ROOT}/skills/impeccable/context-protocol.md` and follow th
 
 Motion clamps to the project's existing budget exactly the way `/colorize` clamps to the palette and `/polish` clamps to the spacing scale — never invent timings a project already defines.
 
-1. **Find the budget**, in order: a `style_directive.md` / `*directive*.md` "Motion" section (e.g. §8); `--ease-*` / `--dur-*` custom properties in `globals.css` / theme CSS; an existing `motion_audit.md`.
+1. **Find the budget**, in order: a `style_directive.md` / `*directive*.md` "Motion" section (e.g. §8); `--ease-*` / `--dur-*` custom properties in `globals.css` / theme CSS; an existing motion report (`<reports_dir>/motion_report_<name>.md`, legacy `motion_audit.md`).
 2. **If found → clamp.** Use those token *names* (`var(--ease-out)`, `var(--dur-fast)`) in every recommendation, not raw bezier/ms literals. Honor any motion ceilings (max duration, banned techniques). **The directive always wins** over this skill's built-in defaults.
 3. **If a motion-intensity knob exists** (`MOTION_INTENSITY` in `visual_philosophy.md`, etc.), respect it: MINIMAL = no stagger, no ambient motion, no spinners; RICH = entrance choreography + signature moments are in-budget.
 4. **If no budget exists** → fall back to the canonical defaults in `${CLAUDE_PLUGIN_ROOT}/skills/impeccable/reference/motion-design.md`, and note the project would benefit from a motion-token set.
 
-**Defer to an existing motion pass.** If `<project>/motion_audit.md` exists, motion was already authored (design-agency Phase 5 / `motion-designer`). Do NOT re-author — verify timing/easing compliance against it, fill only genuine gaps, and cite it.
+**Defer to an existing motion pass.** If a motion report exists (`<reports_dir>/motion_report_<name>.md`, legacy `<project>/motion_audit.md`), motion was already authored (design-agency Phase 5 / `motion-designer`). Do NOT re-author — verify timing/easing compliance against it, fill only genuine gaps, and cite it.
 
 **Invoked from `/delight`?** If handed off from `/delight` (emotional motion), skip the "functional motion only" framing below and layer expressive timing on top of the functional layer.
 

@@ -101,7 +101,7 @@ change; makes the implicit contract explicit per rubric row 14).
   state dir, env-overridable via `DESIGN_AGENCY_STATE_DIR`).
 - **Outputs:** four mandatory deliverables per project — `ui/landing_page.html`,
   `ui/design_system.html`, `ui/brand_book.html`, `brand_book.md`. QA report artifacts —
-  `motion_audit.md`, `polish_report_*.md`, `taste_report.md`, advisory
+  `<reports_dir>/{motion,polish,enforcer,taste,vqa}_report_<name>.md`, advisory
   `heatmap_report_*.html` / `persona_report_*.html`. State updates —
   `{AGENCY_STATE}/style_library.md`, `{AGENCY_STATE}/lessons_learned.md`,
   `{AGENCY_STATE}/logo_feedback_log.json`. Portal updates (`index.html`,
@@ -368,15 +368,15 @@ browser verify.
   if not found, omit it — no fake logo.
 - _Quality pipeline (six-stage, after all four tracks; dispatch each gate as a subagent):_
   1. **`motion_designer`** (`design-agency:motion-designer`) — Emil Kowalski principles within the
-     directive motion spec → `motion_audit.md` per animated deliverable.
+     directive motion spec → `motion_report_<name>.md` per animated deliverable.
   2. **`polish_inspector`** (`design-agency:polish-inspector`) — runs the Impeccable sequence
      `/audit → /layout → /typeset → /colorize → /harden → /polish`, clamping every
-     suggestion to directive tokens → `polish_report_<deliverable>.md`.
+     suggestion to directive tokens → `polish_report_<name>.md`.
   3. **`style_enforcer`** (`design-agency:style-enforcer`) — **Hard gate.** Zero-tolerance objective
      compliance; 0 violations before proceeding (see The Binding Contract).
   4. **`taste_guardian`** (`design-agency:taste-guardian`) — originality + craft vs the three knobs from
      `visual_philosophy.md`; collision check vs `{AGENCY_STATE}/style_library.md` →
-     `taste_report.md`; feeds VQA's Originality + Craft sub-scores. On a hard-gate
+     `taste_report_<name>.md`; feeds VQA's Originality + Craft sub-scores. On a hard-gate
      rejection, emit a Bridge-D candidate (§ Memory & Learning).
   5. **`visual_qa_agent`** (`design-agency:visual-qa`) — **Hard gate.** Subjective quality (Design
      Coherence, Originality, Craft, Functionality); 3+/5 on all dimensions. On a
@@ -486,7 +486,7 @@ just apply.
    every touched HTML deliverable — 0 violations before commit/deploy/review (see The
    Binding Contract); editing does not bypass the hard gate.
 3. **Targeted re-checks.** Touched animations → `motion_designer` (`design-agency:motion-designer`)
-   re-audits `motion_audit.md`. Added/restructured sections → `polish_inspector`
+   re-audits its motion report. Added/restructured sections → `polish_inspector`
    (`design-agency:polish-inspector`) on the touched file.
 4. **Artifact persistence.** Every gate that runs writes/updates its report on disk; a
    transcript-only check did not happen.
@@ -609,7 +609,7 @@ Optional deterministic append (when a shell is available), instead of hand-writi
 
 > **Heavyweight tier (eval-backed, separate from this lightweight block):** the taste-rubric
 > sil adapter (self-learning.md §2.1) tunes `taste_guardian.md` rubric thresholds from a
-> rolling window of `taste_report.md` scores + Phase-5 hard-gate pass-rate. It is
+> rolling window of taste-report scores + Phase-5 hard-gate pass-rate. It is
 > **ONE_CLICK / PROSE_RULE** — the loop _proposes_ a scored, logged, reversible rubric edit;
 > a human applies it, and it NEVER writes into the read-only `{AGENCY_ROOT}` (HARD RULE).
 > Ledger: `~/.claude/design-agency/sil/taste-ledger.jsonl`. The Bridge-D candidate stream

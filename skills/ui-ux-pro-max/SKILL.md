@@ -1,11 +1,11 @@
 ---
 name: ui-ux-pro-max
-description: "UI/UX design intelligence for web and mobile — generates design systems, picks styles/palettes/type pairings, and reviews UI code for quality and accessibility. Use whenever the task changes how a feature looks, feels, moves, or is interacted with — building or refactoring pages and components, choosing color/typography/spacing/layout, adding animation or responsive behavior, or reviewing UI for usability and a11y — even if the user never says 'UI', 'UX', or 'design'. Covers 50+ styles, 161 color palettes, 57 font pairings, 161 product types, 99 UX guidelines, and 25 chart types across 10 stacks (React, Next.js, Vue, Svelte, SwiftUI, React Native, Flutter, Tailwind, shadcn/ui, HTML/CSS). Projects: website, landing, dashboard, admin, e-commerce, SaaS, portfolio, blog, mobile app. Styles: glassmorphism, claymorphism, minimalism, brutalism, bento, dark mode, flat. Skip for pure backend, API/DB-only, infra/DevOps, or non-visual scripting. Integrates shadcn/ui MCP."
+description: "UI/UX design intelligence for web and mobile — generates design systems, picks styles/palettes/type pairings, and reviews UI code for quality and accessibility. Use whenever the task changes how a feature looks, feels, moves, or is interacted with — building or refactoring pages and components, choosing color/typography/spacing/layout, adding animation or responsive behavior, or reviewing UI for usability and a11y — even if the user never says 'UI', 'UX', or 'design'. Covers 50+ styles, 192 color palettes, 74 font pairings, 192 product types, 119 UX guidelines, and 25 chart types across 22 stacks (React, Next.js, Vue, Svelte, Angular, SwiftUI, React Native, Flutter, Jetpack Compose, Tailwind, shadcn/ui, .NET desktop, and more). Projects: website, landing, dashboard, admin, e-commerce, SaaS, portfolio, blog, mobile app. Styles: glassmorphism, claymorphism, minimalism, brutalism, bento, dark mode, flat. Skip for pure backend, API/DB-only, infra/DevOps, or non-visual scripting. Integrates shadcn/ui MCP."
 ---
 
 # UI/UX Pro Max - Design Intelligence
 
-Comprehensive design guide for web and mobile applications. A searchable database (50+ styles, 161 color palettes, 57 font pairings, 161 product types with reasoning rules, 99 UX guidelines, 25 chart types across 10 technology stacks) plus priority-based recommendations, driven by Python search scripts.
+Comprehensive design guide for web and mobile applications. A searchable database (50+ styles, 192 color palettes, 74 font pairings, 192 product types with reasoning rules, 119 UX guidelines, 25 chart types, 17 GSAP motion presets across 22 technology stacks) plus priority-based recommendations, driven by Python search scripts.
 
 ## Table of Contents
 
@@ -56,20 +56,20 @@ Use this Skill when the task involves **UI structure, visual design decisions, i
 
 ## Rule Categories by Priority
 
-*Follow priority 1→10 to decide which rule category to focus on first; use `--domain <Domain>` to query details. Scripts do not read this table.*
+_Follow priority 1→10 to decide which rule category to focus on first; use `--domain <Domain>` to query details. Scripts do not read this table._
 
-| Priority | Category | Impact | Domain | Key Checks (Must Have) | Anti-Patterns (Avoid) |
-|----------|----------|--------|--------|------------------------|------------------------|
-| 1 | Accessibility | CRITICAL | `ux` | Contrast 4.5:1, Alt text, Keyboard nav, Aria-labels | Removing focus rings, Icon-only buttons without labels |
-| 2 | Touch & Interaction | CRITICAL | `ux` | Min size 44×44px, 8px+ spacing, Loading feedback | Reliance on hover only, Instant state changes (0ms) |
-| 3 | Performance | HIGH | `ux` | WebP/AVIF, Lazy loading, Reserve space (CLS &lt; 0.1) | Layout thrashing, Cumulative Layout Shift |
-| 4 | Style Selection | HIGH | `style`, `product` | Match product type, Consistency, SVG icons (no emoji) | Mixing flat & skeuomorphic randomly, Emoji as icons |
-| 5 | Layout & Responsive | HIGH | `ux` | Mobile-first breakpoints, Viewport meta, No horizontal scroll | Horizontal scroll, Fixed px container widths, Disable zoom |
-| 6 | Typography & Color | MEDIUM | `typography`, `color` | Base 16px, Line-height 1.5, Semantic color tokens | Text &lt; 12px body, Gray-on-gray, Raw hex in components |
-| 7 | Animation | MEDIUM | `ux` | Duration 150–300ms, Motion conveys meaning, Spatial continuity | Decorative-only animation, Animating width/height, No reduced-motion |
-| 8 | Forms & Feedback | MEDIUM | `ux` | Visible labels, Error near field, Helper text, Progressive disclosure | Placeholder-only label, Errors only at top, Overwhelm upfront |
-| 9 | Navigation Patterns | HIGH | `ux` | Predictable back, Bottom nav ≤5, Deep linking | Overloaded nav, Broken back behavior, No deep links |
-| 10 | Charts & Data | LOW | `chart` | Legends, Tooltips, Accessible colors | Relying on color alone to convey meaning |
+| Priority | Category            | Impact   | Domain                | Key Checks (Must Have)                                                | Anti-Patterns (Avoid)                                                |
+| -------- | ------------------- | -------- | --------------------- | --------------------------------------------------------------------- | -------------------------------------------------------------------- |
+| 1        | Accessibility       | CRITICAL | `ux`                  | Contrast 4.5:1, Alt text, Keyboard nav, Aria-labels                   | Removing focus rings, Icon-only buttons without labels               |
+| 2        | Touch & Interaction | CRITICAL | `ux`                  | Min size 44×44px, 8px+ spacing, Loading feedback                      | Reliance on hover only, Instant state changes (0ms)                  |
+| 3        | Performance         | HIGH     | `ux`                  | WebP/AVIF, Lazy loading, Reserve space (CLS &lt; 0.1)                 | Layout thrashing, Cumulative Layout Shift                            |
+| 4        | Style Selection     | HIGH     | `style`, `product`    | Match product type, Consistency, SVG icons (no emoji)                 | Mixing flat & skeuomorphic randomly, Emoji as icons                  |
+| 5        | Layout & Responsive | HIGH     | `ux`                  | Mobile-first breakpoints, Viewport meta, No horizontal scroll         | Horizontal scroll, Fixed px container widths, Disable zoom           |
+| 6        | Typography & Color  | MEDIUM   | `typography`, `color` | Base 16px, Line-height 1.5, Semantic color tokens                     | Text &lt; 12px body, Gray-on-gray, Raw hex in components             |
+| 7        | Animation           | MEDIUM   | `ux`                  | Duration 150–300ms, Motion conveys meaning, Spatial continuity        | Decorative-only animation, Animating width/height, No reduced-motion |
+| 8        | Forms & Feedback    | MEDIUM   | `ux`                  | Visible labels, Error near field, Helper text, Progressive disclosure | Placeholder-only label, Errors only at top, Overwhelm upfront        |
+| 9        | Navigation Patterns | HIGH     | `ux`                  | Predictable back, Bottom nav ≤5, Deep linking                         | Overloaded nav, Broken back behavior, No deep links                  |
+| 10       | Charts & Data       | LOW      | `chart`               | Legends, Tooltips, Accessible colors                                  | Relying on color alone to convey meaning                             |
 
 The full per-rule digest for all ten categories lives in **`references/quick-reference.md`** (load it for review / fix / pre-delivery passes — see Pre-Delivery Checklist).
 
@@ -79,21 +79,22 @@ Check Python is installed: `python3 --version || python --version`. If absent, i
 
 ## How to Use This Skill
 
-| Scenario | Trigger Examples | Start From |
-|----------|-----------------|------------|
-| **New project / page** | "Build a landing page", "Build a dashboard" | Step 1 → Step 2 (design system) |
-| **New component** | "Create a pricing card", "Add a modal" | Step 3 (domain search: style, ux) |
-| **Choose style / color / font** | "What style fits a fintech app?", "Recommend a palette" | Step 2 (design system) |
-| **Review existing UI** | "Review this page for UX issues", "Check accessibility" | `references/quick-reference.md` checklist |
-| **Fix a UI bug** | "Button hover is broken", "Layout shifts on load" | `references/quick-reference.md` → relevant § |
-| **Improve / optimize** | "Make this faster", "Improve mobile experience" | Step 3 (domain search: ux + stack) |
-| **Implement dark mode** | "Add dark mode support" | Step 3 (domain: style "dark mode") |
-| **Add charts / data viz** | "Add an analytics dashboard chart" | Step 3 (domain: chart) |
-| **Stack best practices** | "React performance tips", "SwiftUI navigation" | Step 4 (stack search) |
+| Scenario                        | Trigger Examples                                        | Start From                                   |
+| ------------------------------- | ------------------------------------------------------- | -------------------------------------------- |
+| **New project / page**          | "Build a landing page", "Build a dashboard"             | Step 1 → Step 2 (design system)              |
+| **New component**               | "Create a pricing card", "Add a modal"                  | Step 3 (domain search: style, ux)            |
+| **Choose style / color / font** | "What style fits a fintech app?", "Recommend a palette" | Step 2 (design system)                       |
+| **Review existing UI**          | "Review this page for UX issues", "Check accessibility" | `references/quick-reference.md` checklist    |
+| **Fix a UI bug**                | "Button hover is broken", "Layout shifts on load"       | `references/quick-reference.md` → relevant § |
+| **Improve / optimize**          | "Make this faster", "Improve mobile experience"         | Step 3 (domain search: ux + stack)           |
+| **Implement dark mode**         | "Add dark mode support"                                 | Step 3 (domain: style "dark mode")           |
+| **Add charts / data viz**       | "Add an analytics dashboard chart"                      | Step 3 (domain: chart)                       |
+| **Stack best practices**        | "React performance tips", "SwiftUI navigation"          | Step 4 (stack search)                        |
 
 ### Step 1: Analyze User Requirements
 
 Extract key information from the user request:
+
 - **Product type**: Entertainment (social, video, music, gaming), Tool (scanner, editor, converter), Productivity (task manager, notes, calendar), or hybrid
 - **Target audience**: consider age group, usage context (commute, leisure, work)
 - **Style keywords**: playful, vibrant, minimal, dark mode, content-first, immersive, etc.
@@ -132,7 +133,7 @@ Creates `design-system/<project>/MASTER.md` (global source of truth) and, with `
 python3 skills/ui-ux-pro-max/scripts/search.py "<keyword>" --domain <domain> [-n <max_results>]
 ```
 
-Use after the design system to deep-dive any dimension: `product`, `style`, `color`, `typography`, `chart`, `ux`, `google-fonts`, `landing`, `react`, `web`, `prompt` (see [Available Domains](#available-domains)).
+Use after the design system to deep-dive any dimension: `product`, `style`, `color`, `typography`, `chart`, `ux`, `google-fonts`, `landing`, `icons`, `gsap`, `react`, `web` (see [Available Domains](#available-domains)).
 
 ### Step 4: Stack Guidelines
 
@@ -140,38 +141,48 @@ Use after the design system to deep-dive any dimension: `product`, `style`, `col
 python3 skills/ui-ux-pro-max/scripts/search.py "<keyword>" --stack <stack>
 ```
 
-Stacks: `react-native`, `nextjs`, `shadcn-ui`, `tailwindcss`, `swiftui`, `flutter` (see [Available Stacks](#available-stacks)).
+Stacks: `react`, `nextjs`, `vue`, `svelte`, `astro`, `nuxtjs`, `nuxt-ui`, `angular`, `laravel`, `swiftui`, `react-native`, `flutter`, `jetpack-compose`, `html-tailwind`, `shadcn`, `threejs`, `javafx`, `wpf`, `winui`, `avalonia`, `uno`, `uwp` (see [Available Stacks](#available-stacks)).
 
-**Then:** synthesize design system + detailed searches and implement the design. The `--design-system` flag also supports `-f markdown` for documentation output (default is an ASCII box for terminal display).
+**Then:** synthesize design system + detailed searches and implement the design. The `--design-system` flag also supports `-f markdown` for documentation output (default is an ASCII box for terminal display) and `--json`.
+
+**Design dials (optional):** `--design-system` accepts `--variance`, `--motion` and `--density` (each 1-10) to tune the output without changing the query: variance biases style picks (low = centered/minimal, high = bold/asymmetric), motion attaches a GSAP preset from `--domain gsap` matched to the tier, density overrides the `--space-*` scale (high = dashboard). Unset dials leave the output unchanged. `--stack` is ignored in `--design-system` mode; run Step 4 separately.
+
+**Zero results:** a search that returns 0 results is not data. Retry once with a narrower query or an explicit `--domain`/`--stack`; if still empty, fall back to the priority rules and say explicitly that no database match was found.
 
 ## Search Reference
 
 ### Available Domains
 
-| Domain | Use For | Example Keywords |
-|--------|---------|------------------|
-| `product` | Product type recommendations | SaaS, e-commerce, portfolio, healthcare, beauty, service |
-| `style` | UI styles, colors, effects | glassmorphism, minimalism, dark mode, brutalism |
-| `typography` | Font pairings, Google Fonts | elegant, playful, professional, modern |
-| `color` | Color palettes by product type | saas, ecommerce, healthcare, beauty, fintech, service |
-| `landing` | Page structure, CTA strategies | hero, hero-centric, testimonial, pricing, social-proof |
-| `chart` | Chart types, library recommendations | trend, comparison, timeline, funnel, pie |
-| `ux` | Best practices, anti-patterns | animation, accessibility, z-index, loading |
-| `google-fonts` | Individual Google Fonts lookup | sans serif, monospace, japanese, variable font, popular |
-| `react` | React/Next.js performance | waterfall, bundle, suspense, memo, rerender, cache |
-| `web` | App interface guidelines (iOS/Android/React Native) | accessibilityLabel, touch targets, safe areas, Dynamic Type |
-| `prompt` | AI prompts, CSS keywords | (style name) |
+| Domain         | Use For                                             | Example Keywords                                            |
+| -------------- | --------------------------------------------------- | ----------------------------------------------------------- |
+| `product`      | Product type recommendations                        | SaaS, e-commerce, portfolio, healthcare, beauty, service    |
+| `style`        | UI styles, colors, effects                          | glassmorphism, minimalism, dark mode, brutalism             |
+| `typography`   | Font pairings, Google Fonts                         | elegant, playful, professional, modern                      |
+| `color`        | Color palettes by product type                      | saas, ecommerce, healthcare, beauty, fintech, service       |
+| `landing`      | Page structure, CTA strategies                      | hero, hero-centric, testimonial, pricing, social-proof      |
+| `chart`        | Chart types, library recommendations                | trend, comparison, timeline, funnel, pie                    |
+| `ux`           | Best practices, anti-patterns                       | animation, accessibility, z-index, loading                  |
+| `google-fonts` | Individual Google Fonts lookup                      | sans serif, monospace, japanese, variable font, popular     |
+| `react`        | React/Next.js performance                           | waterfall, bundle, suspense, memo, rerender, cache          |
+| `web`          | App interface guidelines (iOS/Android/React Native) | accessibilityLabel, touch targets, safe areas, Dynamic Type |
+| `icons`        | Icon recommendations (curated + Phosphor)           | decorative icon aria hidden, icon button accessible label   |
+| `gsap`         | GSAP animation presets                              | scroll reveal stagger, pin, Flip, SplitText                 |
 
 ### Available Stacks
 
-| Stack | Focus |
-|-------|-------|
-| `react-native` | Components, Navigation, Lists, Styling, Performance |
-| `nextjs` | App Router, Server Components, Data Fetching, Caching, Streaming |
-| `shadcn-ui` | Theming, Components, Forms, Composition, Dark Mode, Accessibility |
-| `tailwindcss` | Layout, Responsive, Dark Mode, Animation, States, Performance |
-| `swiftui` | Views, Layout, State, Animation, Navigation, Accessibility |
-| `flutter` | Widgets, Material 3, State, Animation, Theming, Performance |
+| Stack          | Focus                                                             |
+| -------------- | ----------------------------------------------------------------- |
+| `react-native` | Components, Navigation, Lists, Styling, Performance               |
+| `nextjs`       | App Router, Server Components, Data Fetching, Caching, Streaming  |
+| `shadcn`       | Theming, Components, Forms, Composition, Dark Mode, Accessibility |
+| `html-tailwind`| Layout, Responsive, Dark Mode, Animation, States, Performance     |
+| `swiftui`      | Views, Layout, State, Animation, Navigation, Accessibility        |
+| `flutter`      | Widgets, Material 3, State, Animation, Theming, Performance       |
+| `react`, `vue`, `svelte`, `astro`, `angular` | Per-framework component, state and rendering patterns |
+| `nuxtjs`, `nuxt-ui`, `laravel` | Framework routing, data and UI-kit conventions    |
+| `jetpack-compose` | Android Compose layout, state, theming                         |
+| `threejs`      | 3D scenes, render loop, performance                               |
+| `javafx`, `wpf`, `winui`, `avalonia`, `uno`, `uwp` | Desktop (Java / .NET) UI guidance |
 
 ### Query Strategy
 
@@ -191,15 +202,15 @@ Scope notice: those tables are for App UI (iOS/Android/React Native/Flutter), no
 
 ## Common Sticking Points
 
-| Problem | What to Do |
-|---------|------------|
-| Can't decide on style/color | Re-run `--design-system` with different keywords |
-| Dark mode contrast issues | quick-reference §6: `color-dark-mode` + `color-accessible-pairs` |
-| Animations feel unnatural | quick-reference §7: `spring-physics` + `easing` + `exit-faster-than-enter` |
-| Form UX is poor | quick-reference §8: `inline-validation` + `error-clarity` + `focus-management` |
-| Navigation feels confusing | quick-reference §9: `nav-hierarchy` + `bottom-nav-limit` + `back-behavior` |
-| Layout breaks on small screens | quick-reference §5: `mobile-first` + `breakpoint-consistency` |
-| Performance / jank | quick-reference §3: `virtualize-lists` + `main-thread-budget` + `debounce-throttle` |
+| Problem                        | What to Do                                                                          |
+| ------------------------------ | ----------------------------------------------------------------------------------- |
+| Can't decide on style/color    | Re-run `--design-system` with different keywords                                    |
+| Dark mode contrast issues      | quick-reference §6: `color-dark-mode` + `color-accessible-pairs`                    |
+| Animations feel unnatural      | quick-reference §7: `spring-physics` + `easing` + `exit-faster-than-enter`          |
+| Form UX is poor                | quick-reference §8: `inline-validation` + `error-clarity` + `focus-management`      |
+| Navigation feels confusing     | quick-reference §9: `nav-hierarchy` + `bottom-nav-limit` + `back-behavior`          |
+| Layout breaks on small screens | quick-reference §5: `mobile-first` + `breakpoint-consistency`                       |
+| Performance / jank             | quick-reference §3: `virtualize-lists` + `main-thread-budget` + `debounce-throttle` |
 
 Before implementation, run the [Pre-Delivery Checklist](#pre-delivery-checklist) below.
 
@@ -211,6 +222,7 @@ Scope notice: this checklist is for App UI (iOS/Android/React Native/Flutter).
 First run `--domain ux "animation accessibility z-index loading"` as a validation pass, then walk `references/quick-reference.md` **§1–§3** (CRITICAL + HIGH) as a final review.
 
 ### Visual Quality
+
 - [ ] No emojis used as icons (use SVG instead)
 - [ ] All icons come from a consistent icon family and style
 - [ ] Official brand assets are used with correct proportions and clear space
@@ -218,6 +230,7 @@ First run `--domain ux "animation accessibility z-index loading"` as a validatio
 - [ ] Semantic theme tokens are used consistently (no ad-hoc per-screen hardcoded colors)
 
 ### Interaction
+
 - [ ] All tappable elements provide clear pressed feedback (ripple/opacity/elevation)
 - [ ] Touch targets meet minimum size (>=44x44pt iOS, >=48x48dp Android)
 - [ ] Micro-interaction timing stays in the 150-300ms range with native-feeling easing
@@ -226,6 +239,7 @@ First run `--domain ux "animation accessibility z-index loading"` as a validatio
 - [ ] Gesture regions avoid nested/conflicting interactions (tap/drag/back-swipe conflicts)
 
 ### Light/Dark Mode
+
 - [ ] Primary text contrast >=4.5:1 in both light and dark mode
 - [ ] Secondary text contrast >=3:1 in both light and dark mode
 - [ ] Dividers/borders and interaction states are distinguishable in both modes
@@ -233,6 +247,7 @@ First run `--domain ux "animation accessibility z-index loading"` as a validatio
 - [ ] Both themes are tested before delivery (not inferred from a single theme)
 
 ### Layout
+
 - [ ] Safe areas are respected for headers, tab bars, and bottom CTA bars
 - [ ] Scroll content is not hidden behind fixed/sticky bars
 - [ ] Verified on 375px small phone, large phone, and tablet (portrait + landscape)
@@ -241,6 +256,7 @@ First run `--domain ux "animation accessibility z-index loading"` as a validatio
 - [ ] Long-form text measure remains readable on larger devices (no edge-to-edge paragraphs)
 
 ### Accessibility
+
 - [ ] All meaningful images/icons have accessibility labels
 - [ ] Form fields have labels, hints, and clear error messages
 - [ ] Color is not the only indicator
@@ -263,17 +279,20 @@ This is the precondition for any future heavyweight self-learning (sil) candidac
 ## I/O Contract
 
 **Inputs**
+
 - User intent string: product type + industry + style keywords (the positional `query` arg).
 - Optional `-p "Project Name"` (persistence target) and `--page "<name>"` (page-specific override).
 - Optional `--domain <domain>` / `--stack <stack>` for targeted searches.
 - Optional repo/user-supplied stack hint (no default).
 
 **Outputs**
+
 - Design-system recommendation (ASCII box or `-f markdown`): pattern, style, colors, typography, effects, anti-patterns.
 - With `--persist`: `design-system/<project>/MASTER.md` and (with `--page`) `design-system/<project>/pages/<page>.md`.
 - Domain/stack search results: BM25-ranked excerpts (Style + Color + Typography + guideline blocks) backed by the CSVs in `data/`.
 
 **Dependencies**
+
 - Scripts: `scripts/search.py` (CLI entry), `scripts/design_system.py`, `scripts/core.py`. Data: `data/*.csv` (incl. `ui-reasoning.csv`) and `data/stacks/`.
 - Upstream: `design-agency` / `lead-design-engineer` (Design Phase 5 entry).
 - Downstream: `impeccable` (AI-slop / quality gate), then `ship` (delivery).
@@ -282,16 +301,19 @@ This is the precondition for any future heavyweight self-learning (sil) candidac
 ## Self-learning
 
 This skill learns across runs via a lessons file. Resolve its path once, first hit wins:
-1. `<project>/.claude/lessons/ui-ux-pro-max.md`  (preferred when inside a project)
-2. `<this-skill-dir>/LESSONS.md`                  (fallback when there is no project context)
+
+1. `<project>/.claude/lessons/ui-ux-pro-max.md` (preferred when inside a project)
+2. `<this-skill-dir>/LESSONS.md` (fallback when there is no project context)
 
 **At run START (read-only, fail-open):**
+
 - Read the lessons file(s) that exist (load both if both do). If none exist, continue silently.
 - Read only the last ~20 lines; treat each `- YYYY-MM-DD …` line as a standing constraint for this run.
 - Never block on a missing file; absence just means "no lessons yet".
 
 **At run END (append, only when warranted):**
-- Append a lesson **only if** this run produced a *correction* (the user fixed/redirected a design-system pick or generated UI), a *gotcha* (a non-obvious failure you had to work around — e.g. a flagged AI-slop pattern, or an `impeccable` override), or a *durable insight* worth reusing. Routine successful runs append nothing — keep the file high-signal.
+
+- Append a lesson **only if** this run produced a _correction_ (the user fixed/redirected a design-system pick or generated UI), a _gotcha_ (a non-obvious failure you had to work around — e.g. a flagged AI-slop pattern, or an `impeccable` override), or a _durable insight_ worth reusing. Routine successful runs append nothing — keep the file high-signal.
 - One physical line, exact format:
   `- YYYY-MM-DD <imperative fix or invariant> [ctx: ui-ux-pro-max/<project-or-->]`
 - Create the file (and parent dir) on first append; otherwise append. Never rewrite existing lines.
@@ -301,7 +323,7 @@ Optional deterministic append (when a shell is available), instead of hand-writi
 `python3 ~/.claude/lib/self-improving-loop/sil/cli.py lessons-append \
   --file "<resolved-path>" --date "YYYY-MM-DD" --window "run" --note "<imperative rule>" --tweak "ui-ux-pro-max/<project>"`
 
-> This lightweight loop is distinct from `--persist` (which writes per-project design-system *output*, not skill learning). The **heavyweight sil adapter** for design-system reasoning (learning which reasoning rules in `data/ui-reasoning.csv` survive vs. get overridden, scored by override-rate) is now wired — see [Self-improvement loop (sil)](#self-improvement-loop-sil) below ([sil/ui-ux-pro-max_loop.py](sil/ui-ux-pro-max_loop.py)). It remains ONE_CLICK / PROSE_RULE (never auto-applied); the lightweight append flow above still feeds it, since user corrections to design-system picks are the override signal the loop scores.
+> This lightweight loop is distinct from `--persist` (which writes per-project design-system _output_, not skill learning). The **heavyweight sil adapter** for design-system reasoning (learning which reasoning rules in `data/ui-reasoning.csv` survive vs. get overridden, scored by override-rate) is now wired — see [Self-improvement loop (sil)](#self-improvement-loop-sil) below ([sil/ui-ux-pro-max_loop.py](sil/ui-ux-pro-max_loop.py)). It remains ONE_CLICK / PROSE_RULE (never auto-applied); the lightweight append flow above still feeds it, since user corrections to design-system picks are the override signal the loop scores.
 
 ---
 

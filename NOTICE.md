@@ -4,6 +4,18 @@ This distribution combines original work under the MIT License (see `LICENSE`) w
 third-party work under the Apache License, Version 2.0, and third-party work under the
 MIT License.
 
+## Provenance (every vendored component)
+
+| Component | Upstream | Version | Commit |
+|---|---|---|---|
+| 18 Impeccable skills (`skills/adapt` … `skills/typeset`) | https://github.com/pbakaus/impeccable | v2.1.1 (`impeccable` SKILL 2.2.0) | not recorded at fork time |
+| `skills/impeccable/reference/{craft-floor,operate,mode-operate,mode-persuade,mode-read}.md` | https://github.com/pbakaus/impeccable (`.claude/skills/impeccable/reference/`) | skill-v4.7.0 | `aeeb3d8c30b5f95aeeb3e893b0f1a308af8fdb8f` |
+| `skills/taste-skill/` body (`SKILL.md` §0/§1/§9/§13/§14 + `references/` except below) | https://github.com/Leonxlnx/taste-skill | v2 (upstream now "v2 experimental", kept in taste-skill-classics) | `ce26fc25c0e5` |
+| `skills/taste-skill/references/app-screens.md`, `app-styles.md` | https://github.com/Leonxlnx/taste-skill | v2.1.3 | `63aba5f43b5056758b15bbe7d683da8c86a7a7ad` |
+| `skills/emil-design-eng/` (+ `references/animation-performance.md`, `review-animations.md`) | https://github.com/emilkowalski/skills | `main` (no tags) | `2d228630ba1446365f614a108cb8252f1feda202` |
+| `skills/ui-ux-pro-max/` (`data/`, `scripts/`) | https://github.com/nextlevelbuilder/ui-ux-pro-max-skill (`src/ui-ux-pro-max/`) | v2.15.0 | `a38d04c3d5c298c851dbe5e6ee1965ee3de42cb5` |
+| `execution/enforce.py` rule set | ported from the author's own `brandbook/tworocks/tools/audit.sh` (MIT, same author) | — | — |
+
 ## Apache-2.0 components
 
 The 18 Impeccable design skills bundled here are a fork:
@@ -43,6 +55,10 @@ Per Apache-2.0 §4(b), the following changes were made to the original files:
 
 No changes were made to the substance of the design guidance in the remaining 17 skills.
 
+The v0.5.0 additions under `skills/impeccable/reference/` (`craft-floor.md`, `operate.md`,
+`mode-operate.md`, `mode-persuade.md`, `mode-read.md`) are copied unmodified from
+skill-v4.7.0 apart from a three-line HTML attribution comment at the top of each file.
+
 ## MIT components
 
 `skills/taste-skill/` (`SKILL.md` + `references/` + `references/modes/`) is taste-skill v2,
@@ -81,6 +97,25 @@ distributed under the MIT License — compatible with this plugin's own MIT lice
 - The sibling upstream skills `soft-skill`, `minimalist-skill`, and `brutalist-skill`
   are bundled as reference modes under `references/modes/` with their frontmatter
   stripped.
+- v0.5.0: `references/app-screens.md` is upstream v2.1.3 verbatim (attribution comment
+  prepended); `references/app-styles.md` is a markdown digest of upstream
+  `library/app.json`. The binding preamble now forks page vs app screen on
+  `SURFACE_MODE`, and an agency note above §13 records that upstream 2.1.0 brought
+  dashboards into scope. The upstream 2.1 scripts and assets (`draw.mjs`, `lint.mjs`,
+  `inspect.mjs`, `app.css`, `charts.js`) are not bundled.
+
+`skills/emil-design-eng/` is from https://github.com/emilkowalski/skills (MIT, copyright
+Emil Kowalski). Modifications: agency frontmatter, Self-learning and Recommended-next-step
+sections; v0.5.0 synced the body to `2d22863` and added the upstream
+`animation-performance` and `review-animations` skills as `references/` (frontmatter
+stripped; `review-animations.md` joins its SKILL.md and STANDARDS.md).
+
+`skills/ui-ux-pro-max/` is from https://github.com/nextlevelbuilder/ui-ux-pro-max-skill
+(MIT). Modifications: agency binding preamble, I/O contract, Self-learning and `sil/`
+sections in `SKILL.md`; the body's stack and domain lists follow v2.15.0. v0.5.0 removed
+`data/design.csv`, `data/draft.csv` and `data/_sync_all.py` (deleted upstream in
+`3da52ff1`, 2026-07-10: unused by the scripts and carrying prompt-shaped text) and the
+stacks renamed upstream (`shadcn-ui` → `shadcn`, `tailwindcss` → `html-tailwind`).
 
 ## External tools (not bundled)
 

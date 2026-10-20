@@ -9,10 +9,13 @@ Evaluation order (first hit wins):
   a. Hard silent opt-outs (#noagency/#nodesign, env, slash command, too short,
      continuation openers).
   b. Per-repo .claude/design-agency.json (disabled / ask_threshold / extra_signals).
-  c. Session-engaged marker (already routed this session) -> silent.
-  d. Brandbook auto-engage: DesignAgencyAgent/master_agent.md found walking up.
-  e. #agency override -> engage.
-  f. Heuristic classifier -> engage/ask/silent.
+  c. Session-engaged marker (user engaged the agency this session) -> silent.
+  d. #agency override -> engage.
+  e. Heuristic classifier -> ask/silent. A repo carrying
+     DesignAgencyAgent/master_agent.md upgrades an ask to engage; below the
+     threshold it stays silent there too, so ops prompts are not hijacked.
+  f. Per-(session, engagement_type) asked marker: one false positive suppresses
+     re-asks of the same type only, never the whole session.
 
 Never crashes the prompt flow: main() is wrapped in try/except and exits 0
 silently on any error.
@@ -28,9 +31,20 @@ import uuid
 from datetime import datetime, timezone
 from pathlib import Path
 
-CACHE_DIR = Path(os.path.expanduser("~/.claude/cache/design-agency"))
+# DESIGN_AGENCY_CACHE_DIR lets tests (and operators) keep fixture runs out of
+# the real telemetry; the same variable is honoured by ui-edit-gate.py and
+# log_override.py.
+CACHE_DIR = Path(
+    os.environ.get("DESIGN_AGENCY_CACHE_DIR")
+    or os.path.expanduser("~/.claude/cache/design-agency")
+)
 ENGAGED_DIR = CACHE_DIR / "engaged"
+ASKED_DIR = CACHE_DIR / "asked"
+DECISIONS_DIR = CACHE_DIR / "decisions"
 AUDIT_LOG = CACHE_DIR / "audit.jsonl"
+# Emitted in every decision so the routing skill can call its scripts by
+# absolute path (CLAUDE_PLUGIN_ROOT is not set in the session's Bash env).
+PLUGIN_ROOT = str(Path(__file__).resolve().parent.parent)
 AUDIT_ROTATE_BYTES = 5 * 1024 * 1024
 ENGAGED_RETAIN_SEC = 7 * 86400
 
@@ -66,22 +80,34 @@ CREATION_VERBS = re.compile(
     r"\b(design|create|make|build|redesign|restyle|polish|improve|iterate)\b", re.I
 )
 DELIVERABLE_PATH = re.compile(r"ui/.*\.html|\.svg|brand_book|design_system", re.I)
+# Path-like tokens (~/Code/brandbook/x.md, src/app/page.tsx, URLs) are removed
+# before phrase scoring: a repo or folder name is not a design request.
+PATH_TOKEN = re.compile(r"(?:https?://\S+|[~.\w-]*/[\w./~-]+)")
 # Word-boundary matching: bare substring checks misfire ("ci" in "social",
-# "test" in "testimonial"). Penalty needs >=2 DISTINCT terms, so a single
-# ambiguous word ("refactor the landing page") never suppresses by itself.
+# "test" in "testimonial"). >=2 DISTINCT terms subtract ENGINEERING_PENALTY,
+# which is large enough to cancel a single Tier-A hit; >=ENGINEERING_VETO
+# distinct terms zero the score (meta prompts about tooling, CI chores).
 ENGINEERING_RE = re.compile(
-    r"\b(apis?|database|db|deploy(?:ment)?|ci|cd|tests?|bugs?|migrations?|"
+    r"\b(apis?|database|db|deploy(?:ment|s|ed)?|ci|cd|tests?|bugs?|migrations?|"
     r"backend|docker|kubernetes|endpoints?|refactor|lint(?:er)?|schema|sdk|"
-    r"server|pull request|type-?check)\b",
+    r"server|pull request|prs?|type-?check|commits?|push|branch|merge|git|repo|"
+    r"script|hooks?|plugin|classifier|fixtures?|changelog|readme|"
+    r"step|stl|cad|fusion|cadquery|nozzle|firmware)\b",
     re.I,
 )
+# Prompts about this plugin's own machinery (its name, hook or spec files)
+# are tooling work whenever any engineering term rides along.
+META_RE = re.compile(
+    r"\b(design-agency|design-intent|ui-edit-gate|skill\.md|agents?\.md)\b", re.I
+)
+ENGINEERING_PENALTY = 0.45
+ENGINEERING_VETO = 4
 THEORY_OPENERS = ("what is", "why does", "explain", "how does")
 
 # (phrase, engagement_type) — phrase match contributes a TIER_A base score.
 TIER_A_SIGNALS = [
     ("brand identity", "brand_project"),
     ("brand book", "brand_project"),
-    ("brandbook", "brand_project"),
     ("rebrand", "brand_project"),
     ("visual identity", "brand_project"),
     ("design system", "deliverable_iteration"),
@@ -91,13 +117,23 @@ TIER_A_SIGNALS = [
     ("character design", "character_3d"),
     ("pose sheet", "character_3d"),
     ("brand kit", "brand_project"),
-    ("3d model", "character_3d"),
     ("image to 3d", "character_3d"),
     ("image-to-3d", "character_3d"),
     ("three.js model", "character_3d"),
     ("procedural model", "character_3d"),
 ]
 TIER_A_SCORE = 0.85
+# Tier-A words that only count alongside a creation verb ("brandbook" is also
+# the user's main repo name; "logo" appears in asset paths and git chatter).
+VERB_GATED_SIGNALS = [
+    ("logo", "asset"),
+    ("brandbook", "brand_project"),
+]
+# "3d model" is CAD vocabulary in hardware repos; it only means character work
+# next to character context.
+CHARACTER_CONTEXT = re.compile(
+    r"\b(mascot|character|three\.?js|avatar|creature|figurine)\b", re.I
+)
 
 TIER_B_SIGNALS = [
     ("landing page", "prototype"),
@@ -119,6 +155,33 @@ TIER_B_SIGNALS = [
     ("mood board", "deliverable_iteration"),
 ]
 TIER_B_SCORE = 0.60
+
+# Product UI (the "Operate" surface): a UI noun AND a visual verb together.
+# Either alone is everyday engineering ("fix the form validation bug").
+PRODUCT_UI_NOUN = re.compile(
+    r"\b(dashboards?|kpis?|kpi cards?|tables?|data tables?|sidebars?|modals?|"
+    r"dialogs?|forms?|components?|pages?|screens?|navbar|nav bar|toolbar|"
+    r"empty states?|charts?|cards?|tabs|settings|onboarding)\b",
+    re.I,
+)
+PRODUCT_UI_VERB = re.compile(
+    r"\b(polish|restyle|redesign|re-?skin|beautify|tidy|denser|density|spacing|"
+    r"padding|alignment|align|hierarchy|layout|visual(?:ly)?|look(?:s)? (?:better|off|cheap|generic)|"
+    r"feel(?:s)? (?:cramped|generic|off)|ui|ux|typography|contrast|dark mode|light mode)\b",
+    re.I,
+)
+PRODUCT_UI_SCORE = 0.60
+
+
+def _phrase_re(phrase):
+    """Whole-word match with an optional plural ("posters", not "posterior")."""
+    return re.compile(r"\b" + re.escape(phrase) + r"(?:s|es)?\b", re.I)
+
+
+_TIER_A_RES = [(_phrase_re(p), p, t) for p, t in TIER_A_SIGNALS]
+_TIER_B_RES = [(_phrase_re(p), p, t) for p, t in TIER_B_SIGNALS]
+_VERB_GATED_RES = [(_phrase_re(p), p, t) for p, t in VERB_GATED_SIGNALS]
+_3D_MODEL_RE = _phrase_re("3d model")
 
 
 def load_project_config(start_dir):
@@ -166,17 +229,18 @@ def find_brandbook_agent(start_dir):
 
 
 def prune_engaged_markers():
-    """Opportunistically delete engaged-marker files older than 7 days."""
-    try:
-        cutoff = time.time() - ENGAGED_RETAIN_SEC
-        for p in ENGAGED_DIR.glob("*"):
-            try:
-                if p.is_file() and p.stat().st_mtime < cutoff:
-                    p.unlink()
-            except OSError:
-                pass
-    except OSError:
-        pass
+    """Opportunistically delete marker files older than 7 days."""
+    cutoff = time.time() - ENGAGED_RETAIN_SEC
+    for d in (ENGAGED_DIR, ASKED_DIR, DECISIONS_DIR):
+        try:
+            for p in d.glob("*"):
+                try:
+                    if p.is_file() and p.stat().st_mtime < cutoff:
+                        p.unlink()
+                except OSError:
+                    pass
+        except OSError:
+            pass
 
 
 def audit_rotate_if_needed():
@@ -197,42 +261,46 @@ def audit_append(record):
         pass
 
 
-def classify_heuristic(prompt, ask_threshold, extra_signals):
+def strip_paths(prompt):
+    return PATH_TOKEN.sub(" ", prompt)
+
+
+def classify_heuristic(prompt, ask_threshold, extra_signals, negative_signals=None):
     """Additive heuristic scorer. Returns (band, score, engagement_type,
     matched_signals, reason) where band is 'ask' or 'none'."""
-    lower = prompt.lower()
+    text = strip_paths(prompt)
     matched = []
     score = 0.0
-
-    best_tier = None  # "A" or "B" — highest tier sets the engagement_type
     engagement_type = "unknown"
+    # Phrase hits are blanked before the creation-verb check so "design
+    # system" does not also count as the verb "design".
+    residue = text
 
-    has_creation_verb = bool(CREATION_VERBS.search(prompt))
+    def hit(name, etype, value):
+        nonlocal score, engagement_type
+        matched.append(name)
+        score += value
+        if engagement_type == "unknown":
+            engagement_type = etype
 
-    # TIER_A phrases.
-    for phrase, etype in TIER_A_SIGNALS:
-        if phrase in lower:
-            matched.append(phrase)
-            score += TIER_A_SCORE
-            if best_tier is None:
-                best_tier = "A"
-                engagement_type = etype
-    # "logo" only when a creation verb is also present.
-    if "logo" in lower and has_creation_verb:
-        matched.append("logo")
-        score += TIER_A_SCORE
-        if best_tier is None:
-            best_tier = "A"
-            engagement_type = "asset"
+    for rx, phrase, etype in _TIER_A_RES:
+        if rx.search(text):
+            hit(phrase, etype, TIER_A_SCORE)
+            residue = rx.sub(" ", residue)
+    if _3D_MODEL_RE.search(text) and CHARACTER_CONTEXT.search(text):
+        hit("3d model", "character_3d", TIER_A_SCORE)
 
-    # TIER_B phrases.
-    for phrase, etype in TIER_B_SIGNALS:
-        if phrase in lower:
-            matched.append(phrase)
-            score += TIER_B_SCORE
-            if best_tier is None:
-                best_tier = "B"
-                engagement_type = etype
+    has_creation_verb = bool(CREATION_VERBS.search(residue))
+    for rx, phrase, etype in _VERB_GATED_RES:
+        if rx.search(text) and has_creation_verb:
+            hit(phrase, etype, TIER_A_SCORE)
+
+    for rx, phrase, etype in _TIER_B_RES:
+        if rx.search(text):
+            hit(phrase, etype, TIER_B_SCORE)
+
+    if not matched and PRODUCT_UI_NOUN.search(text) and PRODUCT_UI_VERB.search(text):
+        hit("product_ui", "product_ui", PRODUCT_UI_SCORE)
 
     # Project extra_signals: list of {"pattern": regex, "score": float}.
     for sig in extra_signals or []:
@@ -242,7 +310,7 @@ def classify_heuristic(prompt, ask_threshold, extra_signals):
         if not pattern:
             continue
         try:
-            if re.search(pattern, prompt, re.I):
+            if re.search(pattern, text, re.I):
                 matched.append(f"extra:{pattern}")
                 score += float(sig.get("score", 0.0))
         except (re.error, TypeError, ValueError):
@@ -255,10 +323,22 @@ def classify_heuristic(prompt, ask_threshold, extra_signals):
     if DELIVERABLE_PATH.search(prompt):
         score += 0.15
         matched.append("deliverable_path")
-    if len({m.lower() for m in ENGINEERING_RE.findall(lower)}) >= 2:
-        score -= 0.30
+    eng_terms = {m.lower() for m in ENGINEERING_RE.findall(text)}
+    # Project negative_signals: list of regexes; each hit counts as one more
+    # distinct engineering term (e.g. patyx: "3d model|STEP|STL|CAD").
+    for pattern in negative_signals or []:
+        try:
+            if isinstance(pattern, str) and re.search(pattern, text, re.I):
+                eng_terms.add(f"neg:{pattern}")
+        except re.error:
+            continue
+    if len(eng_terms) >= ENGINEERING_VETO or (eng_terms and META_RE.search(text)):
+        score = 0.0
+        matched.append("engineering_veto")
+    elif len(eng_terms) >= 2:
+        score -= ENGINEERING_PENALTY
         matched.append("engineering_dominant")
-    if lower.strip().startswith(THEORY_OPENERS) and not has_creation_verb:
+    if text.lower().strip().startswith(THEORY_OPENERS) and not has_creation_verb:
         score -= 0.40
         matched.append("theory_question")
 
@@ -275,31 +355,39 @@ def classify_heuristic(prompt, ask_threshold, extra_signals):
 
 
 def engagement_from_heuristics(prompt):
-    """Best-effort engagement_type guess used by the brandbook auto-engage path,
-    which skips scoring thresholds. Returns a type or 'unknown'."""
-    lower = prompt.lower()
-    has_creation_verb = bool(CREATION_VERBS.search(prompt))
-    for phrase, etype in TIER_A_SIGNALS:
-        if phrase in lower:
-            return etype
-    if "logo" in lower and has_creation_verb:
-        return "asset"
-    for phrase, etype in TIER_B_SIGNALS:
-        if phrase in lower:
-            return etype
-    return "unknown"
+    """Best-effort engagement_type guess for the #agency override, which skips
+    scoring thresholds. Returns a type or 'unknown'."""
+    _, _, engagement_type, _, _ = classify_heuristic(prompt, 2.0, [])
+    return engagement_type
+
+
+def asked_marker(session_id, engagement_type):
+    return ASKED_DIR / f"{session_id}-{engagement_type}"
 
 
 def emit(decision, msg_extra, cwd):
-    """Touch the engaged marker, append audit, print the additionalContext block."""
+    """Write session markers, append audit, print the additionalContext block.
+
+    engage -> the session is engaged (silent from now on). ask -> only this
+    engagement_type is marked asked; the session is marked engaged later, by
+    log_override.py, if and only if the user picks "Use design agency"
+    (it maps decision_id -> session via DECISIONS_DIR)."""
     session_id = decision.get("_session_id")
+    decision["plugin_root"] = PLUGIN_ROOT
     decision_public = {k: v for k, v in decision.items() if not k.startswith("_")}
 
-    # Side effects: engaged marker + audit line.
     try:
-        ENGAGED_DIR.mkdir(parents=True, exist_ok=True)
         if session_id:
-            (ENGAGED_DIR / str(session_id)).touch()
+            if decision_public.get("band") == "engage":
+                ENGAGED_DIR.mkdir(parents=True, exist_ok=True)
+                (ENGAGED_DIR / str(session_id)).touch()
+            else:
+                ASKED_DIR.mkdir(parents=True, exist_ok=True)
+                asked_marker(session_id, decision_public.get("engagement_type")).touch()
+            DECISIONS_DIR.mkdir(parents=True, exist_ok=True)
+            (DECISIONS_DIR / str(decision_public.get("decision_id"))).write_text(
+                str(session_id)
+            )
     except OSError:
         pass
 
@@ -369,6 +457,7 @@ def main():
     except (TypeError, ValueError):
         ask_threshold = DEFAULT_ASK_THRESHOLD
     extra_signals = project_cfg.get("extra_signals") or []
+    negative_signals = project_cfg.get("negative_signals") or []
 
     # --- (c) session-engaged marker ---
     prune_engaged_markers()
@@ -382,25 +471,7 @@ def main():
     decision_id = "da_" + uuid.uuid4().hex[:10]
     thresholds = {"ask": round(ask_threshold, 2)}
 
-    # --- (d) brandbook auto-engage ---
-    if find_brandbook_agent(cwd) is not None:
-        engagement_type = engagement_from_heuristics(prompt)
-        decision = {
-            "band": "engage",
-            "confidence": 1.0,
-            "engagement_type": engagement_type,
-            "matched_signals": [],
-            "reason": "DesignAgencyAgent/master_agent.md present in repo; auto-engaging.",
-            "source": "repo_agents_md",
-            "decision_id": decision_id,
-            "thresholds": thresholds,
-            "plan_mode": False,
-            "_session_id": session_id,
-        }
-        emit(decision, None, cwd)
-        return 0
-
-    # --- (e) #agency override ---
+    # --- (d) #agency override ---
     if "#agency" in lower:
         engagement_type = engagement_from_heuristics(prompt)
         decision = {
@@ -418,20 +489,33 @@ def main():
         emit(decision, None, cwd)
         return 0
 
-    # --- (f) heuristic classifier ---
+    # --- (e) heuristic classifier ---
     band, score, engagement_type, matched, reason = classify_heuristic(
-        prompt, ask_threshold, extra_signals
+        prompt, ask_threshold, extra_signals, negative_signals
     )
     if band == "none":
         return 0
 
+    # --- (f) same-type re-ask suppression ---
+    if session_id:
+        try:
+            if asked_marker(session_id, engagement_type).exists():
+                return 0
+        except OSError:
+            pass
+
+    source = "heuristic"
+    if find_brandbook_agent(cwd) is not None:
+        band, source = "engage", "repo_agents_md"
+        reason = "DesignAgencyAgent/master_agent.md present in repo; " + reason
+
     decision = {
-        "band": "ask",
+        "band": band,
         "confidence": round(score, 2),
         "engagement_type": engagement_type,
         "matched_signals": matched,
         "reason": reason,
-        "source": "heuristic",
+        "source": source,
         "decision_id": decision_id,
         "thresholds": thresholds,
         "plan_mode": False,

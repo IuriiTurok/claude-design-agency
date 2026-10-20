@@ -25,3 +25,24 @@
 {"name":"mascot-threejs-3d-ask","payload":{"prompt":"rebuild this mascot photo as a three.js model","cwd":"/tmp","session_id":"fixture-mascot3d-025"},"expect":"ask","expect_type":"character_3d"}
 {"name":"threejs-build-fix-none","payload":{"prompt":"fix the three.js build error in the api","cwd":"/tmp","session_id":"fixture-threejsfix-026"},"expect":"none"}
 {"name":"task-notification-none","payload":{"prompt":"<task-notification>\n<task-id>a62ac81452de4b176</task-id>\n<status>completed</status>\n<result>Design a brand book, rebuild the brandbook landing page and design system</result>\n</task-notification>","cwd":"/tmp","session_id":"fixture-tasknotif-027"},"expect":"none"}
+{"name":"poster-posterior-none","payload":{"prompt":"add a posterior CG estimate to the report","cwd":"/tmp","session_id":"fixture-posterior-028"},"expect":"none"}
+{"name":"og-dog-image-none","payload":{"prompt":"why is the dog image not loading on the og page","cwd":"/tmp","session_id":"fixture-dogimage-029"},"expect":"none"}
+{"name":"brandbook-repo-name-none","payload":{"prompt":"check the brandbook repo git log for yesterday's commits","cwd":"/tmp","session_id":"fixture-bbrepo-030"},"expect":"none"}
+{"name":"brandbook-path-none","payload":{"prompt":"open ~/Code/brandbook/HeyFin/README.md and summarize","cwd":"/tmp","session_id":"fixture-bbpath-031"},"expect":"none"}
+{"name":"brandbook-create-ask","payload":{"prompt":"create a brandbook for the coffee startup","cwd":"/tmp","session_id":"fixture-bbcreate-032"},"expect":"ask","expect_type":"brand_project"}
+{"name":"cad-3d-model-none","payload":{"prompt":"export the 3d model of the nozzle as STEP for Fusion","cwd":"/tmp","session_id":"fixture-cad-033"},"expect":"none"}
+{"name":"mascot-3d-model-ask","payload":{"prompt":"make a 3d model of the mascot for the site","cwd":"/tmp","session_id":"fixture-mascot3dm-034"},"expect":"ask","expect_type":"character_3d"}
+{"name":"engineering-cancels-tier-a-none","payload":{"prompt":"refactor the design system build script, fix the failing tests and deploy","cwd":"/tmp","session_id":"fixture-engcancel-035"},"expect":"none"}
+{"name":"two-eng-terms-cancel-single-tier-a-none","payload":{"prompt":"update the design system tokens in the repo and push","cwd":"/tmp","session_id":"fixture-engtwo-036"},"expect":"none"}
+{"name":"pr-review-design-system-none","payload":{"prompt":"review the PR that fixes the design system token export in the API and the database schema","cwd":"/tmp","session_id":"fixture-prreview-037"},"expect":"none"}
+{"name":"plugin-meta-audit-none","payload":{"prompt":"audit the design-agency plugin: style guide gate, brand book model, landing page track","cwd":"/tmp","session_id":"fixture-meta-038"},"expect":"none"}
+{"name":"plugin-meta-task-none","payload":{"prompt":"Implement design-agency v0.5.0 in this worktree: add taste-skill app-screens, fix the classifier false positives (brandbook, 3d model, poster), port the linter, bump the version, write the CHANGELOG, commit, push and open a PR","cwd":"/tmp","session_id":"fixture-metatask-039"},"expect":"none"}
+{"name":"kpi-cards-product-ui-ask","payload":{"prompt":"polish the KPI cards on the analytics page in the React app","cwd":"/tmp","session_id":"fixture-kpi-040"},"expect":"ask","expect_type":"product_ui"}
+{"name":"dashboard-density-product-ui-ask","payload":{"prompt":"make the portal dashboard table denser and tidy the sidebar spacing","cwd":"/tmp","session_id":"fixture-dash-041"},"expect":"ask","expect_type":"product_ui"}
+{"name":"form-bug-not-product-ui-none","payload":{"prompt":"fix the form validation bug in the settings page","cwd":"/tmp","session_id":"fixture-formbug-042"},"expect":"none"}
+{"name":"fp-sequence-1-poster-ask","payload":{"prompt":"design a poster for the launch event","cwd":"/tmp","session_id":"fixture-seq-043"},"expect":"ask","expect_type":"asset"}
+{"name":"fp-sequence-2-same-type-none","payload":{"prompt":"make another poster variant with the date","cwd":"/tmp","session_id":"fixture-seq-043"},"expect":"none"}
+{"name":"fp-sequence-3-new-type-ask","payload":{"prompt":"now create a brand book for the event series","cwd":"/tmp","session_id":"fixture-seq-043"},"expect":"ask","expect_type":"brand_project"}
+{"name":"brandbook-repo-ops-none","payload":{"prompt":"show me the git log and push the branch to origin","cwd":"{{MARKER_REPO}}","session_id":"fixture-bbops-044"},"expect":"none"}
+{"name":"negative-signals-config-none","payload":{"prompt":"make a landing page for the openrocket simulation results","cwd":"{{NEG_REPO}}","session_id":"fixture-neg-045"},"expect":"none"}
+{"name":"negative-signals-control-ask","payload":{"prompt":"make a landing page for the openrocket simulation results","cwd":"/tmp","session_id":"fixture-negctl-046"},"expect":"ask","expect_type":"prototype"}

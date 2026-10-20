@@ -1,6 +1,6 @@
 # design-agency
 
-A 23-role virtual design agency for Claude Code, with hard QA gates.
+A 24-role virtual design agency for Claude Code, with hard QA gates.
 
 Most design help from an LLM stops at "here is a landing page." This plugin models the
 part that actually produces quality: a **workflow with gates**. It detects design intent
@@ -206,7 +206,7 @@ Stated plainly, because a UserPromptSubmit hook deserves it:
 | `GEMINI_API_KEY` + `google-generativeai` | Logo generation                   | Logo roles produce SVG by hand               |
 | vision venv (`.venv-vision`)             | Saliency heatmaps, visual diffing | Heatmap analyst is skipped (advisory anyway) |
 | `node` + `npx`                           | marp decks, svgo, sharp           | Presentation/asset roles degrade to HTML     |
-| chrome-devtools MCP                      | visual-qa full-page screenshots   | visual-qa grades from source only            |
+| Built-in browser or Claude in Chrome MCP | visual-qa screenshots (1440/390, light/dark) | visual-qa returns `UNMEASURED`, never PASS |
 | `~/.claude/lib/self-improving-loop`      | Self-improving rubric loops       | Loops print a notice and exit cleanly        |
 | `img2threejs` skill at `~/.claude/skills/img2threejs` (clone https://github.com/img2threejs/img2threejs and symlink) | Image-to-3D procedural Three.js models for the Character Designer | The 3D track stops and prints the install commands |
 

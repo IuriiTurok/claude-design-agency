@@ -6,7 +6,7 @@
 
 ## When to invoke
 
-Any request to: replicate an app with client branding, build an interactive prototype, iterate a prototype version, or prepare a prototype for external developers (Lovable, agency dev partner).
+Any request to: replicate an app with client branding, build an interactive prototype, iterate a prototype version, or prepare a prototype for external developers (Lovable, agency dev partner). Changes to a real, running product app (its components, tokens, screens) are not prototypes: they go to `product_ui_lead.md`.
 
 ## Protocol
 

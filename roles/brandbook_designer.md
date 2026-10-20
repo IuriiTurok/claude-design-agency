@@ -74,7 +74,7 @@ Save as `brand_book.md` in the main project directory.
 
 If the client explicitly requests a PDF deliverable:
 
-- Use the `/pdf` skill to compile the brand book markdown into a production-quality PDF
+- Use the `anthropic-skills:pdf` skill to compile the brand book markdown into a production-quality PDF
 - Leverage reportlab for beautiful, multi-page PDFs with proper typography, color blocks, and image embedding
 - Save as `brand_book.pdf`
 
@@ -82,8 +82,8 @@ If the client explicitly requests a PDF deliverable:
 
 If the client explicitly requests a presentation deck:
 
-- Use the `/theme-factory` skill to select or create a theme matching the brand's style directive
-- Use the `/pptx` skill to create a professional client presentation
+- Use the `theme-factory` (optional) skill to select or create a theme matching the brand's style directive
+- Use the `anthropic-skills:pptx` skill to create a professional client presentation
 - Follow anti-slop design principles: dark/light sandwich structure, dominant color (60-70% weight), visual motif repetition
 - Save as `brand_presentation.pptx`
 
@@ -95,6 +95,6 @@ When the agency is ready to present Discovery Findings, Initial Concepts, or Fin
 
 1. Always produce `ui/brand_book.html` with all 10 sections (PRIMARY deliverable)
 2. Always produce `brand_book.md` with all brand identity content (text reference)
-3. If PDF requested: use `/pdf` to compile `brand_book.pdf`
-4. If PPTX requested: use `/theme-factory` + `/pptx` to create `brand_presentation.pptx`
+3. If PDF requested: use `anthropic-skills:pdf` to compile `brand_book.pdf`
+4. If PPTX requested: use `theme-factory` (optional) + `anthropic-skills:pptx` to create `brand_presentation.pptx`
 5. Compile and link all visual assets and strategic elements in the File Reference section

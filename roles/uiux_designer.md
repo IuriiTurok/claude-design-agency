@@ -60,23 +60,23 @@ You are the UI/UX Designer. You take the brand identity and translate it into in
      - **Page theme lock:** one theme (light, dark, or auto) for the whole page; no section inverts mid-page.
    - **Partner/Customer logos:** If the landing page includes a "Partners", "Trusted by", or "Customers" section, ALL logos MUST be sourced from official company websites via WebSearch + WebFetch. Save to `assets/partner_logos/`. May grayscale/tint for consistency. NEVER generate synthetic logos for real companies. See master_agent.md Anti-Pattern #21.
 
-## Taste Pass (before `/frontend-design`)
+## Taste Pass (before `frontend-design` (optional))
 
-Before invoking `/frontend-design` for any deliverable, invoke `design-agency:taste-skill` (`{AGENCY_ROOT}/skills/taste-skill/SKILL.md`):
+Before invoking `frontend-design` (optional) for any deliverable, invoke `design-agency:taste-skill` (`{AGENCY_ROOT}/skills/taste-skill/SKILL.md`):
 
-1. **Scope check (§13).** If the deliverable is a dashboard, product UI, prototype, data table, or wizard, do NOT apply taste-skill. Say so in one line in your working notes and hand it off to `{AGENCY_ROOT}/roles/prototype_lead.md` + `ui-ux-pro-max`. Marketing surfaces of the same project (landing, about, brand pages) still get the full pass.
+1. **Surface check.** Read `SURFACE_MODE` from `visual_philosophy.md`. If the deliverable is an app screen (`operate`: dashboard, product UI, data table, settings, wizard in real app code), hand it to `{AGENCY_ROOT}/roles/product_ui_lead.md`, which applies taste-skill's `references/app-screens.md` instead of the page rules; fake-data prototypes go to `{AGENCY_ROOT}/roles/prototype_lead.md`. Say which in one line in your working notes. Marketing surfaces of the same project (landing, about, brand pages) still get the full page pass.
 2. **Design Read (§0.B).** Emit the one-line Design Read — *"Reading this as: \<page kind> for \<audience>, with a \<vibe> language, leaning toward \<design system or aesthetic family>."* — and declare it at the top of your working notes for the deliverable. It must agree with the Creative Director's read in `visual_philosophy.md`; if it diverges, raise it with the Creative Director instead of silently re-reading the brief.
 3. **Dials and mode.** Use the dials and `TASTE_MODE` exactly as declared in `visual_philosophy.md`. Load only the selected mode file, `{AGENCY_ROOT}/skills/taste-skill/references/modes/<TASTE_MODE>.md` (`none` loads nothing). A mode sharpens the aesthetic; it never outranks `style_directive.md`.
 4. **Engineering rules.** Read `{AGENCY_ROOT}/skills/taste-skill/references/engineering.md` before writing code (§4.7 layout hard rules, §4.11 page theme lock, §5 motion skeletons, §8 dark mode).
 
-Only then invoke `/frontend-design`.
+Only then invoke `frontend-design` (optional).
 
 ## Official Skill Integration
 
 When generating frontend code or interactive mockups, invoke the appropriate official skill:
 
-- **`/frontend-design`** — Use this for all production web UI code, after the Taste Pass. Feed it the `style_directive.md`, the Design Read, the dials, and the loaded mode file as context so it enforces the brand's specific aesthetic, not generic "bold" choices. This generates single-file HTML with embedded styles.
-- **`/web-artifacts-builder`** — Use this for building interactive HTML showcases and prototypes with React + TypeScript + shadcn/ui components. These produce self-contained HTML files that the client can open in a browser.
+- **`frontend-design` (optional)** — Use this for all production web UI code, after the Taste Pass. Feed it the `style_directive.md`, the Design Read, the dials, and the loaded mode file as context so it enforces the brand's specific aesthetic, not generic "bold" choices. This generates single-file HTML with embedded styles.
+- **`web-artifacts-builder` (optional)** — Use this for building interactive HTML showcases and prototypes with React + TypeScript + shadcn/ui components. These produce self-contained HTML files that the client can open in a browser.
 
 ## Font Loading (Critical)
 
@@ -134,7 +134,7 @@ Every deliverable that went through the Taste Pass runs taste-skill v2 §14 befo
 3. **Fix fails first.** Re-run the affected boxes and update the file until nothing is marked fail.
 4. **Only then** submit to the Visual QA gate. A pre-flight that exists only in the transcript did not happen.
 
-§13 out-of-scope deliverables handed to `prototype_lead` do not get a pre-flight file.
+App screens handed to `product_ui_lead` or `prototype_lead` do not get a page pre-flight file; their gate is the Operate rubric.
 
 ## Visual QA Gate
 

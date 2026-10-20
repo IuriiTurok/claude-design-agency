@@ -7,6 +7,12 @@ Tests:
   3. Debounce: second invocation same session+file → silent.
   4. Non-UI file path → silent.
   5. Missing tool_input in payload → silent (exit 0, no output).
+  6. Dispatch name is the registered design-agency:<agent> form.
+  7-11. Product UI (Operate track): config directive_path, ui_globs filter,
+        test files skipped, no config → silent, engaged session + walk-up.
+
+Hermetic: HOME and DESIGN_AGENCY_CACHE_DIR point at a throwaway dir, so the
+real ~/.claude/cache/design-agency markers are never touched.
 """
 
 import hashlib
@@ -19,10 +25,18 @@ import tempfile
 import unittest
 from pathlib import Path
 
-HOOK = Path(__file__).parent.parent / "hooks" / "ui-edit-gate.py"
-CACHE_DIR = Path(os.path.expanduser("~/.claude/cache/design-agency"))
+PLUGIN = Path(__file__).resolve().parent.parent
+HOOK = PLUGIN / "hooks" / "ui-edit-gate.py"
+TEST_HOME = Path(tempfile.mkdtemp())
+CACHE_DIR = TEST_HOME / ".claude" / "cache" / "design-agency"
 ENGAGED_DIR = CACHE_DIR / "engaged"
 GATE_DIR = CACHE_DIR / "gate"
+ENV = dict(os.environ, HOME=str(TEST_HOME), DESIGN_AGENCY_CACHE_DIR=str(CACHE_DIR))
+
+
+def tearDownModule():
+    import shutil
+    shutil.rmtree(TEST_HOME, ignore_errors=True)
 
 
 def run_hook(payload: dict) -> subprocess.CompletedProcess:
@@ -31,6 +45,7 @@ def run_hook(payload: dict) -> subprocess.CompletedProcess:
         input=json.dumps(payload),
         capture_output=True,
         text=True,
+        env=ENV,
     )
 
 
@@ -227,6 +242,85 @@ class TestUiEditGate(unittest.TestCase):
         result = run_hook(payload)
         self.assertEqual(result.returncode, 0)
         self.assertEqual(result.stdout.strip(), "", "Missing tool_input should produce no output")
+
+    # ------------------------------------------------------------------
+    # Case 6: dispatch string names a registered, namespaced agent
+    # ------------------------------------------------------------------
+    def test_dispatch_name_is_registered_agent(self):
+        self.session_id = "pytest-gate-006"
+        (Path(self.tmpdir) / "style_directive.md").write_text("# SD\n")
+        html_file = Path(self.tmpdir) / "ui" / "page.html"
+        html_file.parent.mkdir()
+        html_file.write_text("<html></html>")
+        self.file_paths.append(str(html_file))
+        result = run_hook({"session_id": self.session_id, "tool_input": {"file_path": str(html_file)}})
+        ctx = json.loads(result.stdout)["hookSpecificOutput"]["additionalContext"]
+        names = re.findall(r'subagent_type="([^"]+)"', ctx)
+        self.assertTrue(names)
+        registered = {
+            "design-agency:" + re.search(r"^name:\s*(\S+)", p.read_text(), re.M).group(1)
+            for p in (PLUGIN / "agents").glob("*.md")
+        }
+        for name in names:
+            self.assertIn(name, registered)
+
+    # ------------------------------------------------------------------
+    # Product UI (Operate track)
+    # ------------------------------------------------------------------
+    def _product_repo(self, config):
+        root = Path(self.tmpdir)
+        (root / ".claude").mkdir()
+        (root / ".claude" / "design-agency.json").write_text(json.dumps(config))
+        (root / "brand").mkdir()
+        (root / "brand" / "style_directive.md").write_text("# SD\n")
+        src = root / "app" / "src"
+        src.mkdir(parents=True)
+        return root, src
+
+    def _edit(self, path):
+        path.write_text("export {}")
+        self.file_paths.append(str(path))
+        return run_hook({"session_id": self.session_id, "tool_input": {"file_path": str(path)}})
+
+    def test_product_ui_config_directive_emits(self):
+        self.session_id = "pytest-gate-007"
+        root, src = self._product_repo({"directive_path": "brand/style_directive.md"})
+        gate = parse_gate_output(self._edit(src / "KpiCards.tsx").stdout)
+        self.assertIsNotNone(gate)
+        self.assertEqual(gate["surface"], "operate")
+        self.assertTrue(gate["directive"].endswith("brand/style_directive.md"))
+
+    def test_product_ui_glob_filters(self):
+        self.session_id = "pytest-gate-008"
+        root, src = self._product_repo(
+            {"directive_path": "brand/style_directive.md", "ui_globs": ["app/src/components/*"]}
+        )
+        self.assertEqual(self._edit(src / "api.tsx").stdout.strip(), "")
+        (src / "components").mkdir()
+        self.assertIsNotNone(parse_gate_output(self._edit(src / "components" / "Table.tsx").stdout))
+
+    def test_product_ui_skips_tests(self):
+        self.session_id = "pytest-gate-009"
+        root, src = self._product_repo({"directive_path": "brand/style_directive.md"})
+        self.assertEqual(self._edit(src / "KpiCards.test.tsx").stdout.strip(), "")
+
+    def test_product_ui_without_config_silent(self):
+        self.session_id = "pytest-gate-010"
+        (Path(self.tmpdir) / "style_directive.md").write_text("# SD\n")
+        src = Path(self.tmpdir) / "src"
+        src.mkdir()
+        self.assertEqual(self._edit(src / "Page.tsx").stdout.strip(), "")
+
+    def test_product_ui_engaged_session_walks_up(self):
+        self.session_id = "pytest-gate-011"
+        ENGAGED_DIR.mkdir(parents=True, exist_ok=True)
+        (ENGAGED_DIR / self.session_id).touch()
+        (Path(self.tmpdir) / "style_directive.md").write_text("# SD\n")
+        src = Path(self.tmpdir) / "src"
+        src.mkdir()
+        gate = parse_gate_output(self._edit(src / "Page.tsx").stdout)
+        self.assertIsNotNone(gate)
+        self.assertEqual(gate["surface"], "operate")
 
 
 if __name__ == "__main__":

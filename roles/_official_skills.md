@@ -135,7 +135,7 @@ Three.js TypeScript factory, through a gated multi-pass pipeline driven by Pytho
 - **Outputs:** `object-sculpt-spec.json`, `src/create<Name>Model.ts`, comparison sheets
   under `<project>/3d/<name>/`.
 - **Gates:** its own turntable/comparison gates run first (inside the pipeline), then
-  the deliverable still passes through `visual-qa` like any other agency asset.
+  the deliverable still passes through `design-agency:visual-qa` like any other agency asset.
 - **Invoked by:** Character Designer (`{AGENCY_ROOT}/roles/character_designer.md`) for
   the 3D track of a character/mascot engagement.
 - **Licence:** Apache-2.0. Never vendored into the plugin — always resolved from the
@@ -251,11 +251,11 @@ gates also dispatch as subagents (parenthesized).
 
 | Role             | File                                       | Phase   | Purpose                                                                                                                                                                                                                               |
 | ---------------- | ------------------------------------------ | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Motion Designer  | `motion_designer.md` (`motion-designer`)   | 5       | Emil Kowalski motion within directive easing/duration; produces `motion_audit.md`                                                                                                                                                     |
-| Polish Inspector | `polish_inspector.md` (`polish-inspector`) | 5       | Orchestrates the forked Impeccable suite (18 sub-skills at `{AGENCY_ROOT}/skills/`) with directive-clamped suggestions; produces `polish_report_<deliverable>.md`                                                          |
-| Style Enforcer   | `style_enforcer.md` (`style-enforcer`)     | 5, 6, 7 | Automated directive compliance (colors, fonts, layout, anti-patterns) — **HARD GATE**                                                                                                                                                 |
-| Taste Guardian   | `taste_guardian.md` (`taste-guardian`)     | 5       | Anti-slop evaluation against the three knobs from `visual_philosophy.md`; collision check vs `{AGENCY_STATE}/style_library.md`; feeds Visual QA                                                                                       |
-| Visual QA Agent  | `visual_qa_agent.md` (`visual-qa`)         | 3, 5, 6 | Screenshot-based quality grading, accessibility audit, browser verification — **HARD GATE**                                                                                                                                           |
+| Motion Designer  | `motion_designer.md` (`design-agency:motion-designer`)   | 5       | Emil Kowalski motion within directive easing/duration; produces `motion_audit.md`                                                                                                                                                     |
+| Polish Inspector | `polish_inspector.md` (`design-agency:polish-inspector`) | 5       | Orchestrates the forked Impeccable suite (18 sub-skills at `{AGENCY_ROOT}/skills/`) with directive-clamped suggestions; produces `polish_report_<deliverable>.md`                                                          |
+| Style Enforcer   | `style_enforcer.md` (`design-agency:style-enforcer`)     | 5, 6, 7 | Automated directive compliance (colors, fonts, layout, anti-patterns) — **HARD GATE**                                                                                                                                                 |
+| Taste Guardian   | `taste_guardian.md` (`design-agency:taste-guardian`)     | 5       | Anti-slop evaluation against the three knobs from `visual_philosophy.md`; collision check vs `{AGENCY_STATE}/style_library.md`; feeds Visual QA                                                                                       |
+| Visual QA Agent  | `visual_qa_agent.md` (`design-agency:visual-qa`)         | 3, 5, 6 | Screenshot-based quality grading, accessibility audit, browser verification — **HARD GATE**                                                                                                                                           |
 | Heatmap Analyst  | `heatmap_analyst.md`                       | 5       | Saliency model (`{AGENCY_ROOT}/execution/predict_attention.py`) over screenshots; verifies directive focal points win attention; produces `heatmap_report_<deliverable>.html` + overlays. **Advisory**                                |
 | Persona Critic   | `persona_critic.md`                        | 5       | Project-persona vision walkthroughs (from `research_context.md` / `brand_strategy.md`); per-persona friction, drop-off, token-cited fixes; cross-references heatmap zones; produces `persona_report_<deliverable>.html`. **Advisory** |
 

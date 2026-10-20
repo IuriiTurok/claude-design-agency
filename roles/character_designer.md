@@ -77,8 +77,8 @@ python3 $I2T/forge/next.py --state .img2threejs/state.json object-sculpt-spec.js
 
 **Gates.**
 1. **img2threejs gates first — the hard gate for likeness.** Its deterministic gates (turntable, self-intersection, attachment anchors, `diagnose_render`) and the per-pass comparison sheet (`forge/stage4_review/make_comparison_sheet.py --reference <img> --render <shot> --out renders/<pass>_cmp.png`) run on every pass. Fail a pass when an identity-defining feature from the anatomy baseline is wrong, even if the global score looks fine. Never claim "done" when a pass says "improved" — improved is not accepted.
-2. **Then `visual-qa`** grades the rendered preview like any other deliverable.
-3. **`style-enforcer`** checks the rendered palette against `style_directive.md`.
+2. **Then `design-agency:visual-qa`** grades the rendered preview like any other deliverable.
+3. **`design-agency:style-enforcer`** checks the rendered palette against `style_directive.md`.
 
 **Record each pass** in `pose_sheet_inventory.md`, or in a `<project>/3d_inventory.md` table:
 

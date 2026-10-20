@@ -32,7 +32,7 @@ Only `python3` (stdlib) is required. Everything else is optional — see
 | Component        | Count | What it does                                                                                                                                                                                                |
 | ---------------- | ----- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Skills**       | 23    | 3 agency skills (orchestrator, routing, taste v2) + 2 design-intelligence skills + the 18 Impeccable design skills (`design-agency:layout`, `:typeset`, `:colorize`, `:animate`, `:critique`, `:polish`, …) |
-| **QA subagents** | 5     | `style-enforcer` and `visual-qa` (hard gates) · `taste-guardian`, `polish-inspector`, `motion-designer` (advisory)                                                                                          |
+| **QA subagents** | 5     | `design-agency:style-enforcer` and `design-agency:visual-qa` (hard gates) · `design-agency:taste-guardian`, `design-agency:polish-inspector`, `design-agency:motion-designer` (advisory)                                                                                          |
 | **Roles**        | 23    | Creative director, logo designer, brandbook designer, copywriter, researcher, prototype lead, character designer, project manager, …                                                                        |
 | **Hooks**        | 2     | Design-intent detection on every prompt · a post-edit gate on `ui/*.html`                                                                                                                                   |
 
@@ -49,7 +49,7 @@ Only `python3` (stdlib) is required. Everything else is optional — see
    **QA** → handoff, dispatching roles from `roles/`.
 
 4. **`ui-edit-gate.py`** (PostToolUse) fires after any edit to a `ui/*.html` file and
-   demands `style-enforcer` before the edit counts as complete — so iteration cannot
+   demands `design-agency:style-enforcer` before the edit counts as complete — so iteration cannot
    quietly bypass compliance.
 
 ## Configuration

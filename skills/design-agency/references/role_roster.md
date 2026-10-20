@@ -9,10 +9,10 @@ dispatch as subagents (in brackets). Full per-role detail:
 - **Creative Design (P3-5 + asset/prototype):** `logo_designer.md`, `uiux_designer.md`,
   `asset_designer.md`, `design_system_expert.md`, `brandbook_designer.md`,
   `character_designer.md`, `prototype_lead.md`.
-- **Quality & Enforcement (P5):** `motion_designer.md` [`motion-designer`],
-  `polish_inspector.md` [`polish-inspector`], `style_enforcer.md` [`style-enforcer`]
-  **HARD GATE**, `taste_guardian.md` [`taste-guardian`], `visual_qa_agent.md`
-  [`visual-qa`] **HARD GATE**, `heatmap_analyst.md` *(advisory)*, `persona_critic.md`
+- **Quality & Enforcement (P5):** `motion_designer.md` [`design-agency:motion-designer`],
+  `polish_inspector.md` [`design-agency:polish-inspector`], `style_enforcer.md` [`design-agency:style-enforcer`]
+  **HARD GATE**, `taste_guardian.md` [`design-agency:taste-guardian`], `visual_qa_agent.md`
+  [`design-agency:visual-qa`] **HARD GATE**, `heatmap_analyst.md` *(advisory)*, `persona_critic.md`
   *(advisory)*.
 - **Presentations & Proposals (P7):** `presentation_creator.md`, `proposal_creator.md`.
 - **Process & Improvement (P1-7):** `project_manager.md`, `refactor_agent.md`.

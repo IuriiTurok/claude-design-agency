@@ -105,8 +105,8 @@ change; makes the implicit contract explicit per rubric row 14).
   (see Memory & Learning → Bridge D); `downstream: [impeccable]`.
 - **Dependencies:** `design-agency-routing` (upstream router) · `prime-as-skill`
   (session context) · `auto-model-routing` (wave dispatch). Sibling design skills /
-  subagents: `style-enforcer` (HARD GATE) · `visual-qa` (HARD GATE) · `taste-guardian`
-  · `polish-inspector` · `motion-designer` · `superpowers:dispatching-parallel-agents`
+  subagents: `design-agency:style-enforcer` (HARD GATE) · `design-agency:visual-qa` (HARD GATE) · `design-agency:taste-guardian`
+  · `design-agency:polish-inspector` · `design-agency:motion-designer` · `superpowers:dispatching-parallel-agents`
   · `figma:create-design-system-rules` · `chrome-devtools-mcp` (VQA screenshots) ·
   `impeccable` (AI-slop ban-list source of truth, Bridge D) · `wrap-session` / `ship`
   (session close + delivery).
@@ -131,7 +131,7 @@ client-folder names; `<project>` = the folder the engagement targets.
 - **Directive first.** No edit to a deliverable without reading that project's
   `style_directive.md` first (see The Binding Contract).
 - **Re-enforce after edits.** After ANY edit to `<project>/ui/*.html`: run the Style
-  Enforcer (`{AGENCY_ROOT}/roles/style_enforcer.md`, or the `style-enforcer` subagent).
+  Enforcer (`{AGENCY_ROOT}/roles/style_enforcer.md`, or the `design-agency:style-enforcer` subagent).
   0 violations before commit, deploy, or user review (see The Binding Contract).
 - **Reports to disk.** QA roles write reports to disk (`motion_audit.md`,
   `polish_report_*.md`, `taste_report.md`, enforcer, VQA). A transcript-only check did
@@ -199,8 +199,8 @@ execution, and QA:
 ### QA gates are dispatchable subagents (preferred for evaluation)
 
 The five Phase-5 QA gates are ALSO dispatchable subagents:
-`Agent(subagent_type="style-enforcer" | "visual-qa" | "taste-guardian" |
-"polish-inspector" | "motion-designer")`. **Subagent dispatch is PREFERRED for every
+`Agent(subagent_type="design-agency:style-enforcer" | "design-agency:visual-qa" | "design-agency:taste-guardian" |
+"design-agency:polish-inspector" | "design-agency:motion-designer")`. **Subagent dispatch is PREFERRED for every
 evaluation stage** — it preserves independent-evaluator separation: a generator must not
 grade its own work, so dispatch a fresh subagent that reaches the deliverable with no
 generation context to defend. The `roles/*.md` files remain each gate's authoritative
@@ -300,7 +300,7 @@ scaffold directly.
 `visual_philosophy.md`, `style_directive.md`; runs `generate_logo.py` for **6 AI visual
 options per concept** across 2-3 distinct routes (18 images min). Color/typography come
 from the directive — no independent invention. Curate the strongest 2-3 per concept;
-present to the USER. Before presenting, run the `visual-qa` subagent on any HTML pages.
+present to the USER. Before presenting, run the `design-agency:visual-qa` subagent on any HTML pages.
 
 **Phase 4 — Refinement & Feedback.** _Roles:_ Logo Designer. _Execution:_
 `generate_logo.py` (feedback loop). _Action:_ Iterate heavily on USER feedback. The Logo
@@ -332,18 +332,18 @@ shadcn/ui CLI. _QA:_ six-stage pipeline + `agent-browser-verify`.
   grayscale/opacity-reduce/tint; **NEVER** generate/synthesize/approximate a real logo;
   if not found, omit it — no fake logo.
 - _Quality pipeline (six-stage, after all four tracks; dispatch each gate as a subagent):_
-  1. **`motion_designer`** (`motion-designer`) — Emil Kowalski principles within the
+  1. **`motion_designer`** (`design-agency:motion-designer`) — Emil Kowalski principles within the
      directive motion spec → `motion_audit.md` per animated deliverable.
-  2. **`polish_inspector`** (`polish-inspector`) — runs the Impeccable sequence
+  2. **`polish_inspector`** (`design-agency:polish-inspector`) — runs the Impeccable sequence
      `/audit → /layout → /typeset → /colorize → /harden → /polish`, clamping every
      suggestion to directive tokens → `polish_report_<deliverable>.md`.
-  3. **`style_enforcer`** (`style-enforcer`) — **Hard gate.** Zero-tolerance objective
+  3. **`style_enforcer`** (`design-agency:style-enforcer`) — **Hard gate.** Zero-tolerance objective
      compliance; 0 violations before proceeding (see The Binding Contract).
-  4. **`taste_guardian`** (`taste-guardian`) — originality + craft vs the three knobs from
+  4. **`taste_guardian`** (`design-agency:taste-guardian`) — originality + craft vs the three knobs from
      `visual_philosophy.md`; collision check vs `{AGENCY_STATE}/style_library.md` →
      `taste_report.md`; feeds VQA's Originality + Craft sub-scores. On a hard-gate
      rejection, emit a Bridge-D candidate (§ Memory & Learning).
-  5. **`visual_qa_agent`** (`visual-qa`) — **Hard gate.** Subjective quality (Design
+  5. **`visual_qa_agent`** (`design-agency:visual-qa`) — **Hard gate.** Subjective quality (Design
      Coherence, Originality, Craft, Functionality); 3+/5 on all dimensions. On a
      hard-gate rejection, emit a Bridge-D candidate (§ Memory & Learning).
   6. **`heatmap_analyst` ∥ `persona_critic`** — predictive UX validation, parallel after
@@ -417,12 +417,12 @@ just apply.
 
 1. **Directive first.** Read the project's `style_directive.md` before the first edit
    (see The Binding Contract — same binding contract as Phase 5).
-2. **Re-validate after editing.** Run `style_enforcer` (`style-enforcer` subagent) on
+2. **Re-validate after editing.** Run `style_enforcer` (`design-agency:style-enforcer` subagent) on
    every touched HTML deliverable — 0 violations before commit/deploy/review (see The
    Binding Contract); editing does not bypass the hard gate.
-3. **Targeted re-checks.** Touched animations → `motion_designer` (`motion-designer`)
+3. **Targeted re-checks.** Touched animations → `motion_designer` (`design-agency:motion-designer`)
    re-audits `motion_audit.md`. Added/restructured sections → `polish_inspector`
-   (`polish-inspector`) on the touched file.
+   (`design-agency:polish-inspector`) on the touched file.
 4. **Artifact persistence.** Every gate that runs writes/updates its report on disk; a
    transcript-only check did not happen.
 5. **Escalation.** Project Manager updates the Completeness Matrix entry. 3+ maintenance
@@ -474,14 +474,14 @@ write notes to `{AGENCY_STATE}`, never into `{AGENCY_ROOT}/roles/*.md`.
 they are not minted here.
 
 - **Producer:** this orchestrator at **Phase-7 close** (engagement retro), and the QA
-  subagents `taste-guardian` + `visual-qa` on a **hard-gate rejection**.
+  subagents `design-agency:taste-guardian` + `design-agency:visual-qa` on a **hard-gate rejection**.
 - **Artifact (append-only, create dir/file if absent):**
   `{AGENCY_STATE}/ai-slop-candidates.jsonl`. One JSON object per
   line:
   ```json
   {
     "ts": "2026-06-14T12:00:00Z",
-    "source": "taste-guardian",
+    "source": "design-agency:taste-guardian",
     "engagement": "<client/asset id>",
     "tell": "<the anti-pattern, ≤140 char>",
     "evidence": "<file:line or asset ref>",
@@ -489,7 +489,7 @@ they are not minted here.
     "status": "candidate"
   }
   ```
-  - `source` ∈ {`design-agency`,`taste-guardian`,`visual-qa`}.
+  - `source` ∈ {`design-agency`,`design-agency:taste-guardian`,`design-agency:visual-qa`}.
   - `scope` ∈ {`general`,`own_brand`} — routes a promoted rule to the right section of the
     canon. Use `own_brand` only for `{AGENCY_OWN_BRAND_FOLDERS}`-owned tells (a token this
     agency reserves for itself); else `general`.
@@ -555,7 +555,7 @@ Optional deterministic append (when a shell is available), instead of hand-writi
 The heavyweight self-learning adapter (self-learning.md §2.1) is implemented at
 `<skill>/sil/design-agency_loop.py`, driving the shared kernel at
 `~/.claude/lib/self-improving-loop`. It **tunes the taste-rubric thresholds** the
-`taste-guardian` enforces in Phase 5.
+`design-agency:taste-guardian` enforces in Phase 5.
 
 - **Fitness signal:** mean `taste_report` score per engagement over a rolling window
   (higher is better), with the Phase-5 hard-gate pass-rate as a safety gate. `propose()`

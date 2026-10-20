@@ -97,12 +97,33 @@ Per-repo, in `<repo>/.claude/design-agency.json`:
 {
   "disabled": false,
   "ask_threshold": 0.55,
-  "extra_signals": ["brand", "palette", "mockup"]
+  "extra_signals": ["brand", "palette", "mockup"],
+  "negative_signals": ["\\bSTEP\\b", "\\bnozzle\\b", "\\bfirmware\\b"],
+  "directive_path": "brand/style_directive.md",
+  "ui_globs": ["app/src/components/**", "app/src/app/**"],
+  "reports_dir": "reports/design"
 }
 ```
 
+| Key | Effect |
+|---|---|
+| `extra_signals` | Words or phrases that count as design intent here. A bare string scores 0.45; `{"pattern": "<regex>", "score": 0.3}` sets both. |
+| `negative_signals` | Regexes for local vocabulary that is not design (CAD, firmware, domain jargon). Each hit counts as one engineering term. |
+| `directive_path` | Where this repo keeps its `style_directive.md` (relative to the repo root). Turns on the edit gate for product-UI files (`*.tsx`, `*.jsx`, `*.vue`, `*.svelte`, `*.css`, `*.scss`). |
+| `ui_globs` | Limit the product-UI edit gate to these repo-relative globs. |
+| `reports_dir` | Where QA gates write `<gate>_report_<name>.md` (default `<project>/reports/`). |
+
 `#noagency` / `#nodesign` in a prompt suppresses the hook for that turn; `#agency` forces
 engagement. `DESIGN_AGENCY_DISABLE=1` turns both hooks off entirely.
+
+How the classifier decides: whole-word phrase matches (Tier A brand/system words 0.85,
+Tier B page/asset words 0.60, product-UI noun + visual verb 0.60), a creation verb +0.10,
+and path-like tokens (`~/Code/brandbook/...`, `src/app/page.tsx`, URLs) removed before
+scoring. Two or more distinct engineering terms subtract 0.45 (enough to cancel one Tier-A
+hit); four or more, or any engineering term in a prompt that names this plugin's own
+machinery, zero the score. One answered question suppresses re-asks of the same
+engagement type for the session; only "Use design agency" silences the hook for the rest
+of it.
 
 Tune `ask_threshold` by reviewing `~/.claude/cache/design-agency/audit.jsonl` — a high
 `not_design` rate means the threshold is too low.
@@ -149,6 +170,7 @@ Role files live at `{AGENCY_ROOT}/roles/` — the `design-agency` skill resolves
 | --------------------- | --------------------------------------------------------- | ---------------------------- |
 | New brand project     | new client, brand identity, logo, brand book from scratch | Full Phases 1–6              |
 | Deliverable iteration | editing an existing `<project>/ui/*.html`                 | Maintenance & Iteration Mode |
+| Product UI            | dashboard, table, KPI row, app screen in the app's code   | `roles/product_ui_lead.md`   |
 | Product prototype     | app replication, multi-screen prototype                   | `roles/prototype_lead.md`    |
 | One-off asset         | favicon, avatar, social image                             | `roles/asset_designer.md`    |
 | Ops / release / git   | release notes, commit/deploy, file moves                  | no design gates              |
@@ -157,10 +179,10 @@ Role files live at `{AGENCY_ROOT}/roles/` — the `design-agency` skill resolves
 **3. Force auto-engage** — an optional `DesignAgencyAgent/` marker
 
 `hooks/design-intent.py` walks up from the working directory looking for
-`DesignAgencyAgent/master_agent.md`. If it finds one, the session engages the agency
-unconditionally (`source: repo_agents_md`) regardless of what the prompt says. **Only the
-file's existence is checked — its contents are never read**, so an empty file is a valid
-marker:
+`DesignAgencyAgent/master_agent.md`. If it finds one, a prompt that would have been
+asked about is engaged directly (`source: repo_agents_md`); prompts below the threshold
+(git, ops, questions) stay silent, as in any other repo. **Only the file's existence is
+checked — its contents are never read**, so an empty file is a valid marker:
 
 ```bash
 mkdir -p DesignAgencyAgent && touch DesignAgencyAgent/master_agent.md
@@ -195,7 +217,9 @@ Stated plainly, because a UserPromptSubmit hook deserves it:
   is pure local Python stdlib — pattern matching and a scoring heuristic. **No network
   calls, no model calls, no telemetry.**
 - **It writes a local audit log** at `~/.claude/cache/design-agency/audit.jsonl` and
-  `overrides.jsonl`, so you can tune the threshold. Local only, never transmitted.
+  `overrides.jsonl`, so you can tune the threshold, plus small per-session marker files
+  (`engaged/`, `asked/`, `decisions/`, `gate/`, pruned after 7 days). Local only, never
+  transmitted. `DESIGN_AGENCY_CACHE_DIR` moves all of it (the test suite uses this).
 - **It ships executable hooks** — two Python scripts, both invoked via
   `${CLAUDE_PLUGIN_ROOT}`, both wrapped so a failure can never block your prompt.
 
@@ -227,14 +251,33 @@ created lazily on first write):
 bash "${CLAUDE_PLUGIN_ROOT}/bin/setup-state.sh"
 ```
 
-Run the suites:
+Run the suites (hermetic: every runner uses a throwaway `HOME` and cache dir, so fixture
+runs never touch your real telemetry):
 
 ```
-bash tests/run.sh                                  # hook classifier + ui-edit gate
-python3 skills/design-agency/sil/test_measure.py   # sil measure()
-claude plugin validate . --strict
-claude plugin validate .claude-plugin/plugin.json --strict
+bash tests/run_all.sh
 ```
+
+That runs `tests/run.sh` (classifier fixtures), the unittest files in `tests/` (edit gate,
+session markers, report checker, enforcer, reference integrity), and the `sil` suites when
+`~/.claude/lib/self-improving-loop` is present. Then:
+
+```
+claude plugin validate . --strict
+```
+
+## Troubleshooting
+
+- **Skills or agents do not load.** Check `enabledPlugins` in `~/.claude/settings.json`
+  first: an installed but disabled plugin looks exactly like a missing one.
+- **`Agent type 'style-enforcer' not found`.** Subagents are namespaced:
+  `design-agency:style-enforcer`, `design-agency:visual-qa`, and so on.
+- **visual-qa reports `UNMEASURED`.** It found no browser. Enable the built-in browser or
+  Claude in Chrome, or close the listed checks yourself in the parent session.
+- **The hook asks about non-design prompts in one repo.** Add that repo's vocabulary to
+  `negative_signals`, and answer "Not design work": those rows are the tuning data.
+- **The edit gate never fires on `.tsx` files.** Set `directive_path` (and optionally
+  `ui_globs`) in `.claude/design-agency.json`.
 
 ## License
 

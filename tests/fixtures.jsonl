@@ -46,3 +46,5 @@
 {"name":"brandbook-repo-ops-none","payload":{"prompt":"show me the git log and push the branch to origin","cwd":"{{MARKER_REPO}}","session_id":"fixture-bbops-044"},"expect":"none"}
 {"name":"negative-signals-config-none","payload":{"prompt":"make a landing page for the openrocket simulation results","cwd":"{{NEG_REPO}}","session_id":"fixture-neg-045"},"expect":"none"}
 {"name":"negative-signals-control-ask","payload":{"prompt":"make a landing page for the openrocket simulation results","cwd":"/tmp","session_id":"fixture-negctl-046"},"expect":"ask","expect_type":"prototype"}
+{"name":"extra-signals-string-form-ask","payload":{"prompt":"tweak the palette for the pricing card please","cwd":"{{EXTRA_REPO}}","session_id":"fixture-extra-047"},"expect":"ask"}
+{"name":"extra-signals-control-none","payload":{"prompt":"tweak the palette for the pricing card please","cwd":"/tmp","session_id":"fixture-extractl-048"},"expect":"none"}

@@ -171,6 +171,7 @@ PRODUCT_UI_VERB = re.compile(
     re.I,
 )
 PRODUCT_UI_SCORE = 0.60
+EXTRA_SIGNAL_SCORE = 0.45
 
 
 def _phrase_re(phrase):
@@ -302,8 +303,11 @@ def classify_heuristic(prompt, ask_threshold, extra_signals, negative_signals=No
     if not matched and PRODUCT_UI_NOUN.search(text) and PRODUCT_UI_VERB.search(text):
         hit("product_ui", "product_ui", PRODUCT_UI_SCORE)
 
-    # Project extra_signals: list of {"pattern": regex, "score": float}.
+    # Project extra_signals: {"pattern": regex, "score": float}, or a bare
+    # word/phrase string worth EXTRA_SIGNAL_SCORE (the README's short form).
     for sig in extra_signals or []:
+        if isinstance(sig, str) and sig.strip():
+            sig = {"pattern": r"\b" + re.escape(sig.strip()) + r"\b", "score": EXTRA_SIGNAL_SCORE}
         if not isinstance(sig, dict):
             continue
         pattern = sig.get("pattern")

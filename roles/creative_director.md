@@ -124,7 +124,7 @@ You are the Creative Director — the Style Architect. You oversee the conceptua
    - **Body:** [Font Name] — [weight, size, line-height]
    - **Mono/Data:** [Font Name] — [usage context: IDs, timestamps, metrics, code]
    - **Size Scale:** [define scale — e.g., 12/14/16/20/24/32/48px]
-   - **Google Fonts import:** `<link href="https://fonts.googleapis.com/css2?family=..." rel="stylesheet">`
+   - **Google Fonts import:** `<link href="https://fonts.googleapis.com/css2?family=..." rel="stylesheet">` (DACH/EU clients: self-host the font files instead; a Google Fonts CDN link is a GDPR finding there)
 
    ## Layout Rules
    - **Corner Radius:** [e.g., 0px for brutalist, 8px for clean, 16-24px for soft]

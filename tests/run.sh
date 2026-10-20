@@ -29,6 +29,10 @@ mkdir -p "$MARKER_REPO/DesignAgencyAgent"
 NEG_REPO="$TEST_HOME/neg-repo"
 mkdir -p "$NEG_REPO/.claude"
 printf '{"negative_signals": ["\\\\bopenrocket\\\\b", "\\\\bsimulations?\\\\b"]}\n' > "$NEG_REPO/.claude/design-agency.json"
+# Repo with the README's short-form extra_signals (bare strings).
+EXTRA_REPO="$TEST_HOME/extra-repo"
+mkdir -p "$EXTRA_REPO/.claude"
+printf '{"ask_threshold": 0.45, "extra_signals": ["palette", "mockup"]}\n' > "$EXTRA_REPO/.claude/design-agency.json"
 trap 'rm -rf "$TEST_HOME"' EXIT
 
 while IFS= read -r line || [ -n "$line" ]; do
@@ -41,6 +45,7 @@ while IFS= read -r line || [ -n "$line" ]; do
     # Substitute the hermetic marker-repo path for the brandbook-engage case.
     PAYLOAD=${PAYLOAD//\{\{MARKER_REPO\}\}/$MARKER_REPO}
     PAYLOAD=${PAYLOAD//\{\{NEG_REPO\}\}/$NEG_REPO}
+    PAYLOAD=${PAYLOAD//\{\{EXTRA_REPO\}\}/$EXTRA_REPO}
     EXPECT_SOURCE=$(python3 -c "import sys,json; d=json.loads(sys.argv[1]); print(d.get('expect_source',''))" "$line")
     EXPECT_TYPE=$(python3 -c "import sys,json; d=json.loads(sys.argv[1]); print(d.get('expect_type',''))" "$line")
 

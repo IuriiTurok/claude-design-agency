@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 # Run design-intent.py against every fixture in fixtures.jsonl.
-# Cleans fixture-* markers before and after the run.
+# Hermetic: HOME and DESIGN_AGENCY_CACHE_DIR point at a throwaway dir, so
+# fixture runs never reach the real ~/.claude/cache/design-agency telemetry.
+# Fixtures run in file order and share one cache, so a sequence of rows with
+# the same session_id exercises the per-session markers.
 # Exits nonzero if any case FAILs.
 
 set -euo pipefail
@@ -8,8 +11,9 @@ set -euo pipefail
 PLUGIN_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 FIXTURES="$PLUGIN_DIR/tests/fixtures.jsonl"
 HOOK="$PLUGIN_DIR/hooks/design-intent.py"
-ENGAGED_DIR="$HOME/.claude/cache/design-agency/engaged"
-GATE_DIR="$HOME/.claude/cache/design-agency/gate"
+TEST_HOME="$(mktemp -d)"
+export HOME="$TEST_HOME"
+export DESIGN_AGENCY_CACHE_DIR="$TEST_HOME/.claude/cache/design-agency"
 
 PASS=0
 FAIL=0
@@ -18,22 +22,18 @@ FAILURES=""
 # Hermetic marker repo for the brandbook auto-engage case: a throwaway dir
 # carrying the DesignAgencyAgent/master_agent.md marker the hook walks up for.
 # Avoids depending on a real repo path that can move between sessions.
-MARKER_REPO="$(mktemp -d)"
+MARKER_REPO="$TEST_HOME/marker-repo"
 mkdir -p "$MARKER_REPO/DesignAgencyAgent"
 : > "$MARKER_REPO/DesignAgencyAgent/master_agent.md"
-trap 'rm -rf "$MARKER_REPO"' EXIT
-
-cleanup_fixtures() {
-    # Remove any engaged / gate markers created by fixture runs.
-    if [ -d "$ENGAGED_DIR" ]; then
-        find "$ENGAGED_DIR" -maxdepth 1 -name 'fixture-*' -delete 2>/dev/null || true
-    fi
-    if [ -d "$GATE_DIR" ]; then
-        find "$GATE_DIR" -maxdepth 1 -name 'fixture-*' -delete 2>/dev/null || true
-    fi
-}
-
-cleanup_fixtures
+# Repo with a per-project config carrying negative_signals.
+NEG_REPO="$TEST_HOME/neg-repo"
+mkdir -p "$NEG_REPO/.claude"
+printf '{"negative_signals": ["\\\\bopenrocket\\\\b", "\\\\bsimulations?\\\\b"]}\n' > "$NEG_REPO/.claude/design-agency.json"
+# Repo with the README's short-form extra_signals (bare strings).
+EXTRA_REPO="$TEST_HOME/extra-repo"
+mkdir -p "$EXTRA_REPO/.claude"
+printf '{"ask_threshold": 0.45, "extra_signals": ["palette", "mockup"]}\n' > "$EXTRA_REPO/.claude/design-agency.json"
+trap 'rm -rf "$TEST_HOME"' EXIT
 
 while IFS= read -r line || [ -n "$line" ]; do
     # Skip blank lines or comments.
@@ -44,6 +44,8 @@ while IFS= read -r line || [ -n "$line" ]; do
     PAYLOAD=$(python3 -c "import sys,json; d=json.loads(sys.argv[1]); print(json.dumps(d['payload']))" "$line")
     # Substitute the hermetic marker-repo path for the brandbook-engage case.
     PAYLOAD=${PAYLOAD//\{\{MARKER_REPO\}\}/$MARKER_REPO}
+    PAYLOAD=${PAYLOAD//\{\{NEG_REPO\}\}/$NEG_REPO}
+    PAYLOAD=${PAYLOAD//\{\{EXTRA_REPO\}\}/$EXTRA_REPO}
     EXPECT_SOURCE=$(python3 -c "import sys,json; d=json.loads(sys.argv[1]); print(d.get('expect_source',''))" "$line")
     EXPECT_TYPE=$(python3 -c "import sys,json; d=json.loads(sys.argv[1]); print(d.get('expect_type',''))" "$line")
 
@@ -134,8 +136,6 @@ except Exception:
     fi
 
 done < "$FIXTURES"
-
-cleanup_fixtures
 
 echo ""
 echo "Results: $PASS passed, $FAIL failed"

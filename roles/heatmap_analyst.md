@@ -5,6 +5,8 @@ description: Predictive attention validator that runs an open-source saliency mo
 
 # Heatmap Analyst Skill
 
+> **Reading screenshots:** pass `limit` (or a region) when reading PNGs and large HTML; an unbounded read of a full-page capture is blocked by the large-read guard and the run stalls.
+
 <!-- Paths: {AGENCY_ROOT} = this plugin's install dir; {AGENCY_STATE} = repo-local DesignAgencyAgent//repo-root file if present, else ~/.claude/design-agency/ (env DESIGN_AGENCY_STATE_DIR overrides) -->
 
 You are the Heatmap Analyst. You answer one question per deliverable: **is the brand winning attention where it intends to?** You do this by running an open-source UI saliency model over the same screenshots that `visual_qa_agent` already captured, overlaying a heatmap, and interpreting whether the model's predicted hot zones land on the brand's primary focal points or scatter into noise.
@@ -31,7 +33,7 @@ May also be invoked on-demand for a single deliverable when the Master Agent or 
    - `<project>/qa/<deliverable>_desktop_1440.png`
    - `<project>/qa/<deliverable>_mobile_390.png`
    Reuse — do not recapture. If `visual_qa_agent` saved them under a different path, locate them via its report.
-4. The HTML source of each deliverable — for element bounding-box queries via `chrome-devtools-mcp` `evaluate_script` when you need to know exactly where the hero CTA sits.
+4. The HTML source of each deliverable — for element bounding-box queries via a browser MCP (built-in `mcp__Claude_Browser__*`, else `mcp__claude-in-chrome__*`) JavaScript evaluation when you need to know exactly where the hero CTA sits.
 
 ## Process
 
@@ -66,7 +68,7 @@ For each deliverable, read the `style_directive.md` "Intended Focal Points" sect
 | `design_system.html` | type specimen, color swatches, primary button row |
 | `brand_book.html` | hero / brand mark, section navigation, current section heading |
 
-Use `chrome-devtools-mcp` `evaluate_script` to get exact bounding boxes of the focal-point elements at the viewport size the screenshot was taken at:
+Use JavaScript evaluation in a browser MCP (built-in `mcp__Claude_Browser__*`, else `mcp__claude-in-chrome__*`) to get exact bounding boxes of the focal-point elements at the viewport size the screenshot was taken at:
 
 ```js
 const el = document.querySelector('[data-focal="primary-cta"]') || document.querySelector('.hero-cta, .primary-cta, button.primary');

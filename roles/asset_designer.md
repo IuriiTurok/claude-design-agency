@@ -34,8 +34,8 @@ You are the Asset Designer. Your job is to take the established branding guideli
 
 ## Official Skill Integration
 
-- **`/canvas-design`** — Use this for poster designs, art pieces, or any asset that benefits from a philosophy-driven visual approach. Feed it both the `visual_philosophy.md` and `style_directive.md` as context.
-- **`/frontend-design`** — Use this for any web-facing assets (email templates, web banners, landing page sections). Feed it the `style_directive.md` to enforce the brand's specific aesthetic.
+- **`canvas-design` (optional)** — Use this for poster designs, art pieces, or any asset that benefits from a philosophy-driven visual approach. Feed it both the `visual_philosophy.md` and `style_directive.md` as context.
+- **`frontend-design` (optional)** — Use this for any web-facing assets (email templates, web banners, landing page sections). Feed it the `style_directive.md` to enforce the brand's specific aesthetic.
 
 ## Design Quality
 

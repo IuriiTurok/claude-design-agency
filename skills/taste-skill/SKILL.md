@@ -1,16 +1,16 @@
 ---
 name: taste-skill
 description: >
-  Anti-slop art direction for marketing surfaces: landing pages, marketing sites,
-  portfolios, brand sites, hero and section design, and redesigns of marketing pages.
-  Use when the user asks to make a page "look less AI", "less generic", "less
-  templated", or "more premium". Reads the three dials (DESIGN_VARIANCE,
-  MOTION_INTENSITY, VISUAL_DENSITY) and TASTE_MODE (soft | minimalist | brutalist |
-  none) from the project's visual_philosophy.md, emits a one-line Design Read, enforces
-  the AI-tell ban list, and writes a pre-flight report before QA. Skip for dashboards,
-  admin panels, data tables, multi-step forms, product prototypes, code editors, and
-  native mobile; those go to ui-ux-pro-max and roles/prototype_lead.md.
-license: MIT. Vendored from github.com/Leonxlnx/taste-skill at ce26fc25c0e5 (upstream name design-taste-frontend) with an agency binding prepended.
+  Anti-slop art direction for two surfaces. Pages (landing pages, marketing sites,
+  portfolios, brand sites, hero and section design, redesigns of those): the dials,
+  TASTE_MODE, the §9 AI-tell ban list and the §14 pre-flight. App screens (dashboards,
+  admin panels, data tables, KPI rows, settings, product UI): the measured app-screen
+  rules in references/app-screens.md and the app styles in references/app-styles.md.
+  Use when the user asks to make a page or screen "look less AI", "less generic",
+  "less templated", "denser" or "more premium". Reads DESIGN_VARIANCE,
+  MOTION_INTENSITY, VISUAL_DENSITY, TASTE_MODE and SURFACE_MODE from the project's
+  visual_philosophy.md. Skip for code editors, native mobile and realtime collab UIs.
+license: MIT. Body vendored from github.com/Leonxlnx/taste-skill at ce26fc25c0e5 (upstream now calls this body "v2 experimental", upstream name design-taste-frontend); references/app-screens.md from v2.1.3. Agency binding prepended.
 ---
 
 # Taste Skill (v2) — Agency Binding
@@ -23,10 +23,10 @@ license: MIT. Vendored from github.com/Leonxlnx/taste-skill at ce26fc25c0e5 (ups
 - **`style_directive.md` is upstream of every rule here.** The active project's `style_directive.md` is the binding aesthetic contract. Where an upstream default conflicts with it (fonts, palette, radius, motion library, Tailwind version, icon set), the directive wins. Upstream picks such as Geist, Phosphor, GSAP, or Tailwind v4 apply only where the directive is silent.
 - **Dials come from the Creative Director, never from this file.** Read `DESIGN_VARIANCE`, `MOTION_INTENSITY`, `VISUAL_DENSITY` (1-10) and `TASTE_MODE` from the project's `visual_philosophy.md`, written in Phase 2 by the Creative Director. This skill carries no baseline values: the `8 / 6 / 4` baseline in §1 and the §1.A / §1.B tables are the Creative Director's tools for choosing values, not a runtime fallback. If any dial or `TASTE_MODE` is missing, stop and request it from the Creative Director. Never default silently.
 - **`TASTE_MODE` loads one mode file.** `soft` → `references/modes/soft.md`, `minimalist` → `references/modes/minimalist.md`, `brutalist` → `references/modes/brutalist.md`, `none` → nothing. Load only the selected mode. A mode sharpens the aesthetic on top of this file; it never outranks the directive, and QA still enforces §9.
-- **Scope is §13.** Landing pages, marketing sites, portfolios, brand sites, and redesigns of those. If the brief is a dashboard, product UI, prototype, data table, or wizard, say so in one line, route it to `ui-ux-pro-max` and `{AGENCY_ROOT}/roles/prototype_lead.md`, and apply only this skill's marketing-surface parts to the surfaces where they fit.
+- **Fork on the surface first: page or app screen.** Read `SURFACE_MODE` from `visual_philosophy.md` (persuade | operate | read | experience, set by the Creative Director; see `{AGENCY_ROOT}/skills/impeccable/reference/` for the mode definitions). A **page** (persuade, experience, and read surfaces such as docs and articles) gets this file: dials, `TASTE_MODE`, §9, §14. An **app screen** (operate: dashboards, admin panels, data tables, KPI rows, settings, product UI in a React/Vue/Svelte app) gets `references/app-screens.md` as its rule set and `references/app-styles.md` for a named app style, and is built through `{AGENCY_ROOT}/roles/product_ui_lead.md`. On app screens the landing-page tells in §9 (em-dash count, eyebrow kickers, hero rules, scroll cues, section-number eyebrows, identical-card grids) do not apply; §9.A-§9.E craft tells and the app-screen tells do. This replaces upstream §13's "dashboards are out of scope", which upstream itself reversed in 2.1.0.
 - **§9.G governs output, not docs.** The em-dash ban applies to generated page copy and markup. It does not apply to this plugin's own documentation, including this file and `references/`.
 - **Bleed-through rules still apply on top of §9.** `{AGENCY_RESERVED_TOKENS}` (every font and color in `reserved_tokens` from `python3 ${CLAUDE_PLUGIN_ROOT}/execution/state_paths.py --brand`, plus grain overlays and glow orbs) are banned in client deliverables and allowed only inside `own_brand_folders`. When `reserved_tokens` is empty there is nothing to enforce. The canonical agency ban list is `{AGENCY_ROOT}/skills/impeccable/reference/ai-slop-bans.md`; §9 adds to it, it does not replace it.
-- **Who runs what.** The UI/UX Designer invokes this skill before `/frontend-design` to emit the §0.B Design Read, and runs §14 before handing to QA. The QA subagents `taste-guardian` and `style-enforcer` read §9 as the ban list.
+- **Who runs what.** The UI/UX Designer invokes this skill before writing frontend code (with `design-agency:impeccable` craft, or `frontend-design` when enabled) to emit the §0.B Design Read, and runs §14 before handing to QA. The QA subagents `taste-guardian` and `style-enforcer` read §9 as the ban list.
 
 **Output convention:** the §14 pre-flight result is written to `<project>/taste_preflight_<deliverable>.md`: the Design Read, the dial values and `TASTE_MODE` used, and every §14 box marked pass or fail with the fix for each failure. A check that exists only in the transcript did not happen, same rule as the other agency gates.
 </design-agency-binding>
@@ -43,6 +43,10 @@ This file holds §0, §1, §9, §13, and §14. Everything else is relocated verb
 | `references/redesign.md`                                                                      | §11 Redesign Protocol, plus the upstream `redesign-skill` companion                                                                                                                                 | When an existing page is being changed.               |
 | `references/block-library.md`                                                                 | §12 Block Library contract                                                                                                                                                                          | When adding a block implementation.                   |
 | `references/modes/soft.md`, `references/modes/minimalist.md`, `references/modes/brutalist.md` | Upstream `soft-skill`, `minimalist-skill`, `brutalist-skill`                                                                                                                                        | Only the one named by `TASTE_MODE`.                   |
+| `references/app-screens.md`                                                                   | Upstream v2.1.3 `references/app-screens.md`, verbatim                                                                                                                                               | Every app screen (`SURFACE_MODE: operate`). Read whole. |
+| `references/app-styles.md`                                                                    | Upstream v2.1.3 `library/app.json`, as a table                                                                                                                                                      | When choosing or matching an app style.               |
+
+**Not bundled from upstream 2.1:** `scripts/draw.mjs`, `lint.mjs`, `inspect.mjs`, `assets/app.css`, `assets/charts.js`. Where `app-screens.md` says to run them: pick the style from `app-styles.md` and the existing directive instead of `draw.mjs`; run `{AGENCY_ROOT}/execution/enforce.py --surface operate` instead of `lint.mjs`; capture the screen in a real browser at 1440 and 390 (the visual-qa recipe) instead of `inspect.mjs`; build with the repo's own components and chart library instead of `app.css` / `charts.js`.
 
 ---
 
@@ -263,6 +267,8 @@ This rule is non-negotiable. The agent has historically ignored em-dash limits w
 ## 13. OUT OF SCOPE
 
 > Sections 2-8 and 10-12 live in references/ (see "Where the rest lives").
+
+> **Agency note:** upstream 2.1.0 brought dashboards, admin panels and data tables into scope through `references/app-screens.md`, and the binding above routes them there. The list below is kept verbatim from the vendored body; only code editors, native mobile and realtime collab UIs remain out of scope.
 
 This skill is NOT for:
 

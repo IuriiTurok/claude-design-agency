@@ -1,6 +1,6 @@
 ---
 name: design-agency-routing
-description: "Routes design-intent prompts to the design agency. Use whenever a <design-agency-decision> block is present in injected context (emitted by the design-agency UserPromptSubmit hook), AND as a discovery fallback when the user mentions brand identity, brand book, rebrand, logo, landing page, design system, style guide, mascot, or UI prototype work but no decision block has appeared yet. Asks the user whether to engage the agency when design intent is detected, with 'Use design agency' as the recommended default. Mandatory before doing design work inline when the band is engage or ask. Skip for trivial one-line CSS/copy tweaks the user explicitly wants inline."
+description: "Routes design-intent prompts to the design agency. Use whenever a <design-agency-decision> block is present in injected context (emitted by the design-agency UserPromptSubmit hook), AND as a discovery fallback when the user mentions brand identity, brand book, rebrand, logo, landing page, design system, style guide, mascot, UI prototype, or product-UI polish (dashboard, KPI cards, tables, app screens) work but no decision block has appeared yet. Asks the user whether to engage the agency when design intent is detected, with 'Use design agency' as the recommended default. Mandatory before doing design work inline when the band is engage or ask. Skip for trivial one-line CSS/copy tweaks the user explicitly wants inline."
 ---
 
 # design-agency-routing
@@ -44,15 +44,22 @@ Named cache paths used by this skill. Override via the matching env var if neede
 {
   "band": "engage" | "ask" | "none",
   "confidence": 0.0-1.0,
-  "engagement_type": "brand_project" | "deliverable_iteration" | "prototype" | "character_3d" | "asset" | "ops" | "unknown",
+  "engagement_type": "brand_project" | "deliverable_iteration" | "product_ui" | "prototype" | "character_3d" | "asset" | "ops" | "unknown",
   "matched_signals": ["..."],
   "reason": "one-sentence justification",
   "source": "heuristic" | "repo_agents_md" | "override" | "project_config",
   "decision_id": "da_xxxxxxxxxx",
   "thresholds": {"ask": 0.55},
-  "plan_mode": false
+  "plan_mode": false,
+  "plugin_root": "/abs/path/to/design-agency"
 }
 ```
+
+`plugin_root` is the plugin's absolute install path, computed by the hook from
+its own location. Every script below is called as `"<plugin_root>/…"`:
+`${CLAUDE_PLUGIN_ROOT}` is not set in the session's Bash environment, and a
+relative `scripts/…` path resolves against the user's cwd, not this skill (the
+v0.4 bug that left 75% of asks unlogged).
 
 `band == "engage"` — the classifier is confident enough to invoke the agency without asking.
 `band == "ask"` — design intent detected but confidence is below the engage threshold; prompt the user.
@@ -60,7 +67,7 @@ Named cache paths used by this skill. Override via the matching env var if neede
 
 `plan_mode` is **best-effort and usually `false`** — the hook can't see plan mode reliably. Trust your own context over this field (see Step 2).
 
-`source == "repo_agents_md"` — the current repo's `AGENTS.md` mandates the design agency (e.g. the brandbook repo). The bootstrap already loaded the correct skill set; do not re-read the plugin roster on top of it. **Inverse case:** when NO `AGENTS.md` is present (the root cause of the 2026-06 audit finding where 58 sessions bypassed the agency), the keyword-fallback in this skill's `description` is the only thing that fires the agency — this is why secondary keyword triggers are declared there.
+`source == "repo_agents_md"` — the repo carries `DesignAgencyAgent/master_agent.md` (the brandbook repo) and the prompt scored at or above the ask threshold, so the ask was upgraded to engage. That marker file is historical; it is not a bootstrap to defer to. Treat it exactly like any other `engage` (Step 4). **Inverse case:** when NO `AGENTS.md` is present (the root cause of the 2026-06 audit finding where 58 sessions bypassed the agency), the keyword-fallback in this skill's `description` is the only thing that fires the agency — this is why secondary keyword triggers are declared there.
 
 ---
 
@@ -109,7 +116,7 @@ so a `<router-decision>` block may be present alongside the
   `continuity_inline` to `ROUTER_AUDIT_LOG` by running:
 
   ```bash
-  scripts/log_router_continuity.sh "<router_decision_id>" "<model>"
+  bash "<plugin_root>/skills/design-agency-routing/scripts/log_router_continuity.sh" "<router_decision_id>" "<model>"
   ```
 
   Rationale: delegating design work to a bare `router-sonnet` worker strips
@@ -128,17 +135,21 @@ so a `<router-decision>` block may be present alongside the
 ### Step 4 — `band == "engage"`
 
 Invoke the `design-agency` skill, passing the `engagement_type` from the
-decision block.
-
-**Special case — `source == "repo_agents_md"`:** The current repo's
-`AGENTS.md` already mandates the agency and has run the bootstrap. Defer
-entirely to that bootstrap — do NOT re-read the plugin roster on top of it.
-Double-loading the roster overwrites role assignments and corrupts the
-context the bootstrap already established.
+decision block. `source == "repo_agents_md"` is no special case: the
+orchestrator skill is authoritative in every repo (the brandbook repo's
+`DesignAgencyAgent/master_agent.md` marks itself historical and points back
+here).
 
 ---
 
 ### Step 5 — `band == "ask"`
+
+0. **Headless check.** A non-interactive run (`claude -p`, a scheduled or
+   launchd job, a background session whose prompt came from another session)
+   cannot answer a question. Take the recommended default for the type
+   (`product_ui` and `deliverable_iteration`: engage; others: engage when
+   confidence ≥ 0.85, else inline), log it with `user_choice` `auto_default`,
+   and say so in one line.
 
 1. Call `AskUserQuestion` with ONE question:
    - **header**: `Design agency`
@@ -157,13 +168,19 @@ context the bootstrap already established.
 3. **Log the user's choice** before doing the work — run:
 
    ```bash
-   python3 scripts/log_override.py "<DECISION_ID>" "<ENGAGEMENT_TYPE>" <CONFIDENCE> "<USER_CHOICE>"
+   python3 "<plugin_root>/skills/design-agency-routing/scripts/log_override.py" "<DECISION_ID>" "<ENGAGEMENT_TYPE>" <CONFIDENCE> "<USER_CHOICE>"
    ```
 
-   Substitute the `decision_id`, `engagement_type`, and `confidence` from the
-   `<design-agency-decision>` block. Use one of `engaged`, `inline`, or
-   `not_design` for `user_choice`. Never block on this — the script exits non-zero
-   but non-fatally on a write failure; proceed with the work regardless.
+   Substitute `plugin_root`, `decision_id`, `engagement_type`, and `confidence`
+   from the `<design-agency-decision>` block. Use one of `engaged`, `inline`,
+   `not_design` or `auto_default` for `user_choice`. Never block on this — the
+   script exits non-zero but non-fatally on a write failure; proceed with the
+   work regardless.
+
+   The log is also the session switch: `engaged` marks the session engaged
+   (the hook stays silent for the rest of it). Any other choice only
+   suppresses re-asks of the same `engagement_type`, so one false positive
+   never silences a later genuine design prompt.
 
    `not_design` rows are false-positive training data for tuning the hook's
    heuristics. Every row matters; never skip the log step.
@@ -185,11 +202,10 @@ agency is engaged, not here.
 
 ## Failure modes to avoid
 
-- **Don't re-ask after the user has already answered once this session.**
-  The hook's engaged-marker should prevent re-prompts on follow-up turns.
-  If a stale `<design-agency-decision>` block appears on a subsequent turn
-  after the user already answered, honour the previous answer and skip the
-  question.
+- **Don't re-ask the same question after the user has answered it.** The
+  hook suppresses re-asks of the same `engagement_type` in a session, and
+  stops entirely once the user engaged. A block of a *different* type after
+  a "Not design work" answer is a new question; ask it.
 
 - **Don't engage the agency for trivial one-line CSS tweaks the user
   explicitly wants inline.** A micro-edit the user described as "just change
@@ -279,7 +295,9 @@ This skill learns across runs via a lessons file. Resolve its path once, first h
   `router_loop.py` sil. Harvest `overrides.jsonl` only; do not re-aggregate rows the router loop
   already processes.
 - `engagement_type` values in scope (harvest by all): `brand_project`, `deliverable_iteration`,
-  `prototype`, `character_3d`, `asset`, `ops`, `unknown`.
+  `product_ui`, `prototype`, `character_3d`, `asset`, `ops`, `unknown`.
+- Filter rows whose `cwd` is `/tmp` or under `/var/folders`: before v0.5.0 the fixture suite
+  wrote into the real `audit.jsonl` (about two thirds of the rows up to 2026-10).
 
 Optional deterministic append (when a shell is available), instead of hand-writing the line:
 `python3 ~/.claude/lib/self-improving-loop/sil/cli.py lessons-append \

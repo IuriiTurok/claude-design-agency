@@ -92,8 +92,8 @@ You are the Design System Architect. You bridge the gap between design and engin
 
 ## Official Skill Integration
 
-- **`/web-artifacts-builder`** — For live, interactive component showcases. Build a React + TypeScript + Tailwind + shadcn/ui application that serves as a living style guide. Produces a single HTML file the client can open in their browser.
-- **`/frontend-design`** — For generating the `ui/design_system.html` as a single-file HTML component library showcase with all tokens, colors, typography, and component examples.
+- **`web-artifacts-builder` (optional)** — For live, interactive component showcases. Build a React + TypeScript + Tailwind + shadcn/ui application that serves as a living style guide. Produces a single HTML file the client can open in their browser.
+- **`frontend-design` (optional)** — For generating the `ui/design_system.html` as a single-file HTML component library showcase with all tokens, colors, typography, and component examples.
 - **shadcn/ui CLI** — Use `npx shadcn@latest docs [component]` to get current API and usage patterns. Use `npx shadcn@latest add` to scaffold components. Use `npx shadcn@latest init -d` for project setup.
 
 ## Output Requirements (Phase 5-6)
@@ -108,6 +108,6 @@ You operate in Phase 5 (in parallel with UI/UX Designer) and Phase 6. Deliver:
    - Font loading instructions
    - Spacing/layout scale
 
-2. **`ui/design_system.html`** — Interactive single-file HTML component library with live examples of every R-tier component for the archetype, color swatches, typography scale, spacing visualization, and usage guidelines. Each component section scores ≥8/10 on the inventory's doc-depth scorecard. Built via `/frontend-design` or `/web-artifacts-builder`.
+2. **`ui/design_system.html`** — Interactive single-file HTML component library with live examples of every R-tier component for the archetype, color swatches, typography scale, spacing visualization, and usage guidelines. Each component section scores ≥8/10 on the inventory's doc-depth scorecard. Built via `frontend-design` (optional) or `web-artifacts-builder` (optional).
 
 3. **`design_system/coverage_matrix.md`** — Coverage matrix using the template in inventory section G. Tracks which B-items shipped, were deferred, or were skipped (with rationale). Consumed by `style_enforcer` and `brandbook_designer`.

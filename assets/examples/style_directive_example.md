@@ -16,6 +16,14 @@ One named direction in a sentence, plus the two or three references it triangula
 between. "Structured Clarity — Swiss grid discipline, with the surface honesty of a
 component library and none of the gloss."
 
+SURFACE_MODE: persuade
+
+One of `persuade | operate | read | experience` (same value as `visual_philosophy.md`).
+`execution/enforce.py` reads this line to decide which rules apply: landing-page tells
+only fire on `persuade`; `operate` (dashboards, app screens) adds the tabular-figures rule
+instead. A project with a landing page and an app keeps this as the default and lets the
+Creative Director's per-deliverable map (or `enforce.py --surface`) set the other.
+
 ## Color Palette
 
 | Role | Value | Notes |
@@ -88,6 +96,16 @@ hover state is a Style Enforcer violation, not a nit.
 Declare every token above as a custom property on `:root` so the enforcer can grep for
 definition sites. Redefine only the values under a dark-mode block — never give a color
 its sole definition inside a media query.
+
+## Brand Overrides
+
+Deliberate identity choices that a generic AI-tell list would flag. Every gate reads this
+section: `execution/enforce.py` waives the listed rule ids and records them as waived;
+taste-guardian and visual-qa must not score a listed choice as a tell. Written before the
+first enforcer run, never added to clear a failing report. One list item per override,
+in the form "dash, `allow`, the rule id in backticks, an em dash, the reason", for example
+allow `mono-data-labels` (system mono for every figure and ID) or allow `em-dash` (DIN 5008
+spaced dashes in German copy). This plain example needs none, so the list is empty.
 
 ## Do Not List
 

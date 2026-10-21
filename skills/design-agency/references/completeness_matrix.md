@@ -11,8 +11,8 @@ taste_guardian → Visual QA + Browser Verify`.
 | `ui/brand_book.html` | Hero, Strategy, Logo (SVG), Colors, Typography, Components, AI/Chat, Motion, Do Not List, Accessibility, File Reference | HTML-gate chain |
 | `brand_book.md` | Brand Story, Strategy, Visual Identity, Logo Usage, Colors, Typography, Voice, Components, Do/Don't, Assets | polish_inspector → Content Review → taste_guardian |
 
-Each gate ALSO writes a report artifact (`motion_audit.md`, `polish_report_*.md`,
-`taste_report.md`, advisory `heatmap_report_*.html` / `persona_report_*.html`) — their
+Each gate ALSO writes a report artifact (`<reports_dir>/<gate>_report_<name>.md` for
+`motion`, `polish`, `enforcer`, `taste`, `vqa`, each with a `Verdict:` line; advisory `heatmap_report_*.html` / `persona_report_*.html`) — their
 required contents are specified at **`{AGENCY_ROOT}/roles/_official_skills.md` →
 "Completeness Matrix — QA report-content rows"**.
 

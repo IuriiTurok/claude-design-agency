@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Fixture Co: calm software</title>
+<style>
+  :root { --bg: #FAFAF9; --surface: #ffffff; --text: #1C1917; --accent: #10B981; --z-nav: 40; }
+  body { background: var(--bg); color: var(--text); font-family: "Geist Sans", system-ui, sans-serif; }
+  h1, h2 { font-family: 'Fraunces', serif; }
+  .hero { min-height: 70vh; padding: 96px 24px; }
+  .nav { position: sticky; top: 0; z-index: var(--z-nav); }
+  .btn { transition: background-color 150ms ease-out; background: var(--accent); }
+  .feature { border-radius: 12px; z-index: 2; }
+  .price { font-family: "Geist Mono", ui-monospace; font-variant-numeric: tabular-nums; }
+</style>
+</head>
+<body>
+<nav class="nav"><a href="#features">Features</a></nav>
+<section class="hero">
+  <h1>Software that stays out of the way</h1>
+  <p>Fixture Co keeps your team focused. Start in five minutes.</p>
+  <button class="btn" type="button">Start free</button>
+</section>
+<section id="features">
+  <h2>What you get</h2>
+  <div class="feature"><p>Plain answers, fast. Issue #12 is closed.</p></div>
+  <p class="price">$24 / month</p>
+</section>
+<!-- a comment with — an em-dash and #abcdef should be ignored -->
+</body>
+</html>

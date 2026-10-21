@@ -3,10 +3,11 @@ name: design-agency
 description: >
   Full design agency engagement — multi-phase orchestration for brand
   identity, brand books, rebrands, logo design, landing pages, design systems, style
-  guides, mascots/characters, UI prototypes, and brand collateral. Use this skill
+  guides, mascots/characters, UI prototypes, product UI (dashboards, tables, KPI
+  rows, app screens in React/Vue/Svelte apps), and brand collateral. Use this skill
   whenever the user mentions a brand, logo, landing page, rebrand, brand book, style
-  guide, design system, visual identity, mascot, or any agency-grade design
-  deliverable — even if they don't explicitly say "agency". Normally invoked via
+  guide, design system, visual identity, mascot, product-UI polish, or any
+  agency-grade design deliverable — even if they don't explicitly say "agency". Normally invoked via
   design-agency-routing after a <design-agency-decision> block; also directly
   invocable. Skip for single-file CSS tweaks, non-visual code, copy-only edits, or
   work already inside Maintenance & Iteration Mode on one existing file.
@@ -41,8 +42,13 @@ Resolve these first, before any other action.
 
 - **`{AGENCY_ROOT}`** = this plugin's install directory (`design-agency/` root with
   `roles/`, `execution/`, `assets/`, `references/`, `skills/`). Dispatch targets,
-  scripts, bundled skills, and example assets address relative to it. In hooks and
-  shell commands it is available as `${CLAUDE_PLUGIN_ROOT}`.
+  scripts, bundled skills, and example assets address relative to it. Resolve it from
+  the `plugin_root` field of the hook's `<design-agency-decision>` or
+  `<design-agency-gate>` block. `${CLAUDE_PLUGIN_ROOT}` is set for hooks but NOT in
+  the session's Bash environment; with neither available, use
+  `$(ls -d ~/.claude/plugins/cache/design-agency-mp/design-agency/*/ | tail -1)`.
+  Pass the resolved absolute path to every subagent you dispatch: a subagent does not
+  know where its own file lives.
 - **`{AGENCY_STATE}`** = the writable state location, resolved **first-existing-wins,
   per file** (table below). Env `DESIGN_AGENCY_STATE_DIR`, when set, overrides
   everything and replaces both legs of every chain. Each chain's first leg is the
@@ -95,7 +101,7 @@ change; makes the implicit contract explicit per rubric row 14).
   state dir, env-overridable via `DESIGN_AGENCY_STATE_DIR`).
 - **Outputs:** four mandatory deliverables per project — `ui/landing_page.html`,
   `ui/design_system.html`, `ui/brand_book.html`, `brand_book.md`. QA report artifacts —
-  `motion_audit.md`, `polish_report_*.md`, `taste_report.md`, advisory
+  `<reports_dir>/{motion,polish,enforcer,taste,vqa}_report_<name>.md`, advisory
   `heatmap_report_*.html` / `persona_report_*.html`. State updates —
   `{AGENCY_STATE}/style_library.md`, `{AGENCY_STATE}/lessons_learned.md`,
   `{AGENCY_STATE}/logo_feedback_log.json`. Portal updates (`index.html`,
@@ -103,13 +109,16 @@ change; makes the implicit contract explicit per rubric row 14).
   `presentation/`, `proposal/` artifacts. **Bridge-D output:** AI-slop candidate
   records appended to `{AGENCY_STATE}/ai-slop-candidates.jsonl`
   (see Memory & Learning → Bridge D); `downstream: [impeccable]`.
-- **Dependencies:** `design-agency-routing` (upstream router) · `prime-as-skill`
-  (session context) · `auto-model-routing` (wave dispatch). Sibling design skills /
-  subagents: `style-enforcer` (HARD GATE) · `visual-qa` (HARD GATE) · `taste-guardian`
-  · `polish-inspector` · `motion-designer` · `superpowers:dispatching-parallel-agents`
-  · `figma:create-design-system-rules` · `chrome-devtools-mcp` (VQA screenshots) ·
-  `impeccable` (AI-slop ban-list source of truth, Bridge D) · `wrap-session` / `ship`
-  (session close + delivery).
+- **Dependencies:** `design-agency-routing` (upstream router). Sibling design skills /
+  subagents: `design-agency:style-enforcer` (HARD GATE) · `design-agency:visual-qa`
+  (HARD GATE) · `design-agency:taste-guardian` · `design-agency:polish-inspector` ·
+  `design-agency:motion-designer` · `design-agency:impeccable` (AI-slop ban-list source
+  of truth, Bridge D) · `{AGENCY_ROOT}/execution/enforce.py` and `check_reports.py`
+  (mechanical gate + report check). A browser for VQA: the built-in browser
+  (`mcp__Claude_Browser__*`) or Claude in Chrome (`mcp__claude-in-chrome__*`).
+  Optional, used only when present in the session's skill list: `prime-as-skill`,
+  `auto-model-routing`, `superpowers:dispatching-parallel-agents`, `wrap-session` /
+  `ship`, a Figma MCP.
 
 ## Engagement Router (classify EVERY session before acting)
 
@@ -120,8 +129,9 @@ client-folder names; `<project>` = the folder the engagement targets.
 | Engagement type                         | Signals                                                       | Protocol                                                                                     |
 | --------------------------------------- | ------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
 | **New brand project**                   | brand identity / logo / brand book from scratch               | Full Phases 1–6 below                                                                        |
-| **Deliverable iteration** (most common) | editing an existing `<project>/ui/*.html` or `brand_book.md`  | **Maintenance & Iteration Mode** below                                                       |
-| **Product prototype**                   | app replication, multi-screen prototype, prototype iterations | `{AGENCY_ROOT}/roles/prototype_lead.md`                                                      |
+| **Deliverable iteration**               | editing an existing `<project>/ui/*.html` or `brand_book.md`  | **Maintenance & Iteration Mode** below                                                       |
+| **Product UI** (most common)            | dashboard, table, KPI row, settings, app screen in a real app (`*.tsx`/`*.vue`/`*.css`) | **Product UI track** below → `{AGENCY_ROOT}/roles/product_ui_lead.md` (`SURFACE_MODE: operate`) |
+| **Product prototype**                   | fake-data app replica, multi-screen clickable prototype        | `{AGENCY_ROOT}/roles/prototype_lead.md`                                                      |
 | **Character / mascot / 3D**             | mascot, character, pose sheet, multi-view, image-to-3D        | `{AGENCY_ROOT}/roles/character_designer.md` (3D models via the external `img2threejs` skill) |
 | **One-off asset**                       | favicon, avatar, social image, single collateral piece        | `{AGENCY_ROOT}/roles/asset_designer.md` — directive binding                                  |
 | **Ops / release / git**                 | release notes, handoff docs, commit/deploy, file moves        | `{AGENCY_ROOT}/roles/project_manager.md` conventions; no design gates                        |
@@ -130,12 +140,16 @@ client-folder names; `<project>` = the folder the engagement targets.
 
 - **Directive first.** No edit to a deliverable without reading that project's
   `style_directive.md` first (see The Binding Contract).
-- **Re-enforce after edits.** After ANY edit to `<project>/ui/*.html`: run the Style
-  Enforcer (`{AGENCY_ROOT}/roles/style_enforcer.md`, or the `style-enforcer` subagent).
-  0 violations before commit, deploy, or user review (see The Binding Contract).
-- **Reports to disk.** QA roles write reports to disk (`motion_audit.md`,
-  `polish_report_*.md`, `taste_report.md`, enforcer, VQA). A transcript-only check did
-  not happen.
+- **Re-enforce after edits.** After ANY edit to `<project>/ui/*.html` or gated product
+  UI: run `execution/enforce.py`, then dispatch the `design-agency:style-enforcer`
+  subagent. 0 violations before commit, deploy, or user review (see The Binding
+  Contract).
+- **Reports to disk, checkably.** Every gate writes `<reports_dir>/<gate>_report_<name>.md`
+  (`enforcer`, `polish`, `motion`, `taste`, `vqa`; `reports_dir` from
+  `.claude/design-agency.json`, default `<project>/reports/`) with a
+  `Verdict: PASS|FAIL|UNMEASURED` line. Before claiming a gate,
+  `python3 {AGENCY_ROOT}/execution/check_reports.py <deliverable>` must exit 0. A
+  transcript-only check did not happen.
 - **Zero agency bleed-through.** In client work, `{AGENCY_RESERVED_TOKENS}` are banned
   outside `{AGENCY_OWN_BRAND_FOLDERS}`.
   A `style_directive.md` may grant a **documented exception** (e.g. a deliberate
@@ -164,9 +178,15 @@ Especially the three imported-vocabulary skills:
   `taste_guardian` (§9 AI Tells). It carries no baseline: the three dials
   (DESIGN_VARIANCE, MOTION_INTENSITY, VISUAL_DENSITY) and `TASTE_MODE` (soft |
   minimalist | brutalist | none) are set per-project by Creative Director in
-  `visual_philosophy.md` (Phase 2). §13 out-of-scope surfaces (dashboards, product UI,
-  prototypes) do not get it — they route to `/ui-ux-pro-max` and
-  `{AGENCY_ROOT}/roles/prototype_lead.md`.
+  `visual_philosophy.md` (Phase 2). App screens (`SURFACE_MODE: operate`) get its
+  measured app-screen rules (`references/app-screens.md`) instead of the page rules.
+- **Surface modes** (Impeccable: persuade | operate | read | experience), declared as
+  `SURFACE_MODE` by the Creative Director. Landing-page tells (eyebrow kickers, em-dash
+  counts, hero rules, scroll cues, identical card grids) apply only to `persuade`;
+  `operate` is graded on task clarity, density and hierarchy, states and accessibility.
+- **Brand Overrides** (`## Brand Overrides` in `style_directive.md`) record deliberate
+  identity choices (mono figures, near-black + one accent, DIN 5008 dashes) with a
+  reason. Every gate honours them; none is improvised mid-review.
 
 `style_enforcer` is the only hard compliance gate. The three skills raise the ceiling on
 craft, originality, and motion; they do not weaken the floor.
@@ -181,30 +201,43 @@ execution, and QA:
    decisions (see Role Roster → `references/role_roster.md`) + the Phase-5 quality roles
    - advisory `heatmap_analyst` / `persona_critic`. Every role works under the binding
      `style_directive.md` (Creative Director, Phase 2) — none begins without reading it.
-3. **Automated Enforcement (Style Enforcer):** programmatic compliance, runs BEFORE
-   VQA; objective violations only (`{AGENCY_ROOT}/roles/style_enforcer.md`).
+3. **Automated Enforcement (Style Enforcer):** `execution/enforce.py` (mechanical,
+   directive-driven) plus the `design-agency:style-enforcer` subagent for the prose rows;
+   runs BEFORE VQA; objective violations only.
 4. **Evaluation (VQA + Evaluation Contracts):** independent grading vs pre-negotiated
    contracts. Per Anthropic "Harness Design for Long-Running Apps," generators praise
    their own work, so evaluation is structurally separated from generation; the VQA
    never self-assesses and only sees Enforcer-passed deliverables (§ below).
-5. **Technical Execution (Official Skills + Scripts):** production output via official
-   Anthropic skills, scripts, and the Node.js pipeline. **Full catalog at
-   `{AGENCY_ROOT}/roles/_official_skills.md`.**
+5. **Technical Execution (Skills + Scripts):** production output via the bundled skills,
+   whichever official skills the session actually lists, and `{AGENCY_ROOT}/execution/`
+   scripts. **Catalog at `{AGENCY_ROOT}/roles/_official_skills.md`.**
 6. **Quality Assurance (two-stage gate):** Stage 1 Style Enforcer (objective); Stage 2
-   only PASSING deliverables reach VQA — `chrome-devtools-mcp` screenshots at desktop
-   (1440px) + mobile (390px), subjective grading, console-error check, route-back to the
-   originating designer, accessibility via `a11y-debugging`. The client never sees
-   unverified work.
+   only PASSING deliverables reach VQA — real browser screenshots at desktop (1440px) +
+   mobile (390px), light + dark where themed, pages served over local http (never
+   `file://`), console-error check, keyboard/focus check, route-back to the originating
+   designer. A VQA run with no browser returns `UNMEASURED`, not PASS. The client never
+   sees unverified work.
 
 ### QA gates are dispatchable subagents (preferred for evaluation)
 
-The five Phase-5 QA gates are ALSO dispatchable subagents:
-`Agent(subagent_type="style-enforcer" | "visual-qa" | "taste-guardian" |
-"polish-inspector" | "motion-designer")`. **Subagent dispatch is PREFERRED for every
-evaluation stage** — it preserves independent-evaluator separation: a generator must not
-grade its own work, so dispatch a fresh subagent that reaches the deliverable with no
-generation context to defend. The `roles/*.md` files remain each gate's authoritative
-spec; the subagent runs that spec in isolation.
+The five Phase-5 QA gates are dispatchable subagents, registered under the plugin
+namespace — the bare name does not resolve:
+`Agent(subagent_type="design-agency:style-enforcer" | "design-agency:visual-qa" |
+"design-agency:taste-guardian" | "design-agency:polish-inspector" |
+"design-agency:motion-designer")`.
+
+- **Subagent dispatch IS the gate.** It preserves independent-evaluator separation: a
+  generator must not grade its own work. An inline enforcement or VQA pass by the
+  orchestrator is a pre-check, never the gate, and never written up as one.
+- **`agents/<gate>.md` is the single authoritative spec** for each gate.
+  `roles/<gate>.md` is a pointer kept for the role roster.
+- **Brief every dispatch** with: the absolute `{AGENCY_ROOT}`, the deliverable path(s),
+  the directive path, `SURFACE_MODE`, the reports dir, and (for VQA) the http URL to
+  open. Subagents reading PNGs must pass `limit` on large reads.
+- **Sequential, never parallel**: the final enforcer run completes before the final VQA
+  starts; VQA must see the enforced file.
+- If the subagent cannot run (agent type missing — check `enabledPlugins` first),
+  say so and stop; do not substitute an inline pass silently.
 
 ## Evaluation Contracts
 
@@ -234,9 +267,9 @@ Four mandatory deliverables unless the client explicitly opts out (sections per 
 Completeness Matrix → `references/completeness_matrix.md`):
 
 1. **Landing Page** (`ui/landing_page.html`) — production-quality single-file HTML via
-   `/frontend-design`, constrained to `style_directive.md`. The hero deliverable.
+   `design-agency:impeccable` craft (or `frontend-design` when enabled), constrained to `style_directive.md`. The hero deliverable.
 2. **Design System** (`ui/design_system.html`) — interactive HTML component reference via
-   `/web-artifacts-builder` or `/frontend-design`. Developer/designer handoff.
+   `design-agency:impeccable` craft (or `web-artifacts-builder` / `frontend-design` when enabled). Developer/designer handoff.
 3. **Brand Book** (`brand_book.md`) — comprehensive identity doc (story, mission/vision/
    values, logo usage, color, typography, voice & tone, imagery, do's & don'ts,
    applications), compiled by the Brandbook Designer.
@@ -280,8 +313,8 @@ System Generator. _Action:_ Creative Director reads `{AGENCY_STATE}/lessons_lear
 consults the Style Librarian for collision checks ONLY (not copying); synthesizes
 `research_context.md` + the **client's brief** into `brand_strategy.md` (decisions trace
 to brief/web research, not past
-projects). Picks a **named** archetype via `/ui-ux-pro-max` (50+ styles, 161 palettes,
-57 font pairings); builds a **Visual Philosophy** via `/canvas-design`. While building
+projects). Picks a **named** archetype via `design-agency:ui-ux-pro-max` (50+ styles, 161 palettes,
+57 font pairings); builds a **Visual Philosophy** (with `canvas-design` when enabled). While building
 the Visual Philosophy, also sets the three taste-skill dials (DESIGN_VARIANCE,
 MOTION_INTENSITY, VISUAL_DENSITY) and `TASTE_MODE` (soft | minimalist | brutalist |
 none) in `visual_philosophy.md`, using taste-skill v2 §1 and the mode files at
@@ -300,7 +333,7 @@ scaffold directly.
 `visual_philosophy.md`, `style_directive.md`; runs `generate_logo.py` for **6 AI visual
 options per concept** across 2-3 distinct routes (18 images min). Color/typography come
 from the directive — no independent invention. Curate the strongest 2-3 per concept;
-present to the USER. Before presenting, run the `visual-qa` subagent on any HTML pages.
+present to the USER. Before presenting, run the `design-agency:visual-qa` subagent on any HTML pages.
 
 **Phase 4 — Refinement & Feedback.** _Roles:_ Logo Designer. _Execution:_
 `generate_logo.py` (feedback loop). _Action:_ Iterate heavily on USER feedback. The Logo
@@ -309,18 +342,20 @@ after every round (→ `{AGENCY_STATE}/logo_feedback_log.json`; feeds the self-i
 loop). Regenerate refined options; finalize logo, colors, type.
 
 **Phase 5 — Application & Development.** _Roles:_ UI/UX Designer, Asset Designer, Design
-System Expert. _Official:_ `/frontend-design`, `/web-artifacts-builder`, `/canvas-design`,
-shadcn/ui CLI. _QA:_ six-stage pipeline + `agent-browser-verify`.
+System Expert. _Generation:_ `design-agency:impeccable` (craft) + `design-agency:taste-skill`;
+official skills (`frontend-design`, `web-artifacts-builder`, `canvas-design`) only when
+the session's skill list shows them enabled; shadcn/ui CLI. _QA:_ six-stage pipeline +
+browser verify.
 
 - _Parallel Execution_ — dispatch all four tracks via
   `superpowers:dispatching-parallel-agents` (sections per Completeness Matrix →
   `references/completeness_matrix.md`):
-  - **A — Landing Page** (`ui/landing_page.html`): UI/UX Designer via `/frontend-design`;
+  - **A — Landing Page** (`ui/landing_page.html`): UI/UX Designer via `design-agency:impeccable` craft (or `frontend-design` when enabled);
     `design-agency:taste-skill` Design Read first, §14 pre-flight written before QA;
     complete, polished, single-file; shadcn/ui patterns (Card, Button, Badge, Tabs) over
     raw HTML; literal font names, not CSS variables.
   - **B — Design System** (`ui/design_system.html`): Design System Expert via
-    `/web-artifacts-builder` or `/frontend-design`; Tailwind v4 `@theme inline` (oklch
+    `design-agency:impeccable` craft (or `web-artifacts-builder` / `frontend-design` when enabled); Tailwind v4 `@theme inline` (oklch
     tokens), shadcn/ui `components.json`, CSS custom properties; also
     `design_system/developer_handoff.md`.
   - **C — Assets/Collateral:** Asset Designer makes collateral.
@@ -332,18 +367,18 @@ shadcn/ui CLI. _QA:_ six-stage pipeline + `agent-browser-verify`.
   grayscale/opacity-reduce/tint; **NEVER** generate/synthesize/approximate a real logo;
   if not found, omit it — no fake logo.
 - _Quality pipeline (six-stage, after all four tracks; dispatch each gate as a subagent):_
-  1. **`motion_designer`** (`motion-designer`) — Emil Kowalski principles within the
-     directive motion spec → `motion_audit.md` per animated deliverable.
-  2. **`polish_inspector`** (`polish-inspector`) — runs the Impeccable sequence
+  1. **`motion_designer`** (`design-agency:motion-designer`) — Emil Kowalski principles within the
+     directive motion spec → `motion_report_<name>.md` per animated deliverable.
+  2. **`polish_inspector`** (`design-agency:polish-inspector`) — runs the Impeccable sequence
      `/audit → /layout → /typeset → /colorize → /harden → /polish`, clamping every
-     suggestion to directive tokens → `polish_report_<deliverable>.md`.
-  3. **`style_enforcer`** (`style-enforcer`) — **Hard gate.** Zero-tolerance objective
+     suggestion to directive tokens → `polish_report_<name>.md`.
+  3. **`style_enforcer`** (`design-agency:style-enforcer`) — **Hard gate.** Zero-tolerance objective
      compliance; 0 violations before proceeding (see The Binding Contract).
-  4. **`taste_guardian`** (`taste-guardian`) — originality + craft vs the three knobs from
+  4. **`taste_guardian`** (`design-agency:taste-guardian`) — originality + craft vs the three knobs from
      `visual_philosophy.md`; collision check vs `{AGENCY_STATE}/style_library.md` →
-     `taste_report.md`; feeds VQA's Originality + Craft sub-scores. On a hard-gate
+     `taste_report_<name>.md`; feeds VQA's Originality + Craft sub-scores. On a hard-gate
      rejection, emit a Bridge-D candidate (§ Memory & Learning).
-  5. **`visual_qa_agent`** (`visual-qa`) — **Hard gate.** Subjective quality (Design
+  5. **`visual_qa_agent`** (`design-agency:visual-qa`) — **Hard gate.** Subjective quality (Design
      Coherence, Originality, Craft, Functionality); 3+/5 on all dimensions. On a
      hard-gate rejection, emit a Bridge-D candidate (§ Memory & Learning).
   6. **`heatmap_analyst` ∥ `persona_critic`** — predictive UX validation, parallel after
@@ -359,16 +394,19 @@ shadcn/ui CLI. _QA:_ six-stage pipeline + `agent-browser-verify`.
      neither invents generic personas/focal points. Findings feed `refactor_agent` +
      `{AGENCY_STATE}/lessons_learned.md` if patterns recur. (Report contents → companion.)
 
-  **Gate order is strict** — polish → enforcer → taste → VQA → persona/heatmap (each
-  stage feeds the next; no craft/vision/saliency spend on work failing an earlier gate).
+  **Gate order is strict and sequential** — polish → enforcer → taste → VQA →
+  persona/heatmap (each stage feeds the next; no craft/vision/saliency spend on work
+  failing an earlier gate). Never run the final enforcer and the final VQA in parallel.
 
-- _Constraint:_ all tracks read `style_directive.md`. _Figma:_ if references exist,
-  invoke `figma:create-design-system-rules`. _Browser Verify:_ after HTML generation,
-  `agent-browser-verify` confirms pages load, checks console errors, validates key UI.
+- _Constraint:_ all tracks read `style_directive.md`. _Figma:_ if references exist and a
+  Figma MCP is connected, pull tokens from it; otherwise ask for exports. _Browser
+  Verify:_ after HTML generation, serve the project over local http
+  (`python3 -m http.server` from the project dir) and load each page in the built-in
+  browser or Claude in Chrome: pages load, console is clean, key UI works.
 
 **Phase 6 — Delivery & Launch.** _Roles:_ Brandbook Designer, Design System Expert,
-Project Manager, Style Librarian, Refactor Agent. _Official:_ `/pdf`, `/pptx` +
-`/theme-factory` (both if requested), `/web-artifacts-builder`. _QA Gate:_ Style Enforcer
+Project Manager, Style Librarian, Refactor Agent. _Official:_ `anthropic-skills:pdf`,
+`anthropic-skills:pptx` (if requested, and if listed in the session). _QA Gate:_ Style Enforcer
 
 - Visual QA (final).
 
@@ -391,7 +429,8 @@ Project Manager, Style Librarian, Refactor Agent. _Official:_ `/pdf`, `/pptx` +
   updates in the same commit.
 
 **Phase 7 — Client Presentation & Proposal (Optional).** _Roles:_ Presentation Creator,
-Proposal Creator. _Official:_ Marp CLI (`tools/` pipeline). _QA Gate:_ Style Enforcer.
+Proposal Creator. _Official:_ Marp CLI (`npx @marp-team/marp-cli`) or the repo's own
+deck pipeline when it has one. _QA Gate:_ Style Enforcer.
 _Action:_ on founder request, produce one or more of: **Brand Identity Reveal Deck**
 (12-16 slides, client's brand, HTML + optional PDF via Marp); **Agency Pitch Deck**
 (10-12 slides, agency brand — Nocturne/Atelier variant); **Project Proposal** (formal
@@ -407,6 +446,29 @@ agency-own brand folders (`{AGENCY_OWN_BRAND_FOLDERS}`) under `proposals/` or
   Learning) so they flow to the impeccable canon. **Recommended next step:** `wrap-session`
   → `ship`.
 
+## Product UI track (Operate)
+
+Entered when the engagement type is `product_ui`, or when the touched files are app
+code (`*.tsx|jsx|vue|svelte|css|scss`) in a repo with a directive. Owner:
+`{AGENCY_ROOT}/roles/product_ui_lead.md` (read it; it carries the full protocol).
+
+1. **Directive first**: `directive_path` in `<repo>/.claude/design-agency.json`, else a
+   `style_directive.md` up the tree, else a root `DESIGN.md`. No directive → ask for one.
+2. **Rules**: `design-agency:taste-skill` `references/app-screens.md` (+ `app-styles.md`),
+   Impeccable `reference/craft-floor.md` and the Operate mode file,
+   `design-agency:ui-ux-pro-max` for the stack. Not the landing-page tells.
+3. **Gates, in order**: `enforce.py --surface operate` on touched files →
+   `design-agency:style-enforcer` → `design-agency:visual-qa` (Operate rubric: task
+   clarity, density & hierarchy, states, accessibility) → `check_reports.py`.
+4. **Verification on auth-gated apps**: a throwaway harness page served by the app's own
+   dev server (realistic + worst-case fixture data), screenshots at 1440 and 390, light
+   and dark, keyboard focus; harness removed before commit. Never sign in with real
+   credentials and never add an auth bypass.
+5. Wire the repo once (optional, recommended): `.claude/design-agency.json` with
+   `directive_path`, `ui_globs`, `reports_dir`, and `negative_signals` for domain
+   vocabulary that is not design (CAD, firmware) — the edit gate then fires on product
+   files.
+
 ## Maintenance & Iteration Mode (post-delivery sessions)
 
 Most real sessions edit existing deliverables, not new projects (a June 2026 audit of 58
@@ -415,14 +477,17 @@ sessions found nearly all skipped the gates — Maintenance Mode closes that gap
 `brand_book.md`, or prototype file is in Maintenance Mode — no announcement, the rules
 just apply.
 
+0. **Edit large showcase files by script, not the Edit tool.** A formatter hook can
+   rewrite a whole `ui/*.html` on Edit (a 17k-line diff once). Make surgical changes with
+   a small script, or set `CC_FORMAT_DISABLE=1` if the repo's hook honours it.
 1. **Directive first.** Read the project's `style_directive.md` before the first edit
    (see The Binding Contract — same binding contract as Phase 5).
-2. **Re-validate after editing.** Run `style_enforcer` (`style-enforcer` subagent) on
+2. **Re-validate after editing.** Run `style_enforcer` (`design-agency:style-enforcer` subagent) on
    every touched HTML deliverable — 0 violations before commit/deploy/review (see The
    Binding Contract); editing does not bypass the hard gate.
-3. **Targeted re-checks.** Touched animations → `motion_designer` (`motion-designer`)
-   re-audits `motion_audit.md`. Added/restructured sections → `polish_inspector`
-   (`polish-inspector`) on the touched file.
+3. **Targeted re-checks.** Touched animations → `motion_designer` (`design-agency:motion-designer`)
+   re-audits its motion report. Added/restructured sections → `polish_inspector`
+   (`design-agency:polish-inspector`) on the touched file.
 4. **Artifact persistence.** Every gate that runs writes/updates its report on disk; a
    transcript-only check did not happen.
 5. **Escalation.** Project Manager updates the Completeness Matrix entry. 3+ maintenance
@@ -474,14 +539,14 @@ write notes to `{AGENCY_STATE}`, never into `{AGENCY_ROOT}/roles/*.md`.
 they are not minted here.
 
 - **Producer:** this orchestrator at **Phase-7 close** (engagement retro), and the QA
-  subagents `taste-guardian` + `visual-qa` on a **hard-gate rejection**.
+  subagents `design-agency:taste-guardian` + `design-agency:visual-qa` on a **hard-gate rejection**.
 - **Artifact (append-only, create dir/file if absent):**
   `{AGENCY_STATE}/ai-slop-candidates.jsonl`. One JSON object per
   line:
   ```json
   {
     "ts": "2026-06-14T12:00:00Z",
-    "source": "taste-guardian",
+    "source": "design-agency:taste-guardian",
     "engagement": "<client/asset id>",
     "tell": "<the anti-pattern, ≤140 char>",
     "evidence": "<file:line or asset ref>",
@@ -489,7 +554,7 @@ they are not minted here.
     "status": "candidate"
   }
   ```
-  - `source` ∈ {`design-agency`,`taste-guardian`,`visual-qa`}.
+  - `source` ∈ {`design-agency`,`design-agency:taste-guardian`,`design-agency:visual-qa`}.
   - `scope` ∈ {`general`,`own_brand`} — routes a promoted rule to the right section of the
     canon. Use `own_brand` only for `{AGENCY_OWN_BRAND_FOLDERS}`-owned tells (a token this
     agency reserves for itself); else `general`.
@@ -544,7 +609,7 @@ Optional deterministic append (when a shell is available), instead of hand-writi
 
 > **Heavyweight tier (eval-backed, separate from this lightweight block):** the taste-rubric
 > sil adapter (self-learning.md §2.1) tunes `taste_guardian.md` rubric thresholds from a
-> rolling window of `taste_report.md` scores + Phase-5 hard-gate pass-rate. It is
+> rolling window of taste-report scores + Phase-5 hard-gate pass-rate. It is
 > **ONE_CLICK / PROSE_RULE** — the loop _proposes_ a scored, logged, reversible rubric edit;
 > a human applies it, and it NEVER writes into the read-only `{AGENCY_ROOT}` (HARD RULE).
 > Ledger: `~/.claude/design-agency/sil/taste-ledger.jsonl`. The Bridge-D candidate stream
@@ -555,7 +620,7 @@ Optional deterministic append (when a shell is available), instead of hand-writi
 The heavyweight self-learning adapter (self-learning.md §2.1) is implemented at
 `<skill>/sil/design-agency_loop.py`, driving the shared kernel at
 `~/.claude/lib/self-improving-loop`. It **tunes the taste-rubric thresholds** the
-`taste-guardian` enforces in Phase 5.
+`design-agency:taste-guardian` enforces in Phase 5.
 
 - **Fitness signal:** mean `taste_report` score per engagement over a rolling window
   (higher is better), with the Phase-5 hard-gate pass-rate as a safety gate. `propose()`
@@ -607,22 +672,25 @@ The MANDATORY enforced standard is the **21-row anti-pattern table → `referenc
 `impeccable` is the canonical source of truth for that ban list; new tells flow there via
 Bridge D (§ Memory & Learning), not by editing the table inline.
 
-## Role Roster (23 Roles)
+## Role Roster (24 Roles)
 
-All roles live at `{AGENCY_ROOT}/roles/<file>` (authoritative spec); QA gates also dispatch
-as subagents (in brackets). **Full roster — Strategy & Discovery, Creative Design, Quality
+All roles live at `{AGENCY_ROOT}/roles/<file>`; the five QA gates' authoritative spec
+is `{AGENCY_ROOT}/agents/<gate>.md` (dispatched as subagents, in brackets). **Full roster — Strategy & Discovery, Creative Design, Quality
 & Enforcement (with HARD GATEs), Presentations & Proposals, Process & Improvement →
 `references/role_roster.md`.** Per-role detail: `{AGENCY_ROOT}/roles/_official_skills.md`.
 
 ## Official Skills & Tooling (Layer 5 — summary)
 
 Production output (frontend HTML, PDFs, presentations, logos, color ramps, SVG
-optimization) is handled by official Anthropic skills (`/frontend-design`,
-`/canvas-design`, `/theme-factory`, `/pdf`, `/pptx`, `/web-artifacts-builder`,
-`/brand-guidelines`, `/ui-ux-pro-max`), `design-agency:taste-skill`, the shadcn/ui CLI,
-the `{AGENCY_ROOT}/execution/` scripts, and the Node.js `tools/` pipeline — each
-operating **within** `style_directive.md`. Sub-agents MUST invoke the appropriate
-official skill rather than hand-produce these formats. 3D reconstruction uses the
+optimization) is handled by the bundled skills (`design-agency:impeccable`,
+`design-agency:taste-skill`, `design-agency:ui-ux-pro-max`, `design-agency:emil-design-eng`),
+the shadcn/ui CLI and the `{AGENCY_ROOT}/execution/` scripts — each operating **within**
+`style_directive.md`. Official Anthropic skills are used **only when the session's skill
+list shows them**: `frontend-design`, `canvas-design`, `theme-factory` and
+`web-artifacts-builder` ship in plugins that are often installed but not enabled, and
+PDF/PPTX/brand-guidelines resolve as `anthropic-skills:pdf` / `:pptx` /
+`:brand-guidelines`. When one is missing, use the bundled equivalent and say so in one
+line; never claim a skill ran that the session does not have. 3D reconstruction uses the
 external `img2threejs` skill (installed at `~/.claude/skills/img2threejs`, not bundled;
 catalog entry in `_official_skills.md`). **Full catalog →
 `{AGENCY_ROOT}/roles/_official_skills.md`.**

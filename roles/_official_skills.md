@@ -1,5 +1,7 @@
 # Official Skills & Tooling Catalog (Technical Execution Layer)
 
+> **Availability (v0.5.0).** Skills marked "(optional)" (`frontend-design`, `web-artifacts-builder`, `canvas-design`, `theme-factory`) ship in Anthropic plugins that are often installed but not enabled. Use one only when the session's skill list shows it; otherwise fall back and say so in one line: `frontend-design` / `web-artifacts-builder` → `design-agency:impeccable` (craft) under the directive; `canvas-design` → write the Visual Philosophy directly; `theme-factory` → the directive's tokens. PDF/PPTX/brand guidelines are `anthropic-skills:pdf` / `:pptx` / `:brand-guidelines`. Bundled skills (`design-agency:*`) are always available. Never record a skill as having run when the session does not have it.
+
 This is **Layer 5** of the agency architecture — the production-grade execution
 layer. Where the agency's creative roles (`{AGENCY_ROOT}/roles/*.md`) make
 domain decisions, the official Anthropic skills, deterministic scripts, and
@@ -15,7 +17,7 @@ PDFs, presentations, or production frontend code.
 
 ## Official Anthropic Skills
 
-### `/frontend-design`
+### `frontend-design` (optional)
 
 Production-grade frontend interfaces with bold, distinctive aesthetics.
 Generates single-file HTML with embedded Tailwind v4 and custom fonts.
@@ -26,7 +28,7 @@ Generates single-file HTML with embedded Tailwind v4 and custom fonts.
 - **Constraint:** output is clamped to `style_directive.md` tokens. Typography
   must use literal font-family names, never unresolved CSS variable references.
 
-### `/canvas-design`
+### `canvas-design` (optional)
 
 Visual art creation through design philosophy.
 
@@ -34,14 +36,14 @@ Visual art creation through design philosophy.
   in Phase 2 to establish the brand's **visual philosophy**, and by the Asset
   Designer for poster/art assets.
 
-### `/theme-factory`
+### `theme-factory` (optional)
 
 Professional theme application with curated color/font pairings.
 
 - **Invoked by:** Brandbook Designer (`{AGENCY_ROOT}/roles/brandbook_designer.md`)
   when PDF/PPTX deliverables are requested.
 
-### `/pdf`
+### `anthropic-skills:pdf`
 
 Full PDF creation, merging, watermarking, and processing using reportlab/pypdf.
 
@@ -49,14 +51,14 @@ Full PDF creation, merging, watermarking, and processing using reportlab/pypdf.
   requests a PDF. PDFs are supplements to, not replacements for, the four
   mandatory deliverables.
 
-### `/pptx`
+### `anthropic-skills:pptx`
 
 Professional PowerPoint creation with anti-slop design principles.
 
 - **Invoked by:** Brandbook Designer — **only** when the client explicitly
   requests a presentation deck.
 
-### `/web-artifacts-builder`
+### `web-artifacts-builder` (optional)
 
 React/TypeScript/shadcn/ui HTML artifacts.
 
@@ -64,13 +66,13 @@ React/TypeScript/shadcn/ui HTML artifacts.
   Design System Expert (`{AGENCY_ROOT}/roles/design_system_expert.md`) for
   component showcases.
 
-### `/brand-guidelines`
+### `anthropic-skills:brand-guidelines`
 
 Anthropic's own brand styling reference. Available as a **structural model** for
 how professional brand guidelines should be organized — not a template to copy
 visually.
 
-### `/ui-ux-pro-max`
+### `design-agency:ui-ux-pro-max`
 
 UI/UX design intelligence with 50+ visual styles, 161 color palettes, 57 font
 pairings, 161 product types, 99 UX guidelines, and 25 chart types.
@@ -95,15 +97,15 @@ design-systems, vocabulary, redesign, block-library) and
 `{AGENCY_ROOT}/skills/taste-skill/references/modes/` (one file per `TASTE_MODE`).
 
 - **Invoked by:** UI/UX Designer (`{AGENCY_ROOT}/roles/uiux_designer.md`) at
-  **generation** time — Design Read before `/frontend-design`, §14 pre-flight written
+  **generation** time — Design Read before `frontend-design` (optional), §14 pre-flight written
   to `<project>/taste_preflight_<deliverable>.md` before QA — and Creative Director
   (`{AGENCY_ROOT}/roles/creative_director.md`) at Phase 2 to set the dials/mode in
   `visual_philosophy.md`.
 - **Consumed by:** `taste_guardian` and `style_enforcer` read §9 as ban-list input.
 - **Constraint:** `style_directive.md` is upstream of every taste-skill rule —
-  directive wins on conflict. Not for §13 out-of-scope surfaces (dashboards, product
-  UI, prototypes, data tables, wizards, code editors, native mobile) — those route to
-  `/ui-ux-pro-max` and `{AGENCY_ROOT}/roles/prototype_lead.md`.
+  directive wins on conflict. App screens (dashboards, product UI, data tables) use its
+  `references/app-screens.md` through `{AGENCY_ROOT}/roles/product_ui_lead.md`; code
+  editors, native mobile and realtime collab UIs stay out of scope.
 - **Source:** vendored from `github.com/Leonxlnx/taste-skill` @ `ce26fc25c0e5`. Licence:
   MIT.
 
@@ -135,7 +137,7 @@ Three.js TypeScript factory, through a gated multi-pass pipeline driven by Pytho
 - **Outputs:** `object-sculpt-spec.json`, `src/create<Name>Model.ts`, comparison sheets
   under `<project>/3d/<name>/`.
 - **Gates:** its own turntable/comparison gates run first (inside the pipeline), then
-  the deliverable still passes through `visual-qa` like any other agency asset.
+  the deliverable still passes through `design-agency:visual-qa` like any other agency asset.
 - **Invoked by:** Character Designer (`{AGENCY_ROOT}/roles/character_designer.md`) for
   the 3D track of a character/mascot engagement.
 - **Licence:** Apache-2.0. Never vendored into the plugin — always resolved from the
@@ -186,8 +188,9 @@ directory.
 
 ## Node.js Design Pipeline Tools
 
-Design pipeline utilities (installed in the project's or agency-own
-`tools/node_modules`).
+Design pipeline utilities. Use a repo-local `tools/node_modules` install when the repo has
+one (the brandbook repo does); otherwise run each through `npx -y <package>`. None ships
+with this plugin.
 
 | Tool                         | Purpose                                                                                                  | Used by                                                                  |
 | ---------------------------- | -------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------ |
@@ -204,13 +207,13 @@ Design pipeline utilities (installed in the project's or agency-own
 
 | Need                                       | Use                                            |
 | ------------------------------------------ | ---------------------------------------------- |
-| Landing page / production frontend HTML    | `/frontend-design`                             |
-| Visual philosophy / poster art             | `/canvas-design`                               |
-| Style archetype + palette selection        | `/ui-ux-pro-max`                               |
-| Interactive prototype / component showcase | `/web-artifacts-builder`                       |
+| Landing page / production frontend HTML    | `frontend-design` (optional)                             |
+| Visual philosophy / poster art             | `canvas-design` (optional)                               |
+| Style archetype + palette selection        | `design-agency:ui-ux-pro-max`                               |
+| Interactive prototype / component showcase | `web-artifacts-builder` (optional)                       |
 | Design system scaffold                     | shadcn/ui CLI                                  |
-| PDF (only on request)                      | `/pdf` (+ `/theme-factory`)                    |
-| Presentation deck (only on request)        | `/pptx` (+ `/theme-factory`) or Marp CLI       |
+| PDF (only on request)                      | `anthropic-skills:pdf` (+ `theme-factory` (optional))                    |
+| Presentation deck (only on request)        | `anthropic-skills:pptx` (+ `theme-factory` (optional)) or Marp CLI       |
 | Logo generation                            | `{AGENCY_ROOT}/execution/generate_logo.py`     |
 | Competitor scrape                          | `{AGENCY_ROOT}/execution/analyze_website.py`   |
 | Saliency / attention heatmap               | `{AGENCY_ROOT}/execution/predict_attention.py` |
@@ -219,7 +222,7 @@ Design pipeline utilities (installed in the project's or agency-own
 
 ---
 
-## Role Roster (23 Roles) — full detail
+## Role Roster (24 Roles) — full detail
 
 All roles live at `{AGENCY_ROOT}/roles/<file>` (the authoritative spec for each).
 SKILL.md carries a compact grouped index; this is the full per-role reference. QA
@@ -240,22 +243,23 @@ gates also dispatch as subagents (parenthesized).
 | Role                 | File                      | Phase     | Purpose                                                                                                                  |
 | -------------------- | ------------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------ |
 | Logo Designer        | `logo_designer.md`        | 3, 4      | AI logo concepts (6 per route), SVG variants, feedback loop                                                              |
-| UI/UX Designer       | `uiux_designer.md`        | 5         | Landing pages, UI mockups via `/frontend-design`                                                                         |
+| UI/UX Designer       | `uiux_designer.md`        | 5         | Landing pages, UI mockups via `frontend-design` (optional)                                                                         |
 | Asset Designer       | `asset_designer.md`       | 5         | Social media, business cards, email signatures, collateral                                                               |
 | Design System Expert | `design_system_expert.md` | 5         | Interactive design system HTML, Tailwind config, developer handoff                                                       |
 | Brandbook Designer   | `brandbook_designer.md`   | 5, 6      | Brand book (HTML + MD), 10-section template                                                                              |
 | Character Designer   | `character_designer.md`   | Asset     | Mascots, characters, pose sheets, multi-view, 3D-prep — asset contract + consistency gate before review                  |
 | Prototype Lead       | `prototype_lead.md`       | Prototype | Product prototypes: classification, design brief before code, token compliance, regression-checked QA loop, handoff docs |
+| Product UI Lead      | `product_ui_lead.md`      | Product UI | Operate surfaces in real app code: directive via `.claude/design-agency.json`, taste app-screens + Impeccable Operate rules, `enforce.py --surface operate`, harness-page verification on auth-gated apps |
 
 ### Quality & Enforcement
 
 | Role             | File                                       | Phase   | Purpose                                                                                                                                                                                                                               |
 | ---------------- | ------------------------------------------ | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Motion Designer  | `motion_designer.md` (`motion-designer`)   | 5       | Emil Kowalski motion within directive easing/duration; produces `motion_audit.md`                                                                                                                                                     |
-| Polish Inspector | `polish_inspector.md` (`polish-inspector`) | 5       | Orchestrates the forked Impeccable suite (18 sub-skills at `{AGENCY_ROOT}/skills/`) with directive-clamped suggestions; produces `polish_report_<deliverable>.md`                                                          |
-| Style Enforcer   | `style_enforcer.md` (`style-enforcer`)     | 5, 6, 7 | Automated directive compliance (colors, fonts, layout, anti-patterns) — **HARD GATE**                                                                                                                                                 |
-| Taste Guardian   | `taste_guardian.md` (`taste-guardian`)     | 5       | Anti-slop evaluation against the three knobs from `visual_philosophy.md`; collision check vs `{AGENCY_STATE}/style_library.md`; feeds Visual QA                                                                                       |
-| Visual QA Agent  | `visual_qa_agent.md` (`visual-qa`)         | 3, 5, 6 | Screenshot-based quality grading, accessibility audit, browser verification — **HARD GATE**                                                                                                                                           |
+| Motion Designer  | `motion_designer.md` (`design-agency:motion-designer`)   | 5       | Emil Kowalski motion within directive easing/duration; produces `motion_report_<name>.md`                                                                                                                                                   |
+| Polish Inspector | `polish_inspector.md` (`design-agency:polish-inspector`) | 5       | Orchestrates the forked Impeccable suite (18 sub-skills at `{AGENCY_ROOT}/skills/`) with directive-clamped suggestions; produces `polish_report_<name>.md`                                                          |
+| Style Enforcer   | `style_enforcer.md` (`design-agency:style-enforcer`)     | 5, 6, 7 | Automated directive compliance (colors, fonts, layout, anti-patterns) — **HARD GATE**                                                                                                                                                 |
+| Taste Guardian   | `taste_guardian.md` (`design-agency:taste-guardian`)     | 5       | Anti-slop evaluation against the three knobs from `visual_philosophy.md`; collision check vs `{AGENCY_STATE}/style_library.md`; feeds Visual QA                                                                                       |
+| Visual QA Agent  | `visual_qa_agent.md` (`design-agency:visual-qa`)         | 3, 5, 6 | Screenshot-based quality grading, accessibility audit, browser verification — **HARD GATE**                                                                                                                                           |
 | Heatmap Analyst  | `heatmap_analyst.md`                       | 5       | Saliency model (`{AGENCY_ROOT}/execution/predict_attention.py`) over screenshots; verifies directive focal points win attention; produces `heatmap_report_<deliverable>.html` + overlays. **Advisory**                                |
 | Persona Critic   | `persona_critic.md`                        | 5       | Project-persona vision walkthroughs (from `research_context.md` / `brand_strategy.md`); per-persona friction, drop-off, token-cited fixes; cross-references heatmap zones; produces `persona_report_<deliverable>.html`. **Advisory** |
 
@@ -330,9 +334,9 @@ report-content specs each gate must satisfy (the gate roles own them):
 
 | Artifact                            | Required Contents                                                                                                                                                                                                   | Gate                                                                                                                                |
 | ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
-| `motion_audit.md`                   | Per-deliverable: every animation classified, justified, directive tokens cited, reduced-motion fallback confirmed                                                                                                   | Included in motion_designer output; verified by Style Enforcer                                                                      |
-| `polish_report_<deliverable>.md`    | Per-deliverable: directive tokens referenced, suggestions applied (before/after), suggestions rejected (with reason), P0/P1 findings from /audit                                                                    | Included in polish_inspector output; reviewed before Style Enforcer                                                                 |
-| `taste_report.md`                   | Knobs stated, anti-slop findings, craft signals present/missing, bleed-through check, collision check, Originality + Craft scores                                                                                   | Included in taste_guardian output; consumed by Visual QA                                                                            |
+| `motion_report_<name>.md`          | Per-deliverable: every animation classified, justified, directive tokens cited, reduced-motion fallback confirmed                                                                                                   | Included in motion_designer output; verified by Style Enforcer                                                                      |
+| `polish_report_<name>.md`          | Per-deliverable: directive tokens referenced, suggestions applied (before/after), suggestions rejected (with reason), P0/P1 findings from /audit                                                                    | Included in polish_inspector output; reviewed before Style Enforcer                                                                 |
+| `taste_report_<name>.md`           | Knobs stated, anti-slop findings, craft signals present/missing, bleed-through check, collision check, Originality + Craft scores                                                                                   | Included in taste_guardian output; consumed by Visual QA                                                                            |
 | `heatmap_report_<deliverable>.html` | Predictor name, knobs stated, intended focal points, top-5 AOIs per viewport, focal-point match table (rank/IoU/share/verdict), diagnoses + token-cited recommendations, cross-viewport synthesis, advisory verdict | **Advisory** — after Visual QA passes; `focal_attention_score < 0.5` alerts the originating designer but does not block delivery    |
 | `persona_report_<deliverable>.html` | Personas evaluated, knobs stated, per-persona walkthrough (first impression, scan path, friction, drop-off risk, what works, token-cited fixes), cross-persona synthesis, heatmap cross-reference, advisory verdict | **Advisory** — after Visual QA passes; halts if personas are missing/under-specified (→ Creative Director); does not block delivery |
 

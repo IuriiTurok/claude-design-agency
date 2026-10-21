@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Fixture Co</title>
+<style>
+  body { background: #FAFAF9; color: #333333; font-family: Inter, sans-serif; }
+  .hero { min-height: 100vh; }
+  .nav { position: fixed; z-index: 100; }
+  .card { transition: all 300ms ease; }
+  .loader { animation: spin 1s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+<nav class="nav"></nav>
+<section class="hero">
+  <h1>Build faster — ship smarter</h1>
+  <div class="scroll-cue">Scroll down to explore</div>
+</section>
+<section>
+  <span class="eyebrow-x">01 —</span>
+  <h2>Features</h2>
+  <div class="card" onclick="openCard()">Card</div>
+  <div class="loader"></div>
+</section>
+<svg viewBox="0 0 10 10"><rect fill="#123456" width="10" height="10"/></svg>
+</body>
+</html>

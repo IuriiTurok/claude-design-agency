@@ -1,0 +1,7 @@
+/* Token file: raw hex is allowed here, even off-palette. */
+@font-face { font-family: "Geist Sans"; src: url("geist.woff2"); }
+:root {
+  --bg: #FAFAF9;
+  --accent: #10B981;
+  --legacy: #abcdef;
+}

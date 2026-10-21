@@ -77,8 +77,8 @@ python3 $I2T/forge/next.py --state .img2threejs/state.json object-sculpt-spec.js
 
 **Gates.**
 1. **img2threejs gates first — the hard gate for likeness.** Its deterministic gates (turntable, self-intersection, attachment anchors, `diagnose_render`) and the per-pass comparison sheet (`forge/stage4_review/make_comparison_sheet.py --reference <img> --render <shot> --out renders/<pass>_cmp.png`) run on every pass. Fail a pass when an identity-defining feature from the anatomy baseline is wrong, even if the global score looks fine. Never claim "done" when a pass says "improved" — improved is not accepted.
-2. **Then `visual-qa`** grades the rendered preview like any other deliverable.
-3. **`style-enforcer`** checks the rendered palette against `style_directive.md`.
+2. **Then `design-agency:visual-qa`** grades the rendered preview like any other deliverable.
+3. **`design-agency:style-enforcer`** checks the rendered palette against `style_directive.md`.
 
 **Record each pass** in `pose_sheet_inventory.md`, or in a `<project>/3d_inventory.md` table:
 
@@ -93,6 +93,14 @@ python3 $I2T/forge/next.py --state .img2threejs/state.json object-sculpt-spec.js
 - `<project>/pose_sheet_inventory.md` — table of every generated asset: pose, view, file path, status (draft/approved/superseded).
 - Assets under `<project>/assets/characters/<name>/`, versioned by folder (`v1/`, `v2/`) with the inventory marking the current version.
 - 3D track: `<project>/3d/<name>/` containing `.img2threejs/state.json`, `assessment.json`, `object-sculpt-spec.json`, `src/create<Name>Model.ts`, and `renders/` (per-pass renders + comparison sheets); per-pass records in `pose_sheet_inventory.md` or `<project>/3d_inventory.md`.
+
+## Gotchas (from shipped character work, 2026-10)
+
+- **A-pose prompts:** never say "arms raised 40 degrees" (image models lift to a cheer or T-pose). Say "arms point down-and-out like the letter A, hands at hip height, below the shoulders", and name the facing for 3/4 and side views ("face toward the viewer's right, like image 2") or the view comes back mirrored.
+- **Background removal before a white-unblend:** take rembg's matte with `remove(..., only_mask=True)` and pair it with the source RGB; rembg's own RGBA blends edge RGB toward black and the unblend turns it into a dark outline.
+- **Before rigging a generated mesh** (Meshy or similar): slice it into cross-section contours and check that each arm is separate from the torso down to the armpit. Arms-down inputs fuse arms to the torso, and every raise then makes a "bat-wing" web no weighting can fix. Generate from arms-out (A-pose) views.
+- **glTF imports split along UV seams** (thousands of islands): weld at 1e-6 before weighting, but capture custom normals first and restore them with `normals_split_custom_set`, or the weld scrambles corners.
+- **Blender 5.x** has no `Action.fcurves` (use `keyframe_insert`, slots and channelbags). For a GLB export keep `rig.animation_data` with `action=None`; `animation_data_clear()` makes the exporter emit zero clips. Driver-driven shape keys do export per clip with deform-bones-only.
 
 ## What this skill does NOT do
 

@@ -33,7 +33,7 @@ NOT active.
 **Expected behaviour:** The skill calls `AskUserQuestion` once with exactly
 three options ("Use design agency (Recommended)", "Quick inline design (no
 agency gates)", "Not design work"). After the user chooses any option, it runs
-`scripts/log_override.py "da_test0001" "prototype" 0.6 "<mapped_choice>"` before
+`python3 "<plugin_root>/skills/design-agency-routing/scripts/log_override.py" "da_test0001" "prototype" 0.6 "<mapped_choice>"` (absolute path from the block's `plugin_root`) before
 doing any work.
 
 **PASS:** Exactly one `AskUserQuestion` is issued; `log_override.py` is called

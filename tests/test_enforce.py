@@ -184,12 +184,15 @@ class OrphanClassesInJs(unittest.TestCase):
         }
         # Applied only from JS strings; none defined in inline <style> or linked CSS.
         self.assertEqual(
-            orphans, {".ghost-panel", ".is-zz", ".row-on", ".badge-q", ".esc-cls", ".nest-on"}
+            orphans,
+            {".ghost-panel", ".is-zz", ".row-on", ".badge-q", ".esc-cls", ".nest-on"},
         )
 
     def test_extra_css_resolves(self):
         extra = Path(TMP) / "extra.css"
-        extra.write_text(".ghost-panel{} .is-zz{} .row-on{} .badge-q{} .esc-cls{} .nest-on{}")
+        extra.write_text(
+            ".ghost-panel{} .is-zz{} .row-on{} .badge-q{} .esc-cls{} .nest-on{}"
+        )
         proc, res = run_json(
             FIX / "orphan_js.html", "--directive", DIRECTIVE, "--css", extra
         )
@@ -199,7 +202,7 @@ class OrphanClassesInJs(unittest.TestCase):
         page = Path(TMP) / "dyn.html"
         page.write_text(
             "<style>.pill{} .on{}</style>\n<script>\n"
-            "const a = `<span class=\"pill status-${s}\">x</span>`;\n"
+            'const a = `<span class="pill status-${s}">x</span>`;\n'
             "const b = `<i class=\"pill ${s === 'ok' ? 'on' : ''}\">y</i>`;\n"
             "</script>\n"
         )
@@ -267,6 +270,152 @@ class ReservedTokens(unittest.TestCase):
         self.assertEqual(proc.returncode, 0, res["violations"])
 
 
+class PageQualityRules(unittest.TestCase):
+    """v0.6.0 accessibility / performance / conversion rules: one positive
+    and one negative case each."""
+
+    def lint(self, name, body, *extra):
+        page = Path(TMP) / name
+        page.write_text(body)
+        return run_json(page, "--directive", DIRECTIVE, *extra)[1]
+
+    def hits(self, res, rule):
+        return [v for v in res["violations"] if v["rule"] == rule]
+
+    def test_img_alt_missing(self):
+        res = self.lint(
+            "pq_alt.html",
+            '<img src="a.png" width="10" height="10">\n'
+            '<img src="b.png" alt="" width="10" height="10">\n'
+            '<img src="c.png" alt="A chart" title="no alt here" width="10" height="10">\n'
+            "<script>const t = '<img src=\"d.png\">';</script>\n",
+        )
+        got = self.hits(res, "img-alt-missing")
+        self.assertEqual([v["line"] for v in got], [1])
+        self.assertEqual(set(got[0]), {"rule", "file", "line", "excerpt", "message"})
+
+    def test_img_alt_missing_jsx(self):
+        res = self.lint(
+            "pq_alt.tsx",
+            "export const A = (p) => (\n"
+            "  <>\n"
+            "    <img src={p.src} />\n"
+            "    <img src={p.src} alt={p.alt} />\n"
+            "    <img {...p} />\n"
+            "    <Img src={p.src} />\n"
+            "  </>\n"
+            ");\n",
+        )
+        self.assertEqual([v["line"] for v in self.hits(res, "img-alt-missing")], [3])
+        # sizes live in CSS / parent components there: HTML-only rules stay off
+        self.assertNotIn("img-dimensions-missing", res["rules_run"])
+        self.assertNotIn("form-control-unlabelled", res["rules_run"])
+        self.assertNotIn("heading-level-skip", res["rules_run"])
+
+    def test_img_dimensions_missing(self):
+        res = self.lint(
+            "pq_dims.html",
+            '<img src="a.png" alt="">\n'
+            '<img src="b.png" alt="" width="10">\n'
+            '<img src="c.png" alt="" width="10" height="10">\n'
+            '<img src="d.png" alt="" style="width:100%; aspect-ratio: 16 / 9">\n',
+        )
+        self.assertEqual(
+            [v["line"] for v in self.hits(res, "img-dimensions-missing")], [1, 2]
+        )
+
+    def test_html_lang_missing(self):
+        res = self.lint(
+            "pq_lang_bad.html", "<!doctype html>\n<html>\n<body></body></html>\n"
+        )
+        self.assertEqual([v["line"] for v in self.hits(res, "html-lang-missing")], [2])
+        res = self.lint(
+            "pq_lang_ok.html",
+            '<!doctype html>\n<html lang="de">\n<body></body></html>\n',
+        )
+        self.assertEqual(self.hits(res, "html-lang-missing"), [])
+        res = self.lint("pq_lang_fragment.html", "<section><p>partial</p></section>\n")
+        self.assertEqual(self.hits(res, "html-lang-missing"), [])
+
+    def test_form_control_unlabelled(self):
+        res = self.lint(
+            "pq_form.html",
+            "<form>\n"
+            '<input type="email" name="email" placeholder="Email">\n'
+            '<select name="plan"><option>A</option></select>\n'
+            '<textarea name="msg"></textarea>\n'
+            '<label for="n">Name</label><input id="n" name="name">\n'
+            '<label>Company <input name="org"></label>\n'
+            '<input name="q" aria-label="Search">\n'
+            '<input name="t" title="Phone">\n'
+            '<input type="hidden" name="token">\n'
+            '<input name="trap" hidden>\n'
+            '<input type="submit" value="Send">\n'
+            "</form>\n",
+        )
+        got = self.hits(res, "form-control-unlabelled")
+        self.assertEqual([v["line"] for v in got], [2, 3, 4])
+        self.assertIn("<input email>", got[0]["message"])
+
+    def test_heading_level_skip(self):
+        res = self.lint(
+            "pq_headings.html",
+            "<h1>One</h1>\n<h2>Two</h2>\n<h4>Four</h4>\n<h2>Back up is fine</h2>\n<h3>Three</h3>\n",
+        )
+        got = self.hits(res, "heading-level-skip")
+        self.assertEqual([v["line"] for v in got], [3])
+        self.assertIn("<h4> follows <h2>", got[0]["message"])
+        res = self.lint(
+            "pq_headings_ok.html", "<h1>One</h1>\n<h2>Two</h2>\n<h3>Three</h3>\n"
+        )
+        self.assertEqual(self.hits(res, "heading-level-skip"), [])
+
+    def test_cta_contact_link(self):
+        body = (
+            "<style>.btn{} .btn-primary{} .hero-cta{}</style>\n"
+            '<a class="btn btn-primary" href="mailto:hi@example.com">Contact us</a>\n'
+            '<a class="hero-cta" href="MAILTO:hi@example.com">Write</a>\n'
+            '<a href="mailto:hi@example.com">hi@example.com</a>\n'
+            '<a class="btn" href="/contact/">Contact us</a>\n'
+        )
+        res = self.lint("pq_cta.html", body)
+        self.assertEqual(
+            [v["line"] for v in self.hits(res, "cta-contact-link")], [2, 3]
+        )
+        res = self.lint("pq_cta.html", body, "--surface", "operate")
+        self.assertNotIn("cta-contact-link", res["rules_run"])
+
+    def test_font_remote_css(self):
+        res = self.lint(
+            "pq_fonts.html",
+            '<link rel="preconnect" href="https://fonts.googleapis.com">\n'
+            '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces">\n'
+            '<link href="https://use.typekit.net/abc1def.css" rel="stylesheet">\n'
+            '<link rel="stylesheet" href="fonts/local.css">\n',
+        )
+        self.assertEqual([v["line"] for v in self.hits(res, "font-remote-css")], [2, 3])
+        res = self.lint(
+            "pq_fonts.css",
+            '@import url("https://fonts.googleapis.com/css2?family=Fraunces");\n'
+            '@import "local.css";\n',
+        )
+        self.assertEqual([v["line"] for v in self.hits(res, "font-remote-css")], [1])
+
+    def test_new_rules_waivable(self):
+        directive = Path(TMP) / "pq_directive.md"
+        directive.write_text(
+            DIRECTIVE.read_text()
+            + "\n## Brand Overrides\n\n- allow `font-remote-css` — fonts stay on the Google CDN (client decision)\n"
+        )
+        page = Path(TMP) / "pq_waived.html"
+        page.write_text(
+            '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces">\n'
+        )
+        proc, res = run_json(page, "--directive", directive)
+        self.assertEqual(proc.returncode, 0, res["violations"])
+        self.assertEqual([w["rule"] for w in res["waived"]], ["font-remote-css"])
+
+
 class Report(unittest.TestCase):
     def test_report_contents(self):
         report = Path(TMP) / "enforcer_report.md"
@@ -302,7 +451,18 @@ class Cli(unittest.TestCase):
     def test_list_rules(self):
         proc = run("--list-rules")
         self.assertEqual(proc.returncode, 0)
-        for rule in ("raw-hex-off-palette", "orphan-class", "missing-tabular-nums"):
+        for rule in (
+            "raw-hex-off-palette",
+            "orphan-class",
+            "missing-tabular-nums",
+            "img-alt-missing",
+            "img-dimensions-missing",
+            "html-lang-missing",
+            "form-control-unlabelled",
+            "heading-level-skip",
+            "cta-contact-link",
+            "font-remote-css",
+        ):
             self.assertIn(rule, proc.stdout)
 
     def test_usage_errors(self):

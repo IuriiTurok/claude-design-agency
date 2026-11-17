@@ -20,7 +20,7 @@ Read `${CLAUDE_PLUGIN_ROOT}/skills/impeccable/context-protocol.md` and follow th
 Understand current performance and identify problems:
 
 1. **Measure current state**:
-   - **Core Web Vitals**: LCP, FID/INP, CLS scores
+   - **Core Web Vitals**: LCP, INP, CLS scores
    - **Load time**: Time to interactive, first contentful paint
    - **Bundle size**: JavaScript, CSS, image sizes
    - **Runtime performance**: Frame rate, memory usage, CPU usage
@@ -204,20 +204,22 @@ const observer = new IntersectionObserver((entries) => {
 
 ## Core Web Vitals Optimization
 
-### Largest Contentful Paint (LCP < 2.5s)
+Targets are the "good" thresholds, measured at the 75th percentile of page loads: LCP ≤ 2.5 s, INP ≤ 200 ms, CLS ≤ 0.1. INP replaced FID as a Core Web Vital in March 2024, so FID is no longer a target.
+
+### Largest Contentful Paint (LCP ≤ 2.5 s)
 - Optimize hero images
 - Inline critical CSS
 - Preload key resources
 - Use CDN
 - Server-side rendering
 
-### First Input Delay (FID < 100ms) / INP (< 200ms)
+### Interaction to Next Paint (INP ≤ 200 ms)
 - Break up long tasks
 - Defer non-critical JavaScript
 - Use web workers for heavy computation
 - Reduce JavaScript execution time
 
-### Cumulative Layout Shift (CLS < 0.1)
+### Cumulative Layout Shift (CLS ≤ 0.1)
 - Set dimensions on images and videos
 - Don't inject content above existing content
 - Use `aspect-ratio` CSS property
@@ -241,7 +243,7 @@ const observer = new IntersectionObserver((entries) => {
 - Performance monitoring (Sentry, DataDog, New Relic)
 
 **Key metrics**:
-- LCP, FID/INP, CLS (Core Web Vitals)
+- LCP, INP, CLS (Core Web Vitals)
 - Time to Interactive (TTI)
 - First Contentful Paint (FCP)
 - Total Blocking Time (TBT)

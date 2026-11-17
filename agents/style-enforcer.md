@@ -63,7 +63,12 @@ raw-hex-off-palette, raw-hex-outside-tokens, font-off-directive, reserved-token-
 (honours `own_brand_folders`, `reserved_tokens` and `carve_outs` from
 `python3 {AGENCY_ROOT}/execution/state_paths.py --brand`), z-index-literal, div-onclick,
 transition-all, loading-spinner, orphan-class, em-dash (persuade, read), h-screen-hero,
-scroll-cue, section-number-eyebrow (persuade), missing-tabular-nums (operate).
+scroll-cue, section-number-eyebrow (persuade), missing-tabular-nums (operate); and since
+v0.6.0 the accessibility, stability and conversion floor: img-alt-missing,
+html-lang-missing, img-dimensions-missing, form-control-unlabelled, heading-level-skip
+(HTML), cta-contact-link (persuade: a button-styled `mailto:`), font-remote-css (remote
+Google Fonts or Typekit CSS). All are violations; a directive may waive one with a
+`## Brand Overrides` line and its reason.
 
 Paste its violations verbatim into the report. Never re-judge or drop a script finding. Only
 Brand Overrides waive, and the script already applies them. If the script cannot run, the
@@ -147,7 +152,7 @@ or breakpoint value before asserting it.
 
 | Deliverable          | Required sections                                                                                                                                        |
 | -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `landing_page.html`  | Navigation, Hero, Trust/Social Proof, Benefits (3+), How It Works (3+ steps), Features (6+), Testimonial/Quote, CTA, Footer (4 columns)                  |
+| `landing_page.html`  | The content jobs in `{AGENCY_ROOT}/skills/design-agency/references/completeness_matrix.md` ("Landing page content jobs"). Check each job is done by real content; do not require a fixed section list, order or card count |
 | `design_system.html` | Color Swatches, Typography Specimen, Spacing Scale, Buttons (primary/secondary/ghost/destructive), Cards, Form Inputs, Badges/Tags, Data Table, Icon Set |
 | `brand_book.html`    | Hero/Cover, Strategy, Logo (inline SVG), Colors, Typography, Components, Motion, Do-Not-List (12+ rules), Accessibility, File Reference                  |
 

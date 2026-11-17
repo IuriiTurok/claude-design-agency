@@ -100,7 +100,9 @@ change; makes the implicit contract explicit per rubric row 14).
   `{AGENCY_ROOT}` (plugin install dir, resolved at runtime); `{AGENCY_STATE}` (writable
   state dir, env-overridable via `DESIGN_AGENCY_STATE_DIR`).
 - **Outputs:** four mandatory deliverables per project — `ui/landing_page.html`,
-  `ui/design_system.html`, `ui/brand_book.html`, `brand_book.md`. QA report artifacts —
+  `ui/design_system.html`, `ui/brand_book.html`, `brand_book.md`. For persuade surfaces
+  `conversion_brief.md`; for a live-site redesign also `research/baseline_inventory.json`,
+  `<reports_dir>/parity_report.md`, `<reports_dir>/shots/` and `probe_*.json`. QA report artifacts —
   `<reports_dir>/{motion,polish,enforcer,taste,vqa}_report_<name>.md`, advisory
   `heatmap_report_*.html` / `persona_report_*.html`. State updates —
   `{AGENCY_STATE}/style_library.md`, `{AGENCY_STATE}/lessons_learned.md`,
@@ -114,7 +116,9 @@ change; makes the implicit contract explicit per rubric row 14).
   (HARD GATE) · `design-agency:taste-guardian` · `design-agency:polish-inspector` ·
   `design-agency:motion-designer` · `design-agency:impeccable` (AI-slop ban-list source
   of truth, Bridge D) · `{AGENCY_ROOT}/execution/enforce.py` and `check_reports.py`
-  (mechanical gate + report check). A browser for VQA: the built-in browser
+  (mechanical gate + report check) · `execution/site_inventory.py` (baseline capture and
+  redesign parity gate) · `execution/probes/page_probe.js` (in-browser performance,
+  accessibility and conversion probe) · `{AGENCY_ROOT}/references/modern_platform.md`. A browser for VQA: the built-in browser
   (`mcp__Claude_Browser__*`) or Claude in Chrome (`mcp__claude-in-chrome__*`).
   Optional, used only when present in the session's skill list: `prime-as-skill`,
   `auto-model-routing`, `superpowers:dispatching-parallel-agents`, `wrap-session` /
@@ -126,15 +130,16 @@ Normally entered via `design-agency-routing` after a `<design-agency-decision>` 
 routed or direct, classify before any creative action. Generalizes to ANY repo — no fixed
 client-folder names; `<project>` = the folder the engagement targets.
 
-| Engagement type                         | Signals                                                       | Protocol                                                                                     |
-| --------------------------------------- | ------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
-| **New brand project**                   | brand identity / logo / brand book from scratch               | Full Phases 1–6 below                                                                        |
-| **Deliverable iteration**               | editing an existing `<project>/ui/*.html` or `brand_book.md`  | **Maintenance & Iteration Mode** below                                                       |
-| **Product UI** (most common)            | dashboard, table, KPI row, settings, app screen in a real app (`*.tsx`/`*.vue`/`*.css`) | **Product UI track** below → `{AGENCY_ROOT}/roles/product_ui_lead.md` (`SURFACE_MODE: operate`) |
-| **Product prototype**                   | fake-data app replica, multi-screen clickable prototype        | `{AGENCY_ROOT}/roles/prototype_lead.md`                                                      |
-| **Character / mascot / 3D**             | mascot, character, pose sheet, multi-view, image-to-3D        | `{AGENCY_ROOT}/roles/character_designer.md` (3D models via the external `img2threejs` skill) |
-| **One-off asset**                       | favicon, avatar, social image, single collateral piece        | `{AGENCY_ROOT}/roles/asset_designer.md` — directive binding                                  |
-| **Ops / release / git**                 | release notes, handoff docs, commit/deploy, file moves        | `{AGENCY_ROOT}/roles/project_manager.md` conventions; no design gates                        |
+| Engagement type              | Signals                                                                                                                       | Protocol                                                                                                 |
+| ---------------------------- | ----------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| **New brand project**        | brand identity / logo / brand book from scratch                                                                               | Full Phases 1–6 below                                                                                    |
+| **Live-site redesign**       | "improve / modernise / redesign this website", a URL or a deployed site with its source, a conversion, UX or bounce complaint | **Live-site Redesign track** below → baseline first, then `{AGENCY_ROOT}/roles/conversion_strategist.md` |
+| **Deliverable iteration**    | editing an existing `<project>/ui/*.html` or `brand_book.md`                                                                  | **Maintenance & Iteration Mode** below                                                                   |
+| **Product UI** (most common) | dashboard, table, KPI row, settings, app screen in a real app (`*.tsx`/`*.vue`/`*.css`)                                       | **Product UI track** below → `{AGENCY_ROOT}/roles/product_ui_lead.md` (`SURFACE_MODE: operate`)          |
+| **Product prototype**        | fake-data app replica, multi-screen clickable prototype                                                                       | `{AGENCY_ROOT}/roles/prototype_lead.md`                                                                  |
+| **Character / mascot / 3D**  | mascot, character, pose sheet, multi-view, image-to-3D                                                                        | `{AGENCY_ROOT}/roles/character_designer.md` (3D models via the external `img2threejs` skill)             |
+| **One-off asset**            | favicon, avatar, social image, single collateral piece                                                                        | `{AGENCY_ROOT}/roles/asset_designer.md` — directive binding                                              |
+| **Ops / release / git**      | release notes, handoff docs, commit/deploy, file moves                                                                        | `{AGENCY_ROOT}/roles/project_manager.md` conventions; no design gates                                    |
 
 ### Hard Rules (all engagement types)
 
@@ -155,6 +160,18 @@ client-folder names; `<project>` = the folder the engagement targets.
   A `style_directive.md` may grant a **documented exception** (e.g. a deliberate
   Inter/JetBrains Mono aerospace exception) — written down, never improvised.
 - **New-project isolation.** Never derive a new client's aesthetics from sibling folders.
+- **A page has one job.** Any persuade surface that is built, restructured or redesigned
+  has a `<project>/conversion_brief.md` (owner: `{AGENCY_ROOT}/roles/conversion_strategist.md`)
+  naming its one primary conversion before the build starts. No invented numbers: a
+  rate, benchmark or lift carries its source and date, or it is written as a hypothesis.
+- **Measured, not asserted.** Performance, accessibility and conversion-path findings
+  come from `execution/probes/page_probe.js` run in a real browser and from
+  `execution/site_inventory.py`; a gate that could not run them reports `UNMEASURED`.
+- **Gates read a frozen build.** No one edits or rebuilds a deliverable while a gate is
+  reading it: fixes wait until the running gate reports, or the gate is told to restart
+  on the new build. A gate that sees a file change under it discards its readings and
+  re-runs on a copy. After a gate fails, re-check with a delta run (resume the same agent
+  with the list of changes), not a cold restart.
 
 ## The Binding Contract (read first, applies everywhere)
 
@@ -243,8 +260,9 @@ namespace — the bare name does not resolve:
 
 Before Phase 5, the Project Manager negotiates an Evaluation Contract with the VQA
 specifying: **deliverable inventory** (exact files); **testable success criteria per
-deliverable** (e.g. "landing page has nav, hero, benefits, how-it-works, features,
-testimonial, CTA, footer"); **grading dimensions** — Design Quality (coherent whole vs
+deliverable** (e.g. "the landing page does the content jobs of the Completeness Matrix in
+the order `conversion_brief.md` sets, and its primary action is reachable in the first
+viewport at 390 and 1440"); **grading dimensions** — Design Quality (coherent whole vs
 collection of parts), Originality (custom vs template), Craft (typography, spacing, color
 harmony), Functionality (usability, completeness); and the **Completeness matrix**
 ([project] x [deliverable] grid, 100% filled before close — full grid at
@@ -320,12 +338,16 @@ MOTION_INTENSITY, VISUAL_DENSITY) and `TASTE_MODE` (soft | minimalist | brutalis
 none) in `visual_philosophy.md`, using taste-skill v2 §1 and the mode files at
 `{AGENCY_ROOT}/skills/taste-skill/references/modes/`. Selects the
 primary accent, then invokes the **Color System Generator** for the full palette
-(10-shade accent ramp, temperature-matched neutrals, semantics, WCAG AA contrast pairs)
+(10-shade accent ramp, temperature-matched neutrals, semantics, WCAG 2.2 AA contrast pairs)
 → CSS custom properties + Tailwind v4 `@theme inline`. Produces **`style_directive.md`**
 — exact colors (hex AND oklch), typography, layout rules, CSS custom properties,
 anti-patterns; the binding contract for all downstream work. MUST include the Tailwind v4
 `@theme inline` block + shadcn/ui `components.json` so the Design System Expert can
-scaffold directly.
+scaffold directly. Before Phase 5 the **Conversion Strategist**
+(`{AGENCY_ROOT}/roles/conversion_strategist.md`) writes `conversion_brief.md` for every
+persuade surface: one primary conversion per page, message match per traffic source, the
+objection to proof map, section order, form budget, hypotheses, events and a readback
+date. Its first-viewport contract becomes the directive's Intended Focal Points.
 
 **Phase 3 — Creative Development.** _Roles:_ Logo Designer. _Execution:_
 `{AGENCY_ROOT}/execution/generate_logo.py` (Gemini 3.1 Flash Image Preview / Imagen
@@ -379,7 +401,12 @@ browser verify.
      `taste_report_<name>.md`; feeds VQA's Originality + Craft sub-scores. On a hard-gate
      rejection, emit a Bridge-D candidate (§ Memory & Learning).
   5. **`visual_qa_agent`** (`design-agency:visual-qa`) — **Hard gate.** Subjective quality (Design
-     Coherence, Originality, Craft, Functionality); 3+/5 on all dimensions. On a
+     Coherence, Originality, Craft, Functionality, and **Conversion path** on any surface
+     with a `conversion_brief.md`); 3+/5 on all dimensions. Runs
+     `execution/probes/page_probe.js` at 390 and 1440 and treats a failed budget
+     (LCP, CLS, long tasks, contrast, 24 px targets, unlabelled controls, a contact-link
+     primary action, horizontal overflow) as a blocking finding; saves its screenshots to
+     `<reports_dir>/shots/<name>_<width>.png`. On a
      hard-gate rejection, emit a Bridge-D candidate (§ Memory & Learning).
   6. **`heatmap_analyst` ∥ `persona_critic`** — predictive UX validation, parallel after
      VQA. **Advisory only — not a hard gate.** `heatmap_analyst` runs the saliency model
@@ -388,10 +415,15 @@ browser verify.
      focal points win attention → `heatmap_report_<deliverable>.html` + overlays to
      `<project>/assets/heatmaps/`. `persona_critic` walks each project persona (from
      `research_context.md`/`brand_strategy.md`) through every HTML deliverable via Claude
-     vision → `persona_report_<deliverable>.html`, cross-referencing heatmap zones. Both
-     HALT for upstream fixes (Creative Director) if prerequisites are missing (heatmap
-     needs an "Intended Focal Points" directive section; persona needs 3-5 personas) —
-     neither invents generic personas/focal points. Findings feed `refactor_agent` +
+     vision → `persona_report_<deliverable>.html`, cross-referencing heatmap zones.
+     Heatmap needs an "Intended Focal Points" directive section (from the brief's
+     first-viewport contract) and halts without one. Persona uses the personas in
+     `conversion_brief.md`, `brand_strategy.md` or `research_context.md`; if none exist it
+     derives three from the brief and the live site and marks them "derived,
+     unvalidated"; it halts only when there is neither a brief nor a site to derive from.
+     Two findings are **blocking, not advisory**: the primary persona cannot find the
+     primary action, or the primary action scores under 0.5 on predicted attention in the
+     first viewport. Findings feed `refactor_agent` +
      `{AGENCY_STATE}/lessons_learned.md` if patterns recur. (Report contents → companion.)
 
   **Gate order is strict and sequential** — polish → enforcer → taste → VQA →
@@ -469,6 +501,59 @@ code (`*.tsx|jsx|vue|svelte|css|scss`) in a repo with a directive. Owner:
    vocabulary that is not design (CAD, firmware) — the edit gate then fires on product
    files.
 
+## Live-site Redesign track (Convert)
+
+Entered when the engagement is "make this existing website better": a URL, a deployed
+site with its source, a complaint about conversion, UX or looking dated. The site already
+has visitors, rankings, inbound links and a backend that expects certain form fields; the
+track exists so the redesign gains conversion without losing any of those. New Project
+Isolation does not apply: reading the existing site and its directive is the job.
+
+1. **Baseline before opinions** (read-only; nothing is edited in this step).
+   - `python3 {AGENCY_ROOT}/execution/site_inventory.py capture --base-url <url> --out
+<project>/research/baseline_inventory.json` (or `--dist-dir` on the built output):
+     every page with title, canonical, hreflang, structured data, headings, actions,
+     forms and their field names, images, anchors.
+   - In a real browser at 390 and 1440 on each page in scope: screenshots to
+     `<reports_dir>/shots/before_<name>_<width>.png` and
+     `execution/probes/page_probe.js` output to `<reports_dir>/probe_before_<name>.json`.
+   - Analytics if the session can reach them (sessions by landing page, source and
+     device; conversion events; form starts against submits). Unreachable analytics is
+     recorded as "Baseline: not measured", never estimated.
+   - Read the project's existing `style_directive.md`, `visual_philosophy.md` and
+     handoff. What the last round decided, and why, is evidence.
+2. **Diagnosis** — the Conversion Strategist writes `conversion_brief.md`
+   (`{AGENCY_ROOT}/roles/conversion_strategist.md`): per page the one primary conversion,
+   what currently blocks it (from the baseline, each finding with its measurement or
+   screenshot), the objection to proof map, the new section order, the form budget,
+   hypotheses and the measurement plan. Read
+   `{AGENCY_ROOT}/skills/taste-skill/references/redesign.md` for the audit checklist.
+3. **Direction: evolve or replace.** The Creative Director decides, in writing, how much
+   of the existing system survives. Default is **evolve**: keep what carries recognition
+   and trust (wordmark, the accent, the type family if it is sound), change what makes the
+   site read as dated or generic (scale, contrast, density, depth, imagery, motion). The
+   decision is an amendment block in `style_directive.md` (dated, with the token
+   changes and the rules it supersedes) and updated dials in `visual_philosophy.md`.
+   Replace only when the brief says the brand itself is wrong. Either way the user sees
+   the direction on one real page before it is rolled out to the rest.
+4. **Build in the real source,** on a branch or worktree cut from the deployed revision,
+   never on a stale checkout: tokens and shared components first, then the pages in the
+   brief's priority order (highest traffic times highest intent first). Platform features
+   per `{AGENCY_ROOT}/references/modern_platform.md`. Slugs, form `action` values and
+   field names, element ids that are link targets, titles, canonicals, hreflang and
+   structured data are a contract: change one only when the brief says so.
+5. **Gates,** in order: `enforce.py` → `design-agency:style-enforcer` →
+   `design-agency:taste-guardian` → `design-agency:visual-qa` (with the brief, the probe
+   and the before screenshots; it reports before against after) → **parity gate**:
+   `python3 {AGENCY_ROOT}/execution/site_inventory.py compare <before>.json <after>.json
+--report <reports_dir>/parity_report.md` must exit 0; every intentional change is a
+   named `--waive` with its reason in the report, never a silent diff. Motion and polish
+   gates run on the pages whose motion or structure changed.
+6. **Ship and read back.** Deployment is the user's decision. The handoff carries the
+   event list for the developer, the hypotheses and the readback date; on that date the
+   numbers are read against the hypotheses and `conversion_brief.md` is updated with what
+   held, what did not, and the next change. A redesign with no readback is unfinished.
+
 ## Maintenance & Iteration Mode (post-delivery sessions)
 
 Most real sessions edit existing deliverables, not new projects (a June 2026 audit of 58
@@ -482,9 +567,19 @@ just apply.
    a small script, or set `CC_FORMAT_DISABLE=1` if the repo's hook honours it.
 1. **Directive first.** Read the project's `style_directive.md` before the first edit
    (see The Binding Contract — same binding contract as Phase 5).
-2. **Re-validate after editing.** Run `style_enforcer` (`design-agency:style-enforcer` subagent) on
-   every touched HTML deliverable — 0 violations before commit/deploy/review (see The
-   Binding Contract); editing does not bypass the hard gate.
+2. **Re-validate after editing, scoped to the diff.** Always: `execution/enforce.py` on
+   every touched file, 0 violations before commit/deploy/review (see The Binding
+   Contract); editing does not bypass the hard gate.
+   - **Copy-only or token-value edit** (no markup or layout change): `enforce.py` is the
+     gate. No subagent dispatch.
+   - **Markup or layout edit:** `style_enforcer` (`design-agency:style-enforcer`
+     subagent) on the touched deliverable, then a section-level `design-agency:visual-qa`
+     pass on the changed sections at 390 and 1440 with a before and after screenshot and
+     the probe. Section and inventory completeness are not re-litigated for an edit that
+     did not add or remove sections.
+   - **Hero, section order, forms or actions changed:** the Conversion Strategist updates
+     `conversion_brief.md` first; this is no longer a maintenance edit if more than one
+     page's structure changes (use the Live-site Redesign track).
 3. **Targeted re-checks.** Touched animations → `motion_designer` (`design-agency:motion-designer`)
    re-audits its motion report. Added/restructured sections → `polish_inspector`
    (`design-agency:polish-inspector`) on the touched file.
@@ -524,7 +619,8 @@ Three learning systems:
    (retrospective lessons + satisfaction).
 
 **Continuous self-improvement:** the **Refactor Agent** at Phase 6 close analyzes the
-retrospective, improves instructions, creates new roles if needed, updates
+retrospective, writes proposed instruction and role changes to
+`{AGENCY_STATE}/refactor_proposals.md` (the plugin is read-only at runtime), updates
 `{AGENCY_STATE}/lessons_learned.md` (esp. customer change requests + the WHY), and runs
 an **Evaluation Contract Review** (missing sections despite passing QA → tighter
 criteria; QA blocking fine work → too strict). **Update Instructions:** capture recurring
@@ -672,7 +768,7 @@ The MANDATORY enforced standard is the **21-row anti-pattern table → `referenc
 `impeccable` is the canonical source of truth for that ban list; new tells flow there via
 Bridge D (§ Memory & Learning), not by editing the table inline.
 
-## Role Roster (24 Roles)
+## Role Roster (25 Roles)
 
 All roles live at `{AGENCY_ROOT}/roles/<file>`; the five QA gates' authoritative spec
 is `{AGENCY_ROOT}/agents/<gate>.md` (dispatched as subagents, in brackets). **Full roster — Strategy & Discovery, Creative Design, Quality

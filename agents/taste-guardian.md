@@ -244,6 +244,7 @@ Hard bans unless the brief explicitly calls for one:
 - **Hero Discipline:** headline ≤ 2 lines, subtext ≤ 20 words, CTAs visible without scroll.
 - **Navigation** on a single line at desktop, ≤ 80px tall.
 - **"Used by" logo wall** directly under the hero (never inside it), with real SVG logos (Simple Icons / devicon or generated marks), not plain-text wordmarks.
+- **Hero proof:** one compact proof element (a single proof line, a figure with its denominator, or one slim strip) in or directly under the hero is expected, and it does not count toward the hero's 4 text elements. What is penalised is a logo wall, a badge cluster or several competing proof blocks inside the hero.
 
 When a deliverable matches one of these patterns: flag it AND verify against knobs —
 the pattern may be intentional at low variance settings. That allowance covers §9.A-§9.E.
@@ -292,15 +293,15 @@ Boxes (condensed; canonical text in `{AGENCY_ROOT}/skills/taste-skill/SKILL.md` 
 - [ ] Page Theme Lock: one theme, no mid-page inversion.
 - [ ] Color Consistency Lock: one accent used identically across sections.
 - [ ] Shape Consistency Lock: one corner-radius system.
-- [ ] Button contrast: every CTA label passes WCAG AA against its background.
+- [ ] Button contrast: every CTA label passes WCAG 2.2 AA against its background.
 - [ ] No CTA label wraps to 2+ lines at desktop.
-- [ ] Form contrast: inputs, placeholders, focus rings, labels pass WCAG AA.
+- [ ] Form contrast: inputs, placeholders, focus rings, labels pass WCAG 2.2 AA.
 - [ ] Serif discipline: no Fraunces / Instrument Serif without a brand reason; differs from the previous project.
 - [ ] Premium-consumer palette is not the beige + brass + oxblood + espresso default; differs from the previous one.
 - [ ] Italic descenders (`y g j p q`) have `leading-[1.1]` minimum and `pb-1` reserve.
 - [ ] Hero fits the viewport: headline ≤ 2 lines, subtext ≤ 20 words and ≤ 4 lines, CTA visible without scroll.
 - [ ] Hero top padding ≤ `pt-24` at desktop.
-- [ ] Hero stack ≤ 4 text elements; no tagline under CTAs, no trust micro-strip in the hero.
+- [ ] Hero stack ≤ 4 text elements; no tagline under CTAs. One compact proof element (a single proof line, a figure with its denominator, or one slim strip) in or directly under the hero is expected and is not a tell; a logo wall, a badge cluster or several competing proof blocks inside the hero fails this box. This agency rule replaces the §14 "no trust micro-strip" wording.
 - [ ] Eyebrow count ≤ ceil(sectionCount / 3); the hero counts as 1.
 - [ ] No split-header (big headline left + small explainer right).
 - [ ] No 3+ consecutive image + text split sections.
@@ -394,6 +395,12 @@ Open the style library. For each past project aesthetic:
    - Bleed-through tokens (zero tolerance in client dirs; skipped when `reserved_tokens`
      is empty).
    - Collision risk vs. style library.
+   Evidence discipline for screenshots: a full-page capture shows `loading="lazy"` images
+   and logos as blank boxes, and a scaled contact sheet does not show type size. Before
+   reporting an image as missing or not painting, look at an element or viewport shot
+   scrolled to it; before reporting a font size, measure the computed size or mark the
+   figure as estimated. A finding that rests on a capture artefact is withdrawn in the
+   report, not left standing.
 3. Score (see Score Calibration), then write `<reports_dir>/taste_report_<name>.md`.
 4. **Archive the taste outcome (deterministic — do NOT hand-format JSON).** After writing
    the report, append one row to the design-agency sil intake so the taste-rubric loop
@@ -534,7 +541,7 @@ non-blocking**: it never alters the verdict, never halts, and a failed append is
 ## Phase-7 learning signal — taste/anti-pattern sil bridge
 
 This is the **primary harvest point** for the design-agency → taste sil loop
-(Initiative 1 heavyweight, per inventory.md).
+(Initiative 1 heavyweight).
 
 After project delivery (Phase 7), the parent agent or nightly pipeline should:
 
@@ -542,7 +549,7 @@ After project delivery (Phase 7), the parent agent or nightly pipeline should:
 
 For each finding in the taste report "Anti-Slop Findings" tagged "THIS IS SLOP":
 
-- If the pattern is NOT in the anti-pattern engine (`src/detect-antipatterns.mjs`),
+- If the pattern is NOT in the anti-pattern engine (`src/detect-antipatterns.mjs` in the impeccable repo),
   dispatch the `anti-patterns` agent with:
   - Pattern name (from the finding)
   - Example HTML snippets (pulled from the deliverable at the flagged element)

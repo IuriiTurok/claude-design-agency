@@ -13,7 +13,7 @@ Every project ships these token categories. Missing categories are flagged by th
 
 | # | Layer | Required content | Status |
 |---|-------|------------------|--------|
-| A1 | **Color** | Primitive ramps (50→950) per hue · semantic aliases (`background`, `surface`, `surface-muted`, `border`, `text`, `text-muted`, `text-secondary`, `accent`, `accent-foreground`, `ring`) · status colors (`success`, `warning`, `destructive`, `info`) · **light + dark + system modes** · WCAG AA contrast target stated per pair | R |
+| A1 | **Color** | Primitive ramps (50→950) per hue · semantic aliases (`background`, `surface`, `surface-muted`, `border`, `text`, `text-muted`, `text-secondary`, `accent`, `accent-foreground`, `ring`) · status colors (`success`, `warning`, `destructive`, `info`) · **light + dark + system modes** · WCAG 2.2 AA contrast target stated per pair | R |
 | A2 | **Typography** | Scale display→caption (≥7 steps) · families (sans + display + mono) · weights (≤3 per screen) · line-height per step · letter-spacing per step · **tabular-figures variant** for data | R |
 | A3 | **Spacing** | 4-based scale `4, 8, 12, 16, 24, 32, 48, 64, 96` with named tokens `xs..3xl`; component padding tokens defined separately | R |
 | A4 | **Radius** | `sm` (8) · `md` (12) · `lg` (16) · `xl` (24) · `2xl` (32) · `full` (9999); vary by element (avoid one global radius) | R |

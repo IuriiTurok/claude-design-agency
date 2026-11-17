@@ -174,7 +174,7 @@ project repo, never back into `{AGENCY_ROOT}`.
 | Script                                          | Purpose                                                                                                                                                                                                                                         | Invoked by                      |
 | ----------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------- |
 | `{AGENCY_ROOT}/execution/generate_logo.py`      | AI logo generation via Gemini 3.1 Flash Image Preview / Imagen 4.0. 6 visual options per concept with self-improvement feedback loop. Requires `GEMINI_API_KEY`. Logs feedback to `{AGENCY_STATE}/logo_feedback_log.json` via `--log-feedback`. | Logo Designer (Phases 3 & 4)    |
-| `{AGENCY_ROOT}/execution/analyze_website.py`    | Web scraping for competitor analysis.                                                                                                                                                                                                           | Researcher / Analyzer (Phase 1) |
+| `{AGENCY_ROOT}/execution/site_inventory.py`     | Site inventory: `capture` a baseline (pages, titles, canonicals, hreflang, structured data, CTAs, forms, images), `compare` before and after. Replaces the deprecated stub `analyze_website.py`.                                                | Researcher / Analyzer (Phase 1) |
 | `{AGENCY_ROOT}/execution/fetch_images.py`       | Image sourcing from reference material.                                                                                                                                                                                                         | Asset Designer, Researcher      |
 | `{AGENCY_ROOT}/execution/generate_materials.py` | Programmatic collateral/material generation.                                                                                                                                                                                                    | Asset Designer                  |
 | `{AGENCY_ROOT}/execution/predict_attention.py`  | Open-source saliency model (fallback chain: UEyes → DeepGaze IIE → OpenCV) over deliverable screenshots.                                                                                                                                        | Heatmap Analyst (Phase 5)       |
@@ -215,7 +215,7 @@ with this plugin.
 | PDF (only on request)                      | `anthropic-skills:pdf` (+ `theme-factory` (optional))                    |
 | Presentation deck (only on request)        | `anthropic-skills:pptx` (+ `theme-factory` (optional)) or Marp CLI       |
 | Logo generation                            | `{AGENCY_ROOT}/execution/generate_logo.py`     |
-| Competitor scrape                          | `{AGENCY_ROOT}/execution/analyze_website.py`   |
+| Site inventory (baseline, parity)          | `{AGENCY_ROOT}/execution/site_inventory.py`    |
 | Saliency / attention heatmap               | `{AGENCY_ROOT}/execution/predict_attention.py` |
 | SVG optimization (mandatory pre-delivery)  | `svgo`                                         |
 | Color ramp / OKLCH                         | `chroma-js` + `culori`                         |
@@ -317,8 +317,9 @@ are the supporting defaults and aspirational references.)
 - Avoid: raw `button`/`input`/`select`/`div` when shadcn primitives exist, nested
   cards in cards, multiple accent colors fighting, shipping empty/loading/error states
   without design treatment.
-- Every generated HTML must include proper font loading (Google Fonts `<link>` or
-  embedded `@font-face`) with literal font-family names, not CSS variable references.
+- Every generated HTML must include proper font loading (self-hosted WOFF2 via
+  `@font-face` with `font-display: swap`; no remote Google Fonts or Typekit `<link>` in
+  client deliverables) with literal font-family names, not CSS variable references.
 
 **World-Class Quality Benchmarks (aspire to these):** Typography — Linear, Stripe,
 Apple. Color systems — Vercel (zinc + single accent), Tailwind UI, Radix Colors

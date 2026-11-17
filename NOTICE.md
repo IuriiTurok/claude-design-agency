@@ -58,6 +58,8 @@ No changes were made to the substance of the design guidance in the remaining 17
 The v0.5.0 additions under `skills/impeccable/reference/` (`craft-floor.md`, `operate.md`,
 `mode-operate.md`, `mode-persuade.md`, `mode-read.md`) are copied unmodified from
 skill-v4.7.0 apart from a three-line HTML attribution comment at the top of each file.
+v0.6.0 changes one sentence in `mode-persuade.md`: its pointer to upstream `visualize.md`
+(not bundled) is replaced by the rule it cites.
 
 ## MIT components
 
@@ -88,6 +90,8 @@ distributed under the MIT License — compatible with this plugin's own MIT lice
   Block Library contract; `references/modes/soft.md`, `references/modes/minimalist.md`,
   `references/modes/brutalist.md` — the upstream `skills/soft-skill`,
   `skills/minimalist-skill`, and `skills/brutalist-skill` bodies.
+  v0.6.0 adds three inline notes marked "Agency override" to `references/redesign.md`
+  (grain, placeholder image services); the upstream text around them is unchanged.
 - Frontmatter `name` was kept as `taste-skill` so the skill resolves as
   `design-agency:taste-skill`; `description` was rewritten for this plugin's routing.
 - A one-line pointer to the relocated content was added under the §0, §9, §13, and §14
@@ -108,7 +112,8 @@ distributed under the MIT License — compatible with this plugin's own MIT lice
 Emil Kowalski). Modifications: agency frontmatter, Self-learning and Recommended-next-step
 sections; v0.5.0 synced the body to `2d22863` and added the upstream
 `animation-performance` and `review-animations` skills as `references/` (frontmatter
-stripped; `review-animations.md` joins its SKILL.md and STANDARDS.md).
+stripped; `review-animations.md` joins its SKILL.md and STANDARDS.md, and since v0.6.0 its
+STANDARDS.md links point at the in-file section).
 
 `skills/ui-ux-pro-max/` is from https://github.com/nextlevelbuilder/ui-ux-pro-max-skill
 (MIT). Modifications: agency binding preamble, I/O contract, Self-learning and `sil/`

@@ -87,7 +87,7 @@ You are the Design System Architect. You bridge the gap between design and engin
    - shadcn/ui `components.json` config
    - Component markup examples using shadcn class patterns
    - `cn()` utility setup (clsx + tailwind-merge)
-   - Font loading instructions (Google Fonts `<link>` + literal font-family names)
+   - Font loading instructions (self-hosted WOFF2 `@font-face` with `font-display: swap`, the preload for the above-the-fold face, and literal font-family names)
    - Spacing and layout scale
 
 ## Official Skill Integration

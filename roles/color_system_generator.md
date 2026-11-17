@@ -1,6 +1,6 @@
 ---
 name: Color System Generator
-description: Programmatically generates complete brand color palettes from a single accent hex code. Produces 10-shade tint/shade ramps using OKLCH perceptual uniformity, neutral scales (warm/cool), semantic colors, and WCAG AA contrast verification. Outputs as CSS custom properties and Tailwind v4 @theme block.
+description: Programmatically generates complete brand color palettes from a single accent hex code. Produces 10-shade tint/shade ramps using OKLCH perceptual uniformity, neutral scales (warm/cool), semantic colors, and WCAG 2.2 AA contrast verification. Outputs as CSS custom properties and Tailwind v4 @theme block.
 ---
 
 # Color System Generator Skill
@@ -97,7 +97,7 @@ Standard semantic palette — these are constant across most brands unless overr
 
 If the accent color conflicts with a semantic color (e.g., accent is red, destructive is also red), shift the conflicting semantic by 30 degrees on the hue wheel to maintain distinction.
 
-### Step 5: WCAG AA Contrast Verification
+### Step 5: WCAG 2.2 AA Contrast Verification
 
 For every text/background combination, calculate contrast ratio:
 
@@ -206,6 +206,6 @@ For every text/background combination, calculate contrast ratio:
 
 - **Perceptual uniformity:** Shades must look evenly distributed to the eye (OKLCH guarantees this)
 - **No neon artifacts:** Chroma reduction at extremes (50, 950) prevents oversaturated pastels/darks
-- **Accessibility first:** Every text/bg combination passes WCAG AA before the palette ships
+- **Accessibility first:** Every text/bg combination passes WCAG 2.2 AA before the palette ships
 - **Both formats:** Always output BOTH hex (for humans) and oklch (for Tailwind v4)
 - **Temperature consistency:** Neutrals must feel harmonious with the accent — warm accent = warm grays

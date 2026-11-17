@@ -1,5 +1,77 @@
 # Changelog
 
+## 0.6.0 (2026-11-13)
+
+**Pages have one job, and we check it.** Until now a page could pass every gate and still
+bury its action under thirteen sections or hand a booking to the mail client. New
+`roles/conversion_strategist.md` writes `conversion_brief.md` before any persuade surface
+is built: one primary conversion per page with its event name, message match per traffic
+source, an objection to proof map, section order, a form policy, hypotheses, and a
+readback date. No analytics is recorded as "Baseline: not measured"; numbers without a
+source are not allowed in a brief. Visual QA grades a fifth persuade dimension,
+**Conversion path**, against it, with anchored scores.
+
+**A track for improving a live website.** New engagement type and orchestrator section,
+**Live-site Redesign**: baseline before opinions, diagnosis, an explicit evolve-or-replace
+decision written as a dated directive amendment, build in the real source from the
+deployed revision, gates, a parity gate, ship and read back. New Project Isolation does
+not apply to it.
+
+**Mechanical checks for what was prose.**
+
+- `execution/site_inventory.py` (stdlib): `capture` inventories a live site or a built
+  `dist` (titles, canonicals, hreflang, structured data, headings, actions, forms and
+  field names, images, anchors); `compare` is the redesign parity gate and fails on a
+  lost page, a changed title, canonical, hreflang or lang, a removed structured-data type,
+  a changed form contract or a broken anchor, with named `--waive` for intended changes.
+  Replaces the `analyze_website.py` stub (kept, deprecated).
+- `execution/probes/page_probe.js`: one expression evaluated in the page (browser JS tool
+  or Playwright). Returns LCP, CLS, long-task time, transfer weight, render-blocking
+  count, contrast sampling, unlabelled controls, heading order, 24 px and 44 px target
+  size, and conversion mechanics (actions above the fold, button-styled `mailto:`, form
+  issues, a sticky action, distance to the first proof). Budgets are overridable; failed
+  budgets block in Visual QA. INP cannot be measured in the lab and is stated as such.
+- `execution/enforce.py`: seven new rules (21 total): `img-alt-missing`,
+  `html-lang-missing`, `img-dimensions-missing`, `form-control-unlabelled`,
+  `heading-level-skip`, `cta-contact-link`, `font-remote-css`. **Behaviour change:**
+  remote Google Fonts or Typekit CSS now fails a deliverable unless the directive waives
+  it; self-host WOFF2.
+
+**Visual QA measures.** It runs the probe at 390 and 1440, saves its screenshots and probe
+JSON under `<reports_dir>/shots/` (the heatmap analyst and the next round read them),
+compares before and after when a baseline exists, and treats a regression on a passing
+budget as a fail. The accessibility bar is named: WCAG 2.2 AA, including target size.
+
+**`references/modern_platform.md`.** What to use freely, what only as progressive
+enhancement, and what not to ship, with Baseline status checked on 2026-11-13 (view
+transitions, scroll-driven animations, anchor positioning, `@starting-style`, popover,
+container and style queries, `light-dark()`, speculation rules and more), plus the
+budgets a build is held to. Required read for the UI/UX and motion roles.
+
+**Contradictions removed.** One source for landing-page content (jobs to be done, no fixed
+nine-section template with card counts, which the taste gate penalised); one compact proof
+element in or under the hero is expected, a logo wall inside it is not; fonts are
+self-hosted in client work; hover timing follows the motion skill; grain and placeholder
+image services carry an agency override note in the vendored redesign reference; the
+Refactor Agent writes proposals to state instead of editing the read-only plugin; personas
+are derived and marked unvalidated instead of halting; dead file references fixed; FID
+replaced by INP.
+
+**Maintenance is scoped to the diff.** Copy-only and token-value edits are gated by
+`enforce.py` alone; markup and layout edits get the enforcer plus a section-level Visual
+QA with before and after; changes to hero, section order, forms or actions go through the
+brief first.
+
+**Tell list refreshed** to the late-2026 set (the cream, serif and terracotta default; the
+accented headline word; decorative mono labels; fade-up everywhere; pulsing dots), plus
+six conversion and delivery defects that a directive may not waive.
+
+**Not in this release.** The vendored skills are behind upstream (taste-skill v2 against
+2.5.1, Impeccable core 2.1.1 against 4.9, both checked 2026-11-13). A resync needs a
+reviewed merge of local changes and is the next release. Speculation rules are documented
+but not scaffolded, because projects with a strict Content-Security-Policy need
+`'inline-speculation-rules'` first.
+
 ## 0.5.0 (2026-10-20)
 
 **Product UI is a first-class track.** Most real engagements are iterations on product

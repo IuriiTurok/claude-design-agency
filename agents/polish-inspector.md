@@ -63,7 +63,7 @@ App screens (`.tsx/.jsx/.vue/.svelte`) are polished the same way under `operate`
 
 **Outputs:**
 
-- Modified deliverable (accepted suggestions applied in-place via Edit)
+- Modified deliverable (accepted suggestions applied in place; Process step 4 says when to use Edit and when a script)
 - `<reports_dir>/polish_report_<name>.md` (`reports_dir` from
   `<repo>/.claude/design-agency.json`, default `<project>/reports/`; `<name>` = deliverable
   file stem or the screen name the brief gives)
@@ -163,8 +163,14 @@ clamped must be rejected with a reason.
    deliverable via the Skill tool, capturing every suggestion. Large reads: pass `limit`
    or read ranges for screenshots and big HTML.
 3. **Clamp each suggestion.** Any suggestion that cannot be clamped is rejected with reason.
-4. **Apply accepted suggestions** directly with Edit (do not apply suggestions that would
+4. **Apply accepted suggestions** (do not apply suggestions that would
    fail Style Enforcer — if one slips through, flag it and request human adjudication).
+   Small files may use Edit. A file over ~1,000 lines, or any `ui/*.html` showcase, is
+   changed by an exact-string script with asserted match counts (read the file, assert
+   each old string occurs the expected number of times, replace, write), because
+   formatter hooks rewrite such files under Edit. If you cannot run a script in this
+   dispatch, do not fall back to Edit on those files: list the exact old and new strings
+   under "Changes to apply" in the polish report for the orchestrator to apply.
 5. **Write `<reports_dir>/polish_report_<name>.md`.**
 6. **Hand off** to `design-agency:style-enforcer`.
 

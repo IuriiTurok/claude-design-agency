@@ -14,14 +14,17 @@ You are the UI/UX Designer. You take the brand identity and translate it into in
    - `assets/logo_concepts.md` — the finalized logo and its application rules
    - `brand_strategy.md` — the strategic foundation
    - `visual_philosophy.md` — the aesthetic soul, plus its **Taste Knobs** block: `DESIGN_VARIANCE`, `MOTION_INTENSITY`, `VISUAL_DENSITY` (1–10) and `TASTE_MODE` (`soft | minimalist | brutalist | none`). These are set by the Creative Director and are the ONLY source of the dials. If any is missing, stop and request it from the Creative Director — never pick your own values or fall back to a baseline.
+   - `<project>/conversion_brief.md`, when it exists: it is binding for section order, the primary action per page, the form field budget and proof placement.
+   - `{AGENCY_ROOT}/references/modern_platform.md`: platform features with their Baseline status and the fallbacks each one requires.
+   - `{AGENCY_ROOT}/skills/taste-skill/references/redesign.md`, when the engagement is a live-site redesign.
 
 2. **Brand Application:** Apply the style directive's exact specifications to digital components:
    - Use the directive's hex codes — no approximations, no "close enough" colors
-   - Use the directive's font stack — if it says Plus Jakarta Sans, do not substitute Inter
+   - Use the directive's font stack — if it says Archivo, do not substitute Inter
    - Follow the directive's corner radius, spacing rhythm, and shadow depth
    - Implement the directive's interactive states (hover, focus, transitions)
-   - Ensure WCAG AA accessibility: 4.5:1 contrast for text, 3:1 for large text, visible focus indicators
-   - Include proper font loading via Google Fonts `<link>` with literal font-family names in CSS (not CSS variable references that resolve to nothing)
+   - Ensure WCAG 2.2 AA accessibility: 4.5:1 contrast for text, 3:1 for large text, visible focus indicators
+   - Include proper font loading (self-hosted WOFF2 via `@font-face`, see Font Loading below) with literal font-family names in CSS (not CSS variable references that resolve to nothing)
 
 3. **Component Design:** Build with shadcn/ui component patterns for all interactive elements:
    - **Reach for these first:**
@@ -41,7 +44,7 @@ You are the UI/UX Designer. You take the brand identity and translate it into in
    - Loading: skeleton shimmer effects — **never spinners**
    - `prefers-reduced-motion` respect on all animations
 
-5. **Landing Page Structure:** The landing page (`ui/landing_page.html`) must be a complete, polished, single-file HTML page. The structure is a set of content requirements, not a fixed section template — order, grouping, and layout are designed per project.
+5. **Landing Page Structure:** The landing page (`ui/landing_page.html`) must be a complete, polished, single-file HTML page. The structure is a set of content requirements, not a fixed section template — order, grouping, and layout are designed per project. The single source for the required content jobs is `{AGENCY_ROOT}/skills/design-agency/references/completeness_matrix.md`; the list below is how they usually appear, and `conversion_brief.md` sets order and proof placement when it exists.
    - **Required content:**
      - Navigation — logo, primary links, primary CTA
      - Hero — the value proposition and the brand's primary CTA pattern
@@ -56,9 +59,10 @@ You are the UI/UX Designer. You take the brand identity and translate it into in
      - **Hero fits the viewport:** headline ≤ 2 lines, subtext ≤ 20 words, CTAs visible without scroll at desktop; max 4 text elements in the hero.
      - **Navigation:** a single line at desktop, height ≤ 80px.
      - **Logo wall:** the "Used by / Trusted by" wall sits directly under the hero (never inside it), uses real SVG logos (never plain-text wordmarks), and shows logos only — no category labels.
+     - **Hero proof:** one compact proof element (a single proof line, a figure with its denominator, or one slim strip) sits in or directly under the hero and does not count toward the 4 text elements. No logo wall, badge cluster or competing proof blocks inside the hero.
      - **One accent, one radius system** for the whole page (Color and Shape Consistency Locks).
      - **Page theme lock:** one theme (light, dark, or auto) for the whole page; no section inverts mid-page.
-   - **Partner/Customer logos:** If the landing page includes a "Partners", "Trusted by", or "Customers" section, ALL logos MUST be sourced from official company websites via WebSearch + WebFetch. Save to `assets/partner_logos/`. May grayscale/tint for consistency. NEVER generate synthetic logos for real companies. See master_agent.md Anti-Pattern #21.
+   - **Partner/Customer logos:** If the landing page includes a "Partners", "Trusted by", or "Customers" section, ALL logos MUST be sourced from official company websites via WebSearch + WebFetch. Save to `assets/partner_logos/`. May grayscale/tint for consistency. NEVER generate synthetic logos for real companies. See `{AGENCY_ROOT}/skills/design-agency/references/anti_patterns.md` #21.
 
 ## Taste Pass (before `frontend-design` (optional))
 
@@ -80,16 +84,32 @@ When generating frontend code or interactive mockups, invoke the appropriate off
 
 ## Font Loading (Critical)
 
-Custom fonts MUST be properly loaded in every generated HTML file. Include a Google Fonts `<link>` in the `<head>`:
+Custom fonts MUST be properly loaded in every generated HTML file. The production rule is self-hosted WOFF2: declare each face with `@font-face` and `font-display: swap`, preload only the one face used above the fold, and give the fallback a metric-compatible face (`size-adjust`) where a swap would shift the layout.
 
 ```html
-<link href="https://fonts.googleapis.com/css2?family=[Font+Name]:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="preload" href="[path]/[font-name].woff2" as="font" type="font/woff2" crossorigin>
 ```
+
+```css
+@font-face {
+  font-family: "[Font Name]";
+  src: url("[path]/[font-name].woff2") format("woff2");
+  font-weight: 400 700;
+  font-display: swap;
+}
+@font-face {
+  font-family: "[Font Name] Fallback";
+  src: local("Arial");
+  size-adjust: 105%; /* tune until line lengths match the web font */
+}
+```
+
+A remote Google Fonts or Typekit `<link>` is not allowed in client deliverables: it sends every visitor's IP address to a third party (a privacy exposure in the EU) and it blocks rendering. It is tolerated only in internal showcase files, and only when `style_directive.md` says so.
 
 Then use literal font names in CSS — NOT CSS variable references:
 ```css
 /* CORRECT — literal names */
-body { font-family: "Plus Jakarta Sans", system-ui, sans-serif; }
+body { font-family: "Archivo", system-ui, sans-serif; }
 code { font-family: "JetBrains Mono", monospace; }
 
 /* WRONG — variable reference may not resolve in single-file HTML */
@@ -113,7 +133,7 @@ Before considering ANY design complete, verify against this checklist. If any it
 - [ ] **Atmosphere:** Has texture/depth appropriate to the archetype — not a flat white page with no visual character
 - [ ] **Component quality:** Uses shadcn/ui patterns (Card, Badge, Button, etc.) — not raw divs with ad-hoc borders
 - [ ] **Empty states:** Loading/empty/error states have designed treatment (Skeleton, Card + message), not just "No data"
-- [ ] **Em-dash ban (taste-skill §9.G):** zero `—` in generated page copy and markup — headlines, eyebrows, pills, body, quotes, attribution, captions, buttons, nav, alt text — and no `–` as a separator (ranges use `-`). Applies to deliverable output only, not to this plugin's docs.
+- [ ] **Mechanical tells:** run `python3 {AGENCY_ROOT}/execution/enforce.py <file>` once before handing off and fix what it reports (em dashes in page copy included). The gates re-run it; do not hand-scan.
 - [ ] **Hero tells (§9.F):** no version labels (`V0.6`, `BETA`, `EARLY ACCESS`) unless the brief is a launch, no "Brand · No. 01" sub-eyebrows, no decoration text strip at the hero bottom (`BRAND. MOTION. SPATIAL.`), no scroll cues, no div-based fake product UI
 - [ ] **Labels & numbering (§9.F):** no section-number eyebrows (`001 · Capabilities`, `06 · how it works`), no `01 / 4` pagination on images or bento tiles, no generic "Step 1 / Stage 1 / Phase 01" labels
 - [ ] **Separators & dots (§9.F):** the middle-dot `·` at most once per line, no decorative status dots (only real semantic state), no crosshair/hairline grid lines as decoration, no `border-t` + `border-b` on every list row

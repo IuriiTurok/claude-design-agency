@@ -31,7 +31,7 @@ def doc_files():
     for p in PLUGIN.rglob("*"):
         if p.suffix in (".md", ".py", ".sh", ".json") and p.is_file():
             rel = p.relative_to(PLUGIN)
-            if rel.parts[0] in (".git", "tests") or rel.name in EXEMPT:
+            if rel.parts[0] in (".git", ".claude", "tests") or rel.name in EXEMPT:
                 continue
             yield p
 

@@ -1,11 +1,13 @@
-# Role Roster (24 Roles)
+# Role Roster (25 Roles)
 
 All roles live at `{AGENCY_ROOT}/roles/<file>`. The five QA gates dispatch as
 subagents (in brackets); their authoritative spec is `{AGENCY_ROOT}/agents/<gate>.md`. Full per-role detail:
 **`{AGENCY_ROOT}/roles/_official_skills.md`**.
 
 - **Strategy & Discovery (P1-2):** `creative_director.md`, `researcher.md`,
-  `analyzer.md`, `style_librarian.md`, `color_system_generator.md`.
+  `analyzer.md`, `style_librarian.md`, `color_system_generator.md`,
+  `conversion_strategist.md` (writes `conversion_brief.md`; mandatory for persuade
+  surfaces and the Live-site Redesign track).
 - **Creative Design (P3-5 + asset/prototype):** `logo_designer.md`, `uiux_designer.md`,
   `asset_designer.md`, `design_system_expert.md`, `brandbook_designer.md`,
   `character_designer.md`, `prototype_lead.md`, `product_ui_lead.md` (Operate track:

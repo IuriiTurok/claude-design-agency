@@ -1,4 +1,4 @@
-<!-- Source: github.com/Leonxlnx/taste-skill @ ce26fc25c0e5 · skills/taste-skill/SKILL.md §11 + skills/redesign-skill/SKILL.md · MIT. Relocated verbatim; the agency binding lives in ../SKILL.md. -->
+<!-- Source: github.com/Leonxlnx/taste-skill @ ce26fc25c0e5 · skills/taste-skill/SKILL.md §11 + skills/redesign-skill/SKILL.md · MIT. Relocated verbatim; the agency binding lives in ../SKILL.md. v0.6.0 adds three inline notes marked "Agency override". -->
 
 ## 11. REDESIGN PROTOCOL
 
@@ -88,10 +88,12 @@ Check for these problems and fix them:
 - **Purple/blue "AI gradient" aesthetic.** This is the most common AI design fingerprint. Replace with neutral bases and a single, considered accent.
 - **Generic `box-shadow`.** Tint shadows to match the background hue. Use colored shadows (e.g., dark blue shadow on a blue background) instead of pure black at low opacity.
 - **Flat design with zero texture.** Add subtle noise, grain, or micro-patterns to backgrounds. Pure flat vectors feel sterile.
+  - **Agency override:** grain and noise only when the project directive grants them; client work carries no grain overlay by default.
 - **Perfectly even gradients.** Break the uniformity with radial gradients, noise overlays, or mesh gradients instead of standard linear 45-degree fades.
 - **Inconsistent lighting direction.** Audit all shadows to ensure they suggest a single, consistent light source.
 - **Random dark sections in a light mode page (or vice versa).** A single dark-background section breaking an otherwise light page looks like a copy-paste accident. Either commit to a full dark mode or keep a consistent background tone throughout. If contrast is needed, use a slightly darker shade of the same palette — not a sudden jump to `#111` in the middle of a cream page.
 - **Empty, flat sections with no visual depth.** Sections that are just text on a plain background feel unfinished. Add high-quality background imagery (blurred, overlaid, or masked), subtle patterns, or ambient gradients. Use reliable placeholder sources like `https://picsum.photos/seed/{name}/1920/1080` when real assets are not available. Experiment with background images behind hero sections, feature blocks, or CTAs — even a subtle full-width photo at low opacity adds presence.
+  - **Agency override:** no placeholder image services (picsum and the like) in deliverables; use real or generated assets.
 
 ### Layout
 
@@ -205,6 +207,7 @@ When upgrading a project, pull from these high-impact techniques to replace gene
 - **True glassmorphism.** Go beyond `backdrop-filter: blur`. Add a 1px inner border and a subtle inner shadow to simulate edge refraction.
 - **Spotlight borders.** Card borders that illuminate dynamically under the cursor.
 - **Grain and noise overlays.** A fixed, pointer-events-none overlay with subtle noise to break digital flatness.
+  - **Agency override:** only when the project directive grants grain; otherwise skip this upgrade in client work.
 - **Colored, tinted shadows.** Shadows that carry the hue of the background rather than using generic black.
 
 ## Fix Priority

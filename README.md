@@ -33,8 +33,9 @@ Only `python3` (stdlib) is required. Everything else is optional — see
 | ---------------- | ----- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Skills**       | 23    | 3 agency skills (orchestrator, routing, taste v2) + 2 design-intelligence skills + the 18 Impeccable design skills (`design-agency:layout`, `:typeset`, `:colorize`, `:animate`, `:critique`, `:polish`, …) |
 | **QA subagents** | 5     | `design-agency:style-enforcer` and `design-agency:visual-qa` (hard gates) · `design-agency:taste-guardian`, `design-agency:polish-inspector`, `design-agency:motion-designer` (advisory)                                                                                          |
-| **Roles**        | 23    | Creative director, logo designer, brandbook designer, copywriter, researcher, prototype lead, character designer, project manager, …                                                                        |
+| **Roles**        | 25    | Creative director, logo designer, brandbook designer, copywriter, researcher, prototype lead, character designer, project manager, …                                                                        |
 | **Hooks**        | 2     | Design-intent detection on every prompt · a post-edit gate on `ui/*.html`                                                                                                                                   |
+| **Mechanical checks** | 4 | `enforce.py` (21 style, accessibility and conversion rules) · `site_inventory.py` (baseline capture and redesign parity gate) · `probes/page_probe.js` (in-browser performance, accessibility and conversion budgets) · `check_reports.py` |
 
 ## How it works
 
@@ -48,7 +49,15 @@ Only `python3` (stdlib) is required. Everything else is optional — see
 3. **`design-agency`** orchestrates phases: discovery → strategy → concept → execution →
    **QA** → handoff, dispatching roles from `roles/`.
 
-4. **`ui-edit-gate.py`** (PostToolUse) fires after any edit to a `ui/*.html` file and
+4. **Pages are held to one job and to numbers.** Every persuade page gets a
+   `conversion_brief.md` (one primary conversion, objection to proof map, form budget,
+   hypotheses, a readback date) before it is built. Redesigns of a live site start from a
+   captured baseline and end with a parity gate, so titles, canonicals, structured data,
+   form contracts and anchors survive unless a change is waived by name. Visual QA runs a
+   browser probe with performance, WCAG 2.2 AA and conversion budgets and grades a
+   Conversion path dimension.
+
+5. **`ui-edit-gate.py`** (PostToolUse) fires after any edit to a `ui/*.html` file and
    demands `design-agency:style-enforcer` before the edit counts as complete — so iteration cannot
    quietly bypass compliance.
 
@@ -169,6 +178,7 @@ Role files live at `{AGENCY_ROOT}/roles/` — the `design-agency` skill resolves
 | Engagement type       | Signals                                                   | Protocol                     |
 | --------------------- | --------------------------------------------------------- | ---------------------------- |
 | New brand project     | new client, brand identity, logo, brand book from scratch | Full Phases 1–6              |
+| Live-site redesign    | improve or modernise a deployed website; conversion or UX | Live-site Redesign track     |
 | Deliverable iteration | editing an existing `<project>/ui/*.html`                 | Maintenance & Iteration Mode |
 | Product UI            | dashboard, table, KPI row, app screen in the app's code   | `roles/product_ui_lead.md`   |
 | Product prototype     | app replication, multi-screen prototype                   | `roles/prototype_lead.md`    |

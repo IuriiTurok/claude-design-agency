@@ -30,8 +30,9 @@ May also be invoked on-demand for a single deliverable when the Master Agent or 
 1. `<project>/style_directive.md` — brand's intended focal points (hero CTA, logo, primary headline, trust signal, etc.) and the token set used to refer to elements.
 2. `<project>/visual_philosophy.md` — knob set; informs whether attention scatter is intentional (high `DESIGN_VARIANCE`) or a problem (low `DESIGN_VARIANCE` = should converge on a single hero).
 3. Screenshots from `visual_qa_agent`:
-   - `<project>/qa/<deliverable>_desktop_1440.png`
-   - `<project>/qa/<deliverable>_mobile_390.png`
+   - `<reports_dir>/shots/<name>_1440.png` (desktop)
+   - `<reports_dir>/shots/<name>_390.png` (mobile)
+   `<name>` is the deliverable file stem; `reports_dir` is set in `<repo>/.claude/design-agency.json` (default `<project>/reports/`). Visual QA also saves a 768 width, which the saliency pass does not use.
    Reuse — do not recapture. If `visual_qa_agent` saved them under a different path, locate them via its report.
 4. The HTML source of each deliverable — for element bounding-box queries via a browser MCP (built-in `mcp__Claude_Browser__*`, else `mcp__claude-in-chrome__*`) JavaScript evaluation when you need to know exactly where the hero CTA sits.
 
@@ -44,7 +45,7 @@ For each `(deliverable, viewport)` pair, invoke `{AGENCY_ROOT}/execution/predict
 ```bash
 source {AGENCY_STATE}/.venv-vision/bin/activate
 python {AGENCY_ROOT}/execution/predict_attention.py \
-    --screenshot <project>/qa/landing_page_desktop_1440.png \
+    --screenshot <reports_dir>/shots/landing_page_1440.png \
     --out <project>/assets/heatmaps/ \
     --label landing_page_desktop \
     --predictor auto \
@@ -123,8 +124,6 @@ The HTML report must be a **self-contained single file**:
   - `assets/heatmaps/<deliverable>_mobile_original.png`
   - `assets/heatmaps/<deliverable>_mobile_heatmap.png`
   - `assets/heatmaps/<deliverable>_mobile_saliency.png`
-
-  (See `{AGENCY_ROOT}/assets/examples/heatmap_report_landing_page.html` for a worked example, if present.)
 
 **Neutral agency-internal styling** (this report is internal tooling, not a client deliverable):
 - Do NOT use the agency’s `{AGENCY_RESERVED_TOKENS}`.

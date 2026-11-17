@@ -1,6 +1,6 @@
 <!-- Source: https://github.com/emilkowalski/skills/tree/2d228630ba1446365f614a108cb8252f1feda202/skills/review-animations (SKILL.md + STANDARDS.md; main @ 2d228630ba1446365f614a108cb8252f1feda202; repo has no tags) -->
 <!-- License: MIT, copyright Emil Kowalski; frontmatter stripped, the two files concatenated, otherwise unmodified -->
-<!-- Vendored into design-agency v0.5.0 as a reference for emil-design-eng -->
+<!-- Vendored into design-agency v0.5.0 as a reference for emil-design-eng; v0.6.0 points the three STANDARDS.md links at the in-file section -->
 
 # Reviewing Animations
 
@@ -20,7 +20,7 @@ You are a senior design engineer with a brutal eye for craft. Your bias is towar
 
 The substantive bar comes from Emil Kowalski's animation philosophy (animations.dev). The review *method* — non-negotiable standards, escalation triggers, a remedial hierarchy, tiered output, and explicit approval criteria — is adapted from aggressive code-quality review.
 
-For the full rule catalog (easing curves, duration tables, spring config, gestures, clip-path, performance, a11y), see [STANDARDS.md](STANDARDS.md). Load it whenever a finding needs a precise value or citation.
+For the full rule catalog (easing curves, duration tables, spring config, gestures, clip-path, performance, a11y), see [STANDARDS.md](#animation-standards-reference). Load it whenever a finding needs a precise value or citation.
 
 ## The Ten Non-Negotiable Standards
 
@@ -32,7 +32,7 @@ Every animation in the diff is measured against these. A violation is a finding.
 
 3. **Responsive easing.** Entering/exiting elements use `ease-out` or a strong custom curve. `ease-in` on UI is a block — it delays the moment the user watches most. Built-in CSS easings are too weak; expect custom cubic-beziers.
 
-4. **Sub-300ms UI.** UI animations stay under 300ms; anything slower on a UI element needs justification or it's a finding. Per-element budgets live in [STANDARDS.md](STANDARDS.md).
+4. **Sub-300ms UI.** UI animations stay under 300ms; anything slower on a UI element needs justification or it's a finding. Per-element budgets live in [STANDARDS.md](#animation-standards-reference).
 
 5. **Origin & physical correctness.** Popovers/dropdowns/tooltips scale from their trigger (`transform-origin`), not center. Never animate from `scale(0)` — start from `scale(0.9–0.97)` + opacity (Modals are exempt — they stay centered.)
 
@@ -110,7 +110,7 @@ Close with an explicit decision:
 - **Block** — any feel-breaking regression, animation on a keyboard/high-frequency action, `scale(0)`/`ease-in` on UI, or a non-GPU animation with an easy GPU fix.
 - **Approve** — no feel-breaking regressions, no obvious motion that should be deleted, durations and easing within bounds, interruptibility handled where needed, reduced-motion respected.
 
-Be specific and cite `file:line`. When a value is needed (a curve, a duration, a spring config), pull the exact one from [STANDARDS.md](STANDARDS.md) rather than approximating.
+Be specific and cite `file:line`. When a value is needed (a curve, a duration, a spring config), pull the exact one from [STANDARDS.md](#animation-standards-reference) rather than approximating.
 
 ## Guidelines
 

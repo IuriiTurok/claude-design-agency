@@ -56,6 +56,25 @@ Skipped, with reasons:
   only z-[N] arbitrary values and zIndex literals are flagged.
   `font:` shorthand is not parsed; only font-family / fontFamily / font-[..] /
   Google Fonts links are.
+
+Page-quality rules (v0.6.0) read opening tags outside <script>/<style>/comments.
+All are violations, waivable through Brand Overrides like any other rule:
+  img-alt-missing          <img> with no alt attribute (alt="" passes).
+  img-dimensions-missing   <img> without width+height and no inline aspect-ratio.
+  html-lang-missing        <html> with no lang.
+  form-control-unlabelled  input/select/textarea with no label[for], wrapping
+                           <label>, aria-label, aria-labelledby or title.
+  heading-level-skip       heading level jumps down by more than one (h2 -> h4).
+  cta-contact-link         button-like <a> (btn|button|cta class) with a mailto:
+                           href; persuade surface only.
+  font-remote-css          stylesheet <link> / @import from fonts.googleapis.com
+                           or use.typekit.net.
+  File types: img-dimensions-missing, form-control-unlabelled and
+  heading-level-skip run on .html/.htm only (in component code sizes, labels
+  and heading order are spread across files). img-alt-missing,
+  html-lang-missing and cta-contact-link also run on .vue/.svelte/.tsx/.jsx
+  and skip any tag that spreads props ({...props}, v-bind="obj").
+  font-remote-css runs on every supported type.
 """
 
 import argparse
@@ -92,6 +111,13 @@ RULES = {
     "scroll-cue": '"Scroll down" copy or bouncing chevron scroll cue.',
     "section-number-eyebrow": 'Numbered eyebrow ("01 —", "/ 02", "§ 03") next to a section heading.',
     "missing-tabular-nums": "Numeric table/KPI content with no tabular-nums / font-variant-numeric.",
+    "img-alt-missing": '<img> without an alt attribute (alt="" is fine for decorative images).',
+    "img-dimensions-missing": "<img> without width and height attributes or an inline aspect-ratio (layout shift).",
+    "html-lang-missing": "<html> without a lang attribute.",
+    "form-control-unlabelled": "input/select/textarea with no label[for], wrapping <label>, aria-label, aria-labelledby or title.",
+    "heading-level-skip": "Heading level jumps down by more than one (h2 -> h4).",
+    "cta-contact-link": "Button-like <a> (btn|button|cta class) whose href is mailto: (primary action hands off to the mail client).",
+    "font-remote-css": "Stylesheet link/@import from fonts.googleapis.com or use.typekit.net (privacy, render-blocking).",
 }
 
 # Override ids judged by the LLM gates (taste-guardian, visual-qa), not here.
@@ -111,6 +137,20 @@ RULE_SURFACES = {
     "scroll-cue": {"persuade"},
     "section-number-eyebrow": {"persuade"},
     "missing-tabular-nums": {"operate"},
+    "cta-contact-link": {"persuade"},
+}
+
+# Rules restricted to some file types; anything absent runs on every type.
+HTML_EXTS = {".html", ".htm"}
+TAG_EXTS = MARKUP_EXTS | {".tsx", ".jsx"}
+RULE_EXTS = {
+    "orphan-class": HTML_EXTS,
+    "img-alt-missing": TAG_EXTS,
+    "img-dimensions-missing": HTML_EXTS,
+    "html-lang-missing": TAG_EXTS,
+    "form-control-unlabelled": HTML_EXTS,
+    "heading-level-skip": HTML_EXTS,
+    "cta-contact-link": TAG_EXTS,
 }
 
 GENERIC_FAMILIES = {
@@ -517,7 +557,9 @@ def _under(path, folder, directive_dir):
     f = Path(folder).expanduser()
     if not f.is_absolute():
         parts, fp = p.parts, f.parts
-        if fp and any(parts[i:i + len(fp)] == fp for i in range(len(parts) - len(fp))):
+        if fp and any(
+            parts[i : i + len(fp)] == fp for i in range(len(parts) - len(fp))
+        ):
             return True
     bases = [f] if f.is_absolute() else [Path.cwd() / f, directive_dir / f]
     for b in bases:
@@ -801,7 +843,7 @@ def _class_tokens(value):
     tokens = []
     for m in re.finditer(r"(?<!\S)\$\{(.*?)\}(?!\S)", value, re.S):
         for lit in STRING_LIT_RE.finditer(m.group(1)):
-            around = m.group(1)[max(0, lit.start() - 4):lit.end() + 4]
+            around = m.group(1)[max(0, lit.start() - 4) : lit.end() + 4]
             if not re.search(r"[!=]=|[<>]", around):
                 tokens += lit.group(2).split()
     tokens += re.sub(r"\$\{.*?\}", "\0", value, flags=re.S).split()
@@ -839,7 +881,11 @@ def used_classes(code):
             re.S,
         ):
             used += [(base + m.start(), t) for t in _class_tokens(m.group(2))]
-        for m in re.finditer(r"(?<![\w:.-])class\s*=\s*\\?([\"'])((?:\$\{[^}]*\}|(?!\\?\1)[^\n`])*)\\?\1", js, re.S):
+        for m in re.finditer(
+            r"(?<![\w:.-])class\s*=\s*\\?([\"'])((?:\$\{[^}]*\}|(?!\\?\1)[^\n`])*)\\?\1",
+            js,
+            re.S,
+        ):
             used += [(base + m.start(), t) for t in _class_tokens(m.group(2))]
     return used
 
@@ -863,7 +909,9 @@ def js_hook_classes(code):
 
 
 def is_tailwindish(cls):
-    return cls in TW_STANDALONE or bool(TW_SCALE_RE.match(cls) or TW_PREFIX_RE.match(cls))
+    return cls in TW_STANDALONE or bool(
+        TW_SCALE_RE.match(cls) or TW_PREFIX_RE.match(cls)
+    )
 
 
 def rule_orphan_class(c):
@@ -1044,6 +1092,212 @@ def rule_missing_tabular_nums(c):
     ]
 
 
+ATTR_RE = re.compile(
+    r"\{(?:[^{}]|\{[^{}]*\})*\}"
+    r"|([^\s\"'<>/={}]+)(?:\s*=\s*(\"[^\"]*\"|'[^']*'|\{(?:[^{}]|\{[^{}]*\})*\}|[^\s\"'>]+))?",
+    re.S,
+)
+BUTTONISH_CLASS_RE = re.compile(
+    r"(?<![A-Za-z])(?:btn|button|cta)(?![a-z])|(?<=[a-z])(?:Btn|Button|Cta|CTA)(?![a-z])",
+    re.I,
+)
+REMOTE_FONT_RE = re.compile(r"fonts\.googleapis\.com|use\.typekit\.net", re.I)
+UNLABELLED_EXEMPT_TYPES = {"hidden", "submit", "button", "reset", "image"}
+
+
+def parse_attrs(attrs):
+    """Attributes of one opening tag as {name: value}. Names are lowercased
+    with Vue's `:` / `v-bind:` prefix dropped; quotes are stripped; a bare
+    attribute maps to "". The key "..." is set when the tag spreads props
+    ({...p}, v-bind="p"), i.e. any attribute may arrive at runtime."""
+    out = {}
+    for m in ATTR_RE.finditer(attrs):
+        if m.group(1) is None:
+            inner = m.group(0)[1:-1].strip()
+            out["..." if inner.startswith("...") else inner.lower()] = ""
+            continue
+        name, value = m.group(1).lower(), m.group(2) or ""
+        if name == "v-bind":
+            out["..."] = ""
+            continue
+        if value[:1] in ('"', "'"):
+            value = value[1:-1]
+        out[re.sub(r"^(?:v-bind)?:", "", name)] = value
+    return out
+
+
+def open_tags(c):
+    """[(offset, tag name, attrs dict)] for opening tags outside script, style
+    and comments. Names are lowercased in HTML; component code keeps case, so
+    <Img> / <Html> components are not mistaken for the native elements."""
+    out = []
+    for m in TAG_OPEN_RE.finditer(c["views"]["nodes"]):
+        name = m.group(1).lower() if c["ext"] in HTML_EXTS else m.group(1)
+        out.append((m.start(), name, parse_attrs(m.group(2))))
+    return out
+
+
+def rule_img_alt_missing(c):
+    return [
+        make_hit(
+            "img-alt-missing",
+            c["display"],
+            c["text"],
+            off,
+            '<img> has no alt attribute; describe it, or use alt="" when decorative',
+        )
+        for off, name, attrs in open_tags(c)
+        if name == "img" and "alt" not in attrs and "..." not in attrs
+    ]
+
+
+def rule_img_dimensions_missing(c):
+    hits = []
+    for off, name, attrs in open_tags(c):
+        if name != "img" or ("width" in attrs and "height" in attrs):
+            continue
+        if re.search(r"aspect-ratio\s*:", attrs.get("style", ""), re.I):
+            continue
+        hits.append(
+            make_hit(
+                "img-dimensions-missing",
+                c["display"],
+                c["text"],
+                off,
+                "<img> has no width/height attributes or inline aspect-ratio; it shifts layout on load",
+            )
+        )
+    return hits
+
+
+def rule_html_lang_missing(c):
+    return [
+        make_hit(
+            "html-lang-missing",
+            c["display"],
+            c["text"],
+            off,
+            "<html> has no lang attribute",
+        )
+        for off, name, attrs in open_tags(c)
+        if name == "html" and not attrs.get("lang") and "..." not in attrs
+    ]
+
+
+def rule_form_control_unlabelled(c):
+    tags = open_tags(c)
+    label_for = {a["for"] for _, n, a in tags if n == "label" and a.get("for")}
+    spans, stack = [], []
+    for m in re.finditer(r"<(/?)label\b", c["views"]["nodes"], re.I):
+        if not m.group(1):
+            stack.append(m.start())
+        elif stack:
+            spans.append((stack.pop(), m.start()))
+    hits = []
+    for off, name, attrs in tags:
+        if name not in ("input", "select", "textarea"):
+            continue
+        if name == "input" and attrs.get("type", "").lower() in UNLABELLED_EXEMPT_TYPES:
+            continue
+        if "hidden" in attrs or re.search(
+            r"display\s*:\s*none", attrs.get("style", ""), re.I
+        ):
+            continue
+        if any(attrs.get(k) for k in ("aria-label", "aria-labelledby", "title")):
+            continue
+        if attrs.get("id") in label_for or any(a < off < b for a, b in spans):
+            continue
+        ident = attrs.get("name") or attrs.get("id") or attrs.get("type") or ""
+        hits.append(
+            make_hit(
+                "form-control-unlabelled",
+                c["display"],
+                c["text"],
+                off,
+                f"<{name}{' ' + ident if ident else ''}> has no label[for], wrapping <label>, aria-label, aria-labelledby or title",
+            )
+        )
+    return hits
+
+
+def rule_heading_level_skip(c):
+    hits, prev = [], None
+    for off, name, _ in open_tags(c):
+        m = re.fullmatch(r"h([1-6])", name)
+        if not m:
+            continue
+        level = int(m.group(1))
+        if prev and level > prev + 1:
+            hits.append(
+                make_hit(
+                    "heading-level-skip",
+                    c["display"],
+                    c["text"],
+                    off,
+                    f"<h{level}> follows <h{prev}>; heading levels must not skip",
+                )
+            )
+        prev = level
+    return hits
+
+
+def rule_cta_contact_link(c):
+    hits = []
+    for off, name, attrs in open_tags(c):
+        if name != "a":
+            continue
+        cls = attrs.get("class") or attrs.get("classname") or ""
+        if BUTTONISH_CLASS_RE.search(cls) and re.match(
+            r"[{\s\"'`]*mailto:", attrs.get("href", ""), re.I
+        ):
+            hits.append(
+                make_hit(
+                    "cta-contact-link",
+                    c["display"],
+                    c["text"],
+                    off,
+                    "button-like link hands off to the mail client (mailto:); use a form or booking flow",
+                )
+            )
+    return hits
+
+
+def rule_font_remote_css(c):
+    hits = []
+    for off, name, attrs in open_tags(c):
+        if name.lower() != "link":
+            continue
+        is_css = "stylesheet" in attrs.get("rel", "").lower() or (
+            attrs.get("as", "").lower() == "style"
+        )
+        host = REMOTE_FONT_RE.search(attrs.get("href", ""))
+        if is_css and host:
+            hits.append(
+                make_hit(
+                    "font-remote-css",
+                    c["display"],
+                    c["text"],
+                    off,
+                    f"remote font stylesheet from {host.group(0).lower()}; self-host the fonts",
+                )
+            )
+    for m in re.finditer(
+        r"@import\b[^;\n]*?(fonts\.googleapis\.com|use\.typekit\.net)",
+        c["views"]["code"],
+        re.I,
+    ):
+        hits.append(
+            make_hit(
+                "font-remote-css",
+                c["display"],
+                c["text"],
+                m.start(),
+                f"remote font stylesheet from {m.group(1).lower()}; self-host the fonts",
+            )
+        )
+    return hits
+
+
 RULE_FUNCS = {
     "raw-hex-off-palette": rule_raw_hex_off_palette,
     "raw-hex-outside-tokens": rule_raw_hex_outside_tokens,
@@ -1059,6 +1313,13 @@ RULE_FUNCS = {
     "scroll-cue": rule_scroll_cue,
     "section-number-eyebrow": rule_section_number_eyebrow,
     "missing-tabular-nums": rule_missing_tabular_nums,
+    "img-alt-missing": rule_img_alt_missing,
+    "img-dimensions-missing": rule_img_dimensions_missing,
+    "html-lang-missing": rule_html_lang_missing,
+    "form-control-unlabelled": rule_form_control_unlabelled,
+    "heading-level-skip": rule_heading_level_skip,
+    "cta-contact-link": rule_cta_contact_link,
+    "font-remote-css": rule_font_remote_css,
 }
 
 
@@ -1076,7 +1337,7 @@ def applicable_rules(directive, brand, surface, ext):
             continue
         if rule_id == "loading-spinner" and not directive["bans_spinners"]:
             continue
-        if rule_id == "orphan-class" and ext not in (".html", ".htm"):
+        if ext not in RULE_EXTS.get(rule_id, SUPPORTED_EXTS):
             continue
         out.append(rule_id)
     return out
